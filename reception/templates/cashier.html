@@ -13,53 +13,57 @@
 	 	<div class="icontext">Рецепция</div>
 	 </a>
 </div>
-	<div class="form-group">
-		<div class="col-lg-3">
-			<a href="#session" class="btn btn-primary" type="button" id="session"
-			data-toggle="popover" data-placement="right"
-	        data-html="true"
-	        data-content="
-	        <div class='col-lg-12' id='cashinfosession'>
-	        
-	        </div>	            
-	        ">
-				Открыть смену
-			</a>
-		</div>
+	<div class="form-group col-lg-3">
+		<label class="col-lg-7">Кассира</label>
+		<input class="col-lg-5 cashier" type="number" name="cashier" value="0">
 	</div>
-		<div class="form-group">
-		<div class="col-lg-3">
-			<a href="#session" class="btn btn-primary" type="button" id="x"
-			data-toggle="popover" data-placement="right"
-	        data-html="true"
-	        data-content="
-	        <div class='col-lg-12' id='cashinfox'>
-	        
-	        </div>	            
-	        ">
-				Очет без гашения
-			</a>
-		</div>
+	<div class="form-group col-lg-3">
+		<a href="#session"
+		class="btn btn-primary disabled" type="button" id="session"
+		data-toggle="popover" data-placement="right"
+        data-html="true"
+        data-content="
+        <div class='col-lg-12' id='cashinfosession'>
+        </div>">
+			Открыть смену
+		</a>
 	</div>
-		<div class="form-group">
-		<div class="col-lg-3">
-			<a href="#session" class="btn btn-danger" type="button" id="z"
-			data-toggle="popover" data-placement="right"
-	        data-html="true"
-	        data-content="
-	        <div class='col-lg-12' id='cashinfoz'>
-	        
-	        </div>	            
-	        ">
-				Очет с гашением
-			</a>
-		</div>
+	<div class="form-group col-lg-3">
+		<a href="#session" class="btn btn-primary" type="button" id="x"
+		data-toggle="popover" data-placement="right"
+        data-html="true"
+        data-content="
+        <div class='col-lg-12' id='cashinfox'>
+        </div>">
+			Очет без гашения
+		</a>
+	</div>
+	<div class="form-group col-lg-3">
+		<a href="#session" class="btn btn-danger" type="button" id="z"
+		data-toggle="popover" data-placement="right"
+        data-html="true"
+        data-content="
+        <div class='col-lg-12' id='cashinfoz'>
+        </div>">
+			Очет с гашением
+		</a>
 	</div>
 
 {% endblock %}
 {% block extrafoot %}
 <script type="text/javascript">
 $(document).ready(function(){
+	var cashier = 0
+
+	$(".cashier").change(function(){
+		cashier = $(this).val()
+		var session_btn = $('#session')
+		if(cashier > 0) {
+			session_btn.removeClass("disabled")
+		} else {
+			session_btn.addClass("disabled")
+		}
+	})
 
 	$( document ).on( "click",'.btn', function(){
 		var act = $(this).attr("id")
@@ -69,45 +73,38 @@ $(document).ready(function(){
 							</div>')
 		var gurl = 'http://{{ cashhost }}:8000/cgi-bin/cashier.py';
 		$.ajax({
-      url: encodeURI(gurl),
+			url: encodeURI(gurl),
 			crossDomain: true,
 			timeout: 2000,
-   		cache: false,
-	   	async: false,
-   		data: ({action: act, }),
+			cache: false,
+			async: false,
+			data: ({action: act, cashier: cashier}),
 			dataType: 'jsonp',
-      success: function (data) {
+        success: function (data) {
         if (data['res'] == 0){
-
         	if (act == 'session'){
 	        			$('#cashinfo' + act).html('<div class="alert alert-success">\
-														    							<h3>Смена открыта</h3>\
-																					</div>')
+													<h3>Смена открыта</h3></div>')
 					} else {
 						$('#cashinfo' + act).html('<div class="alert alert-success">\
-												    							<h3>Отчет напечатан</h3>\
-																			</div>')
+												    <h3>Отчет напечатан</h3></div>')
 					}
 
         } else if (data['res'] == -1000){
       		$('#cashinfo' + act).html('<div class="alert alert-warning">\
-											    							<h3>Неверный запрос</h3>\
-																		</div>')
+										<h3>Неверный запрос</h3></div>')
         } else if (data['res'] == -100) {
     			$('#cashinfo' + act).html('<div class="alert alert-danger">\
-											    							<h3>Смена уже открыта</h3>\
-																		</div>')
+											<h3>Смена уже открыта</h3></div>')
         } else {
     			$('#cashinfo' + act).html('<div class="alert alert-danger">\
-										    							<h3>Код ошибки кассы: ' + data['res']
-										    							+'</h3>\
-																	   </div>')
+										    <h3>Код ошибки кассы: ' + data['res'] +'</h3>\
+											</div>')
         }
       }, // end success
     	error: function(){
     		$('#cashinfo' + act).html('<div class="alert alert-danger">\
-										    							<h3>Ошибка связи с кассой</h3>\
-																	</div>')
+										<h3>Ошибка связи с кассой</h3></div>')
     	}
     });// ajax	
 
