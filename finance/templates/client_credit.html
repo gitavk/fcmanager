@@ -1,0 +1,597 @@
+{% extends "base.html" %}
+{% load static %}
+{% load extra_filtrs %}
+{% load url from future %}
+
+{% block title %}Кредит{% endblock %}
+{% block menu %}
+{{ res }}
+{% endblock %}
+{% block content %}
+<form id="main" class="form-horizontal col-lg-12" method="post"
+enctype="multipart/form-data"
+ {% if b_url == 'r_guest_card' %}
+  action="{% url 'guest_credit' clnt.pk %}"
+ {% elif b_url == 'person_card' %}
+  action="{% url 'p_clnt_credit' clnt.pk %}"
+ {% else %}
+  action=""
+ {% endif %}
+>
+  {% csrf_token %}
+  <div id="legend">
+      <legend>Новый долг
+        <label >Итого: <span id="total">0</span></label>
+      </legend>
+  </div>
+    <div class="form-group col-lg-6">
+  {% if not clnt %}
+      <a href="{% url 'r_menu' %}" class="btn btn-info">назад</a>
+  {% else %}
+      <a href="{% url b_url clnt.pk %}" class="btn btn-info">назад</a>
+      {% if b_url == 'r_guest_card' %}
+      <input type="hidden" name="guest" value="{{ clnt.pk }}">
+      {% else %}
+      <input type="hidden" name="client" value="{{ clnt.pk }}">
+      {% endif %}
+  {% endif %}
+    </div>
+    <div class="form-group col-lg-6">
+        <button class="btn btn-success">дальше</button>
+    </div>
+    <div id="needinvite" class="alert alert-extradanger col-lg-12" 
+    style="display:none;">
+        Нет разового визита
+      </div>
+
+    <div id="clnt_only" class="alert alert-extradanger col-lg-12" 
+    style="display:none;">
+        только для клиентов
+      </div>
+
+    <div id="needtrainer" class="alert alert-danger col-lg-12" 
+    style="display:none;">
+        Не выбран тренер
+        <span class="glyphicon glyphicon-remove-circle"></span>
+      </div>
+    <div class="form-group" id="id_user">
+      <!-- Username -->
+  {% if not clnt %}
+      <div class='col-lg-4 lastname'>
+      <label class="control-label" for="lastname">
+        Фамилия/номер карты
+      </label>
+      </div>
+      <div class="controls col-lg-6 lastname">
+        <input id="id_lastname" name="lastname"
+        maxlength="50" type="text" class="form-control input-lg">
+      </div>
+  {% else %}
+      <div class="col-lg-12 text-center">
+      <h4><strong>{{ clnt|title }}</strong> </h4>
+      </div>
+  {% endif %}
+  </div>
+    <div id="unotfind" class="alert alert-danger" style="display:none;">
+    Совпадений не найдено
+    <span class="glyphicon glyphicon-remove-circle"></span>
+  </div>
+  <div id="ulistfind" class="alert alert-warning" style="display:none;">
+    Найдено несколько совпадений:
+    <span class="glyphicon glyphicon-remove-circle"></span>
+  <table class="table">
+    <tbody id="user_list">
+      <!-- user_list -->
+    </tbody>
+  </table>
+  </div>
+</form>
+<form id='fgoods' class="form-horizontal col-lg-12" method="post">
+    <div class="form-group">
+      <!-- Goods -->
+      <div class='col-lg-4'>
+      <label class="control-label"  for="goods">Название/штрих код</label>
+      </div>
+      <div class="controls col-lg-6">
+        <input id="id_goods" name="goods" maxlength="50" type="text" 
+        class="form-control input-lg" required>
+      </div>
+      <div class="col-lg-2">
+        <button class="btn btn-success" >добавить</button>
+    </div>
+    </div>
+  <div id="notfind" class="alert alert-danger" style="display:none;">
+    Совпадений не найдено
+    <span class="glyphicon glyphicon-remove-circle"></span>
+  </div>
+  <div id="listfind" class="alert alert-warning" style="display:none;">
+    Найдено несколько совпадений:
+    <span class="glyphicon glyphicon-remove-circle"></span>
+  <table class="table">
+    <tbody id="goods_list">
+      <!-- goods_list -->
+    </tbody>
+  </table>
+  </div>
+  <table class="table">
+  <thead>
+    <th width="200px">Тренер
+      <input form="main" type="hidden" id="goods_cnt" name="goods_cnt" value="0">
+    </th>
+    <th>Товар</th>
+    <th>Цена</th>
+    <th>Количество</th>
+    <th></th>
+  </thead>
+  <tbody id="goods_table">
+    <!-- goods_table -->
+  </tbody>
+  </table>
+</form>
+<input type="hidden" id="trainer_option" />
+{% endblock %}
+{% block extrafoot %}
+<script type="text/javascript" src="{% static "bootstrap-select/bootstrap-select.js" %}"></script>
+<script type="text/javascript" src="{% static "bootstrap-select/i18n/defaults-ru-RU1.js" %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static "bootstrap-select/bootstrap-select.css" %}">
+
+<script type="text/javascript">
+$(document).ready(function() {
+  $('#id_goods').focus();
+  var glist = []
+  var goods_cnt = 0
+  var trainer = ""
+
+  $('#main').submit(function( event ){
+    if ($('#id_lastname').val().length != 0){
+      $.ajax({
+        url: encodeURI("{% url 'credit' %}" ),
+        data: ({clnquery: $('#id_lastname').val()}),
+        dataType: "json",
+        success: function (data) {
+          cnt = data[0]
+          if (cnt == 0){
+            $('#unotfind').show()
+            $('#ulistfind').hide()
+          } else if (cnt == 1) {
+            $('.lastname').hide()
+            $('#unotfind').hide()
+            $('#ulistfind').hide()
+            user = data[1].split('/')
+            var htmltext = '<div class="col-lg-12 text-center">\
+                    <h4><strong>' + user[0]
+                    +'</strong> </h4>\
+                  </div>'
+            var name = ''
+            if ( user[2] == 'C'){
+              utype = 'client'
+              // {% url 'p_clnt_credit' 1 %}
+              $("#main").attr('action','/credit/client/' + user[1] + '/')
+              $.ajax({
+                url: "{% url 'p_search' %}",
+                data: ({is_active: user[1]}),
+                success: function (data) {
+                  if (parseInt(data['res'], 10) > 0){
+                    $('#clnt_only').hide()
+                    $('#main .btn-success').attr('disabled', false)
+                  }
+                }
+              })
+            } else {
+              // {% url 'guest_credit' 1 %}
+              utype = 'guest'
+              $("#main").attr('action','/credit/guest/' + user[1] + '/')
+            }
+            htmltext += '<input type="hidden"\
+                         name="' + utype + '" \
+                          value="' + user[1] + '">'
+            $('#id_user').html(htmltext)             
+          } else {
+            $('#ulistfind').show()
+            $('#unotfind').hide()
+            var tbodyhtml = ""
+            user = data[1].split('/')
+            for (var i=0; i<cnt; i++) {
+              if ( user[i*3 + 2] == 'C'){
+                utype = 'клиент'
+              } else {
+                utype = 'гость'
+              }
+              tbodyhtml += '<tr><td>' + user[i*3] 
+                  + '</td><td>' + utype
+                  + '</td><td>'
+                  + '<a href="#user_list" class="btn btn-warning btn-xs"\
+                            name="uchoose" id="' + i + '">\
+                            выбрать\
+                           </a>\
+                  </td></tr>'
+              $('#user_list').html(tbodyhtml)
+            }
+          }
+        }
+      });
+      event.preventDefault();
+    }
+  });
+
+ $( document ).on( "click", "a[name='uchoose']", function() {
+    var id =  $(this).attr("id")
+    var htmltext = '<div class="col-lg-12 text-center">\
+            <h4><strong>' + user[id*3]
+            +'</strong> </h4>\
+          </div>'
+    var name = ''
+    if ( user[id*3 + 2] == 'C'){
+      utype = 'client'
+      // {% url 'p_clnt_credit' 1 %}
+      $("#main").attr('action','/credit/client/' + user[id*3 + 1] + '/')
+      // check whether the user has active contract
+      $.ajax({
+        url: "{% url 'p_search' %}",
+        data: ({is_active:user[id*3 + 1]}),
+        success: function (data) {
+          if (parseInt(data['res'], 10) > 0){
+            $('#clnt_only').hide()
+            $('#needinvite').hide()
+          } else { // if has not active contract check for invite
+            inv_url = '/person/hasinvite/'
+            $.ajax({ // {% url 'g_hasitinvite' 1 %}
+              url: encodeURI(inv_url + user[id*3 + 1]),
+              dataType: "jsonp",
+              success: function (data) {
+                if (data['res'] == 0){
+                  $('#needinvite').show()
+                }
+              },
+              error: function (data){
+                $('#needinvite').show()
+              }
+            })
+          }
+        }
+      })
+
+    } else {
+      // {% url 'guest_credit' 1 %}
+      utype = 'guest'
+      $("#main").attr('action','/credit/guest/' + user[id*3 + 1] + '/')
+    }
+    htmltext += '<input type="hidden"\
+                 name="' + utype + '" \
+                  value="' + user[id*3 + 1] + '">'
+    $('#id_user').html(htmltext) 
+    $('#ulistfind').hide()
+  });
+
+  $('#fgoods').submit(function( event ){
+    var gqeury = $('#id_goods').val()
+      $.ajax({
+        url: encodeURI("{% url 'credit' %}?gqeury=" + gqeury),
+        dataType: "json",
+        success: function (data) {
+          cnt = data[0]
+          if (cnt == 0) {
+            $('#notfind').show()
+            $('#listfind').hide()
+          } else if (cnt > 1) {
+            $('#listfind').show()
+            $('#notfind').hide()
+            var list = ""
+            glist = data[1].split('|')
+            for (var i=0; i<cnt; i++) {
+              list += '<tr><td>' + glist[i*4] 
+                  + '</td><td>' + glist[i*4+1]
+                  + '</td><td>'
+                  if (parseInt(glist[i*4+3], 10) > 0) {
+                    list += '<a href="#goods_list" class="btn btn-warning btn-xs"\
+                            name="gchoose" id="' + i + '">\
+                            выбрать\
+                           </a>'
+                        + '</td></tr>'
+                  } else{
+                    list += '<a href="#goods_list" class="btn btn-danger btn-xs"\
+                            disabled="true">\
+                            нет в продаже\
+                           </a>'
+                        + '</td></tr>'
+                  };
+            }
+            $('#goods_list').html(list)
+          } else {
+            glist = data[1].split('|')
+            var can_add = 1
+            if (glist[3] > 0) {
+              goods_cnt ++;
+              var pk = glist[2].split('::')[0]
+              if (glist[2].split('::')[1] == 'T'){
+              // personal training ==> need trainer
+                var inv_url = ''
+                var clnt_type = $('#main').prop('action').split('/')[4]
+                var c_id = $('#main').prop('action').split('/')[5]
+                if (clnt_type == 'guest') {
+                  inv_url = '/guest/hasinvite/'
+                } else {
+                  inv_url = '/person/hasinvite/'
+                }
+                $.ajax({ // {% url 'g_hasitinvite' 1 %}
+                  url: encodeURI(inv_url + c_id),
+                  dataType: "jsonp",
+                  success: function (data) {
+                    if (data['res'] == 0){
+                      $('#needinvite').show()
+                    }
+                  },
+                  error: function (data){
+                    $('#needinvite').show()
+                  } 
+                });
+                $('#main .btn-success').attr('disabled', true)
+                $('#needtrainer').show()
+                $('#needinvite').hide()
+                // !!! trainer
+                trainer = '<div class="control-group">\
+                             <div class="controls">\
+                              <select id="id_trainer" form="main"\
+                              name="trainer' + goods_cnt + '"\
+                               class="selectpicker" data-width="100%">\
+                                <option ></option>'
+                $.ajax({
+                  url: encodeURI("{% url 'ptt_trainer' %}"),
+                  data:({id: pk}),
+                  dataType: "json",
+                  async: false,
+                  cache: false,
+                  success: function (data) {
+                    var to = ""
+                    $.each(data, function(k, v) {
+                      to += '<option value="' + k +'">'
+                                  + v + '</option>'
+                    });
+                    $('#trainer_option').val(to)
+                  }
+                })
+                trainer += $('#trainer_option').val() + '</select>\
+                          </div>\
+                        </div>'
+              } else if (glist[2].split('::')[1] == 'C') {
+                // for client only ==> check if credit on client 
+                var clnt_type = $('#main').prop('action').split('/')[4]
+                var c_id = $('#main').prop('action').split('/')[5]
+                if (clnt_type !== 'client'){
+                  $('#clnt_only').show()
+                  $('#main .btn-success').attr('disabled', true)
+                } else {
+                  $.ajax({
+                    url: "{% url 'p_search' %}",
+                    data: ({is_active: c_id}),
+                    success: function (data) {
+                      if (parseInt(data['res'], 10) > 0){
+                        $('#clnt_only').hide()
+                        $('#main .btn-success').attr('disabled', false)
+                      } else {
+                        $('#clnt_only').show()
+                        $('#main .btn-success').attr('disabled', true)
+                      }
+                    }
+                  })
+                }
+              }
+               var list = '<tr>\
+                <td width="200px">' + trainer +
+                  '<input type="hidden" name="g' + goods_cnt + '"\
+                   value="' + pk + '" form="main">\
+                </td>\
+                <td width="200px"><h4>' + glist[0] + '</h4></td>\
+                <td width="100px">\
+                  <input type="text" class="form-control" disabled\
+                  name="cost" value="' + glist[1] + '" >\
+                </td>\
+                <td width="80px">\
+                  <input type="number" class="form-control" \
+                  name="cnt' + goods_cnt + '" value="1" id="cnt" form="main">\
+                </td>\
+                <td>\
+                  <a class="btn btn-danger btn-xs goods_rem"\
+                    href="#goods_list"\
+                    val="' + glist[2].split('::')[1] +'">\
+                      убрать\
+                  </a>\
+                </td>\
+              </tr>'
+                $('#goods_table').append(list)
+                $('#goods_cnt').val(goods_cnt)
+                $('#cnt').change()
+                $('#listfind').hide()
+                $('#notfind').hide()
+                $('.selectpicker').selectpicker('refresh');
+            } else {
+              $('#listfind').show()
+              var list = '<tr><td>' + glist[0] 
+                + '</td><td>' + glist[1]
+                + '</td><td>\
+                  <a href="#goods_list" class="btn btn-danger btn-xs"\
+                          disabled="true">\
+                          нет в продаже\
+                         </a>\
+                  </td></tr>'
+              $('#goods_list').html(list)
+            }
+          }
+        },
+      });
+    $('#id_goods').focus();
+    $('#id_goods').val('');
+    event.preventDefault();
+  });
+
+$( document ).on( "change", "[name^='trainer']", function() {
+  $(this).f_need_trainer()
+});
+
+$( document ).on( "click", '.goods_rem', function() {
+  $(this).parent().parent().remove();
+  var cnt_clients = 0
+  $(".goods_rem").each(function(idx){
+    if ($(this).attr('val') == 'C') {
+      cnt_clients += 1
+    }
+  });
+  if (cnt_clients < 1){
+    $('#clnt_only').hide();
+    $('#main .btn-success').attr('disabled', false)
+  }
+
+  $(this).f_need_trainer();
+  $('#cnt').change()
+});
+
+$( document ).on( "click", "a[name='gchoose']", function() {
+    var id =  $(this).attr("id")
+    goods_cnt++;
+    trainer = ""
+    var pk = glist[id*4+2].split('::')[0]
+    if (glist[id*4+2].split('::')[1] == 'T'){
+      $('#main .btn-success').attr('disabled', true)
+      $('#needtrainer').show()
+      // personal training ==> need trainer
+            var inv_url = ''
+            var clnt_type = $('#main').prop('action').split('/')[4]
+            var c_id = $('#main').prop('action').split('/')[5]
+            if (clnt_type == 'guest') {
+              inv_url = '/guest/hasinvite/'
+            } else {
+              inv_url = '/person/hasinvite/'
+            }
+            $.ajax({ // {% url 'g_hasitinvite' 1 %}
+              url: encodeURI(inv_url + c_id),
+              dataType: "jsonp",
+              success: function (data) {
+                if (data['res'] == 0){
+                  $('#needinvite').show()
+                }
+              },
+              error: function (data){
+                    $('#needinvite').show()
+                  }
+             });
+      // !!! trainer
+        trainer = '<div class="control-group">\
+                     <div class="controls">\
+                      <select id="id_trainer" form="main"\
+                      name="trainer' + goods_cnt + '"\
+                       class="selectpicker" data-width="100%">\
+                        <option ></option>'
+       $.ajax({
+          url: encodeURI("{% url 'ptt_trainer' %}"),
+          data:({id: pk}),
+          dataType: "json",
+          async: false,
+          cache: false,
+          success: function (data) {
+             var to = ""
+            $.each(data, function(k, v) {
+              to += '<option value="' + k +'">'
+                          + v + '</option>'
+
+            });
+            $('#trainer_option').val(to)
+          }
+        })
+        trainer += $('#trainer_option').val() + '</select>\
+                    </div>\
+                  </div>'
+    } else if (glist[id*4+2].split('::')[1] == 'C'){
+      // for client only ==> check if credit on client 
+      var clnt_type = $('#main').prop('action').split('/')[4]
+      var c_id = $('#main').prop('action').split('/')[5]
+      if (clnt_type !== 'client'){
+        $('#clnt_only').show()
+        $('#main .btn-success').attr('disabled', true)
+      } else {
+        $.ajax({
+          url: "{% url 'p_search' %}",
+          data: ({is_active: c_id}),
+          success: function (data) {
+            if (parseInt(data['res'], 10) > 0){
+              $('#clnt_only').hide()
+              $('#main .btn-success').attr('disabled', false)
+            } else {
+              $('#clnt_only').show()
+              $('#main .btn-success').attr('disabled', true)
+            }
+          }
+        })
+      }
+    }
+
+    var list = '<tr>\
+                <td width="200px">' + trainer +
+                  '<input type="hidden" name="g' + goods_cnt + '"\
+                   value="' + pk + '" form="main">\
+                </td>\
+                <td width="200px"><h4>' + glist[id*4] + '</h4></td>\
+                <td width="100px">\
+                  <input type="text" class="form-control" disabled\
+                  name="cost" value="' + glist[id*4+1] + '" >\
+                </td>\
+                <td width="80px">\
+                  <input type="number" class="form-control" \
+                  name="cnt' + goods_cnt + '" value="1" id="cnt"  form="main">\
+                </td>\
+                <td>\
+                  <a class="btn btn-danger btn-xs goods_rem"\
+                    href="#goods_list"\
+                    val="' + glist[id*4+2].split('::')[1] +'">\
+                      убрать\
+                  </a>\
+                </td>\
+              </tr>'
+    $('#goods_table').append(list)
+    $('#goods_cnt').val(goods_cnt)
+    $('#cnt').change()
+    $('#listfind').hide()
+    $('.selectpicker').selectpicker('refresh');
+});
+
+$( document ).on( "change", '#cnt', function() {
+  var summ = 0
+  $('#goods_table tr').each(function(idx){
+    cnt = $(this).find('[type="number"]').val()
+    cost = $(this).find('[name="cost"]').val()
+    summ = summ + cnt * cost;
+  });
+  $('#total').html(summ)
+});
+
+$(".glyphicon-remove-circle").on( "click", function() {
+  $(this).parent().hide();
+});
+
+$.fn.f_need_trainer = function() {
+  var need_trainer = 0
+  var cnt_need_trainer = 0
+  $("[name^='trainer']").each(function(idx){
+    if ($(this).val() > 0 ){
+      cnt_need_trainer += 1
+    } else {
+      need_trainer += 1
+      cnt_need_trainer += 1
+    }
+  });
+  // if find one or more need trainer ==> disable the next
+  if ( need_trainer > 0 && cnt_need_trainer != 0) {  
+    $('#main .btn-success').attr('disabled', true);
+    $('#needtrainer').show();
+  } else {
+    $('#main .btn-success').attr('disabled', false);
+    $('#needtrainer').hide();
+  }
+
+  if ( cnt_need_trainer == 0) {  
+    $('#needinvite').hide();
+  }
+};
+
+});
+</script>
+{% endblock %}

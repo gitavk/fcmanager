@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Посещения за период{% endblock %}
+
+{% block menu %} 
+<div class="row">
+	<div class="col-lg-3">
+	  <a href="{% url "r_menu" %}">
+	    <img src="{% static "img/cash.png"%}" alt="Ресепшен">
+	    <div class="icontext">Рецепция</div>
+	   </a>
+	</div>
+</div>
+<div class="row"><div class='col-lg-3'>.</div></div>
+<div class="row">
+	<div class='col-lg-3'>
+		<label for="id_contract_date">Начало: </label>
+	</div>
+	<div class='col-lg-3'>
+		<div class='input-group date' id='date_start' 
+		data-date-format="DD.MM.YYYY">
+	        <input id="date_start" type="text" name="date_start" 
+	        class="form-control input-lg" />
+	        <span class="input-group-addon">
+	        	<i class="fa fa-calendar"></i>
+	        </span>
+	    </div>
+	</div>
+	<div class='col-lg-3'>
+		<label for="id_contract_date">Окончание: </label>
+	</div>
+	<div class='col-lg-3'>
+		<div class='input-group date' id='date_end' 
+		data-date-format="DD.MM.YYYY">
+	        <input id="date_end" type="text" name="date_end" 
+	        class="form-control input-lg" />
+	        <span class="input-group-addon">
+	        	<i class="fa fa-calendar"></i>
+	        </span>
+	    </div>
+	</div>
+</div>
+<div class="row"><div class='col-lg-3'>.</div></div>
+<div class="row">
+	<div class="col-lg-3">
+		<a id='r_visits' href="{% url "r_visits" Y m d Y m d %}" 
+			class="btn btn-info">
+			посещения клиентами
+		</a>
+	</div>
+</div>
+{% endblock %}
+{% block extrafoot %}
+
+<script type="text/javascript">
+$(document).ready(function(){
+
+    $('#date_start').datetimepicker({
+        pickTime: false,
+       	defaultDate: '{% now "m/d/Y" %}'
+    });
+    
+    $('#date_end').datetimepicker({
+        pickTime: false,
+       	defaultDate: '{% now "m/d/Y" %}'
+    });
+
+    $('#date_start').change(function() {
+     	date = new Date($(this).data("DateTimePicker").getDate());
+     	day = date.getDate()
+     	month = date.getMonth() + 1
+     	if(month < 10) {
+		    month = '0' + month;
+		} else {
+		    month = '' + month;
+		}
+     	if(day < 10) {
+		    day = '0' + day;
+		} else {
+		    day = '' + day;
+		}
+ 		year =  date.getFullYear();
+        // r_visits
+        r_visits = $('#r_visits').attr('href').split('/')
+        r_visits[3] = year
+        r_visits[4] = month
+        r_visits[5] = day
+        $('#r_visits').attr('href',r_visits.join('/'))
+	});
+
+    $('#date_end').change(function() {
+     	date = new Date($(this).data("DateTimePicker").getDate());
+     	day = date.getDate()
+     	month = date.getMonth() + 1
+     	if(month < 10) {
+		    month = '0' + month;
+		} else {
+		    month = '' + month;
+		}
+     	if(day < 10) {
+		    day = '0' + day;
+		} else {
+		    day = '' + day;
+		}
+ 		year =  date.getFullYear();
+        // r_visits
+        r_visits = $('#r_visits').attr('href').split('/')
+        r_visits[6] = year
+        r_visits[7] = month
+        r_visits[8] = day
+        $('#r_visits').attr('href',r_visits.join('/'))
+ 	});
+});
+</script>
+{% endblock %}

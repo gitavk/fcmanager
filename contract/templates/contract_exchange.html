@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+{% load static %}
+{% load extra_filtrs %}
+{% block title %}Переоформление договора клиента{% endblock %}
+{% block content %}
+<form id="exchange" class="form-horizontal" method="post" 
+enctype="multipart/form-data">
+    {% csrf_token %}
+{% if err %}
+<div class="col-lg-12 alert alert-danger">{{ err }}</div>
+{% endif %}
+<!-- Form Name -->
+<legend>
+	<div class='col-sm-6'>Переоформление договора № {{ contract.number }}  
+	</div>   
+    <a href="{% url "person_card" contract.client.id %}"
+    	class="btn btn-success" role="button">
+        Личная карта
+    </a>
+</legend>
+<div class="form-group">
+	<div class='col-sm-6'>
+	  <label >Текущий владелец</label>
+	</div>
+	<div class='col-sm-3'>
+	  <label >Сменить плательщика</label>
+	</div>
+	<div class='col-sm-3'>
+		<input name="change_payer" type="checkbox" value="1">
+	</div>
+</div>
+<hr/>
+<div class="form-group">
+	<div class='col-sm-6'>
+	    <input type="text" class="form-control input-lg" readonly 
+	       value ="{{contract.client.get_full_name}}">
+	</div>
+	<div class='col-sm-2'>
+		  <label for="id_contract_date">Дата регистрации</label>
+		</div>
+		<div class='col-sm-4'>
+		    <input id="id_contract_date" type="text" name="contract_date" class="form-control input-lg"
+	       value ="{{ contract.date|date:'d.m.Y' }}" readonly />
+		</div>
+</div>
+<div class="form-group">
+	<div class='col-sm-2'>
+	  <label for="id_number">номер договора</label>
+	</div>
+	<div class='col-sm-4'>
+		<div class="control-group">
+	    	<div class="controls">
+			    <input type="text" readonly class="form-control input-lg"
+			     value ="{{ contract.number|default_if_none:"" }}"/>
+			</div>
+		</div>
+	</div>
+	<div class='col-sm-2'>
+	  <label for="id_card">Номер карты</label>
+	</div>
+	<div class='col-sm-4'>
+		<div class="control-group">
+	    	<div class="controls">
+			    <input id="id_card" type="number" name="card"
+			     class="form-control input-lg"
+			     data-validation-number-message="Числовое поле"
+			     value ="{{ contract.card |default_if_none:"0" }}"/>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="form-group">
+	<div class='col-lg-2'>
+	  <label >Новый владелец</label>
+	</div>
+	<div class='col-lg-1'>
+	  <label for="id_">Поиск</label>
+	</div>
+	<div class="col-lg-3">
+		<div class="input-group">
+	        <input class="form-control" type="text" id="id_query">
+	        <span class="input-group-addon" id="clnt_query">
+	            <i class="fa fa-search"></i>
+	        </span>
+	    </div>
+	</div>
+	<div class='col-lg-6'>
+			<div class="control-group"><div class="controls">
+				<select id="id_client" name="client" class="selectpicker"
+					data-width="100%">
+						<option></option>
+				</select>
+			</div>
+		</div>
+	</div></div>
+<hr/>
+	<div class="form-group">
+		<div class='col-sm-2'>
+		  <label for="id_last_name">Фамилия</label>
+		</div>
+		<div class='col-sm-4'>
+		    <input id="id_last_name" type="text" name="last_name" 
+		    class="form-control input-lg" required
+		    value="{{ form.last_name.value|default:"" }}" />
+		</div>
+		<div class='col-sm-2'>
+		  <label for="id_first_name">Имя</label>
+		</div>
+		<div class='col-sm-4'>
+		    <input id="id_first_name" type="text" name="first_name" 
+		    class="form-control input-lg" required
+		    value="{{ form.first_name.value|default:"" }}" />
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-sm-2'>
+		  <label for="id_patronymic">Отчество</label>
+		</div>
+		<div class='col-sm-4'>
+		    <input id="id_patronymic" type="text" name="patronymic"
+		     class="form-control input-lg" required
+		    value="{{ form.patronymic.value|default:"" }}" />
+		</div>
+		<div class='col-sm-2'>
+		  <label for="id_born_date">Пол</label>
+		</div>
+		<div class='col-sm-4'>
+	     	<label for="on" >М</label>
+			<input type="radio" name="gender" id="on" value="0" checked>
+		    <label for="off" >Ж</label>
+			<input type="radio" name="gender" id="off" value="1">
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-sm-2'>
+		  <label for="id_born_date">Дата рождения</label>
+		</div>
+		<div class='col-sm-4'>
+		     <div class='input-group date' id='born_cal'
+		      data-date-format="DD.MM.YYYY">
+	            <input id="id_born_date" type="text" name="born_date"
+	            class="form-control input-lg" />
+		            <span class="input-group-addon">
+		            	<span class="glyphicon glyphicon-calendar"></span>
+		            </span>
+	        </div>
+		</div>
+		<div class='col-sm-2'>
+		  <label for="id_address">Адрес</label>
+		</div>
+		<div class='col-sm-4'>
+			<div class="control-group">
+		    	<div class="controls">
+				    <input id="id_address" type="text" name="address" class="form-control input-lg"
+				    data-validation-minlength-message="Не менее 8 символов" minlength="8"
+		    		value="{{ form.address.value|default:"" }}" />
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-sm-2'>
+		  <label for="id_phone">Телефон</label>
+		</div>
+		<div class='col-sm-4'>
+		<div class="control-group">
+		    	<div class="controls">
+				    <input id="id_phone" type="text" name="phone" class="form-control input-lg" 
+				       data-validation-regex-regex="^79[0-9]{9}$|^812[0-9]{7}$" 
+				       data-validation-regex-message="мобильный 79... городской 812..."
+				      value ="{{ form.phone.value|default:"" }}" required/>
+		      </div>
+		      </div>
+		</div>
+		<div class='col-sm-2'>
+		  <label for="id_email">E-mail</label>
+		</div>
+		<div class='col-sm-4'>
+			<div class="control-group">
+		    	<div class="controls">
+				    <input id="id_email" type="email" name="email" class="form-control input-lg"
+				    data-validation-email-message="неверный адрес эл. почты"
+				      value ="{{ form.email.value|default:"" }}"/>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-sm-2'>
+		  <label for="id_passport">Паспорт</label>
+		</div>
+		<div class='col-sm-4'>
+			<div class="control-group">
+		    	<div class="controls">
+				    <input id="id_passport" type="text" name="passport" 
+				    class="form-control input-lg"
+				    	data-validation-minlength-message="Не менее 8 символов" minlength="8"
+				      value ="{{ form.passport.value|default:"" }}"/>
+			    </div>
+			</div>
+		</div>
+<input type="hidden" name="newclient" id="newclient" value="0">
+	</div>
+    <a href="{% url "p_active" 0 %}" class="btn btn-info" role="button">
+        Назад
+    </a>
+    <button class="btn btn-success" type="submit">
+        Сохранить
+    </button>
+</form>
+{% endblock %}
+{% block extrafoot %}
+<script src="{% static "ReactiveRaven/jqBootstrapValidation.js" %}">
+</script>
+<script>
+  $(function () { $("input,textarea").not("[type=submit]").jqBootstrapValidation(); });
+</script>
+
+<script type="text/javascript">
+$(function () {
+    $('#born_cal').datetimepicker({
+        // language: 'ru',
+        pickTime: false,
+        minDate: '01/01/1930',
+        maxDate: '01/01/2009',
+        defaultDate: '{{ clnt.born_date|date:"m/d/Y"|default:"01/01/2009" }}'
+    });
+});
+</script>
+<script type="text/javascript" src="{% static "bootstrap-select/bootstrap-select.js" %}"></script>
+<script type="text/javascript" src="{% static "bootstrap-select/i18n/defaults-ru-RU1.js" %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static "bootstrap-select/bootstrap-select.css" %}">
+
+<script type="text/javascript">
+$(document).ready(function(){
+$('.selectpicker').selectpicker();
+    $("#clnt_query").click(function() {
+	  	$.ajax({
+	  		url: "{% url 'p_search' %}",
+        	data: ({query: $('#id_query').val()}),
+	  		success: function (data) {
+	  			$("select[name*='client']").empty().append(data)
+	  			$('.selectpicker').selectpicker('refresh');
+	  		},
+	  	})
+	});
+
+    $("#id_client").change(function() {
+	  	$.ajax({
+	  		url: "{% url 'p_search' %}",
+        	data: ({id: $(this).val()}),
+	  		success: function (data) {
+	  			$('#id_first_name').val(decodeURI(data['first_name']))
+	  			$('#id_first_name').attr('readonly', true)
+	  			$('#id_last_name').val(decodeURI(data['last_name']))
+	  			$('#id_last_name').attr('readonly', true)
+	  			$('#id_patronymic').val(decodeURI(data['patronymic']))
+	  			$('#id_patronymic').attr('readonly', true)
+	  		$('#born_cal').data("DateTimePicker").setDate(data['born_date'])
+	  		$('#born_cal').data("DateTimePicker").disable();
+	  			var gender = parseInt(data['gender'], 10);
+	  			if ( gender === 0 ){
+	  				$('#on').click()
+	  			} else {
+	  				$('#off').click()
+	  			}
+	  			$('#id_address').val(decodeURI(data['address']))
+	  			$('#id_address').attr('readonly', true)
+	  			$('#id_phone').val(decodeURI(data['phone']))
+	  			$('#id_phone').attr('readonly', true)
+	  			$('#id_passport').val(decodeURI(data['passport']))
+	  			$('#id_passport').attr('readonly', true)
+	  			$('#id_email').val(decodeURI(data['email']))
+	  			$('#id_email').attr('readonly', true)
+	  			$('#newclient').val(decodeURI(data['id']))
+	  		},
+	  	})
+	});
+	{% if form.born_date.value %}
+	$('#born_cal').data("DateTimePicker").setDate('{{ form.born_date.value|date:"m/d/Y"|default:"01/01/2009" }}')
+	{% endif %}
+	{% if form.gender.value == '1' %}
+	$('#off').click()
+	{% endif %}
+});
+</script>
+{% endblock %}

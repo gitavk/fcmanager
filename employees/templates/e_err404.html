@@ -1,0 +1,11 @@
+{% extends "errbase.html" %}
+{% load static %}
+
+{% block title %} {{ p_title }} {% endblock %}
+    {% block menu %}{% endblock %}
+{% block content %} 
+<div class="alert alert-danger">{{ p_title }} не найдены</div>
+<a href="{{ b_url }}" class="btn btn-info" role="button">
+        Назад
+    </a>
+{% endblock %}

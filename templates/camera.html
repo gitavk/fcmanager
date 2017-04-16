@@ -1,0 +1,18 @@
+{% load static %}
+			<a href="#btn1" class="btn btn-small" id="btn1" onclick="cameraclick()" role="button">
+			    <span class="glyphicon glyphicon-camera"> камера</span>
+			</a>
+		    <div id="photodiv" style="display:none" class="hide">
+				<p>
+					<img src="{% static "img/webcamlogo.png" %}" style="vertical-align:text-top"/>
+					<select id="cameraNames" size="1" onChange="changeCamera()" 
+					style="width:245px;font-size:10px;height:25px;">
+					</select>
+				</p>
+				<div id="webcam"></div>
+				<p><a href="#btn1" class="btn btn-small" id="btn1" onclick="base64_tofield()" role="button">
+				Фото <span class="glyphicon glyphicon-camera"></span></a></p>
+
+				<p><textarea id="formfield" style="display:none;" name="avatar64"></textarea></p>
+				<p><img id="image" style="width:320px;height:240px;"/></p>
+			</div>

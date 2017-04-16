@@ -1,0 +1,50 @@
+{% for t in lst %}
+<tr><td>
+  <div class="col-lg-6">
+    <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{ t.id }}">
+      {{ t.name }} <strong>[ {{ t.price }} руб. ]</strong>
+    </a>
+  </div>
+  <div class="col-lg6">
+  {% if all %}.{% else %}
+    <a href="{% url "editcontractt" t.pk %}" class="btn btn-sm btn-warning" role="button">
+      Редактировать
+    </a>
+    <a href="{% if t.is_active %}
+              {% url "hidecontractt" t.pk %}
+              {% else %}
+              {% url "activecontractt" t.pk %}
+              {% endif %}
+              "
+      class="btn btn-sm btn-danger" role="button">
+      {% if t.is_active %}Скрыть{% else %}Активировать{% endif %}
+    </a>
+  {% endif%}
+  </div>
+      <div id="collapse{{ t.id }}" class="panel-collapse collapse">
+      <div class="panel-body">
+        <table class="table">
+          <thead><tr>
+            <th>Срок действия(дней)</th>
+            <th>Лимит заморозки</th>
+            <th>Срок активации(дней)</th>
+            <th>Максимум посещений</th><th>Время посещения</th>
+          </tr>
+           </thead>
+          <tr>
+            <td>{{ t.period_days }}</td>
+            <td>{{ t.period_freeze }}</td>
+            <td>{{ t.period_activation }}</td>
+            <td>{% if t.max_visit == 99999 %}
+                  безлимитный
+                {% else %}
+                  {{ t.max_visit }}
+                {% endif %}
+              </td>
+            <td>{{ t.period_time_type }}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+</td></tr>
+{% endfor %}

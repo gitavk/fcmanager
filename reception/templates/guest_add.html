@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{p_title}}{% endblock %}
+{% block extrahead %}
+{% endblock %}
+{% block menu %}
+{{ res }}
+{% endblock %}
+{% block content %}
+<form id="period" class="form-horizontal" action="" method="post">
+    {% csrf_token %}
+<!-- Form Name -->
+<legend>{{p_title}}</legend>
+<div class="form-group">
+	<div class='col-lg-2'>
+	  <label for="id_lastname">Фамилия</label>
+	  <span class="glyphicon glyphicon-flash"></span>
+	</div>
+	<div class='col-lg-4'>
+		<div class="control-group"><div class="controls">
+		    <input id="id_lastname" type="text" name="lastname" required
+		     class="form-control input-lg" />
+		</div></div>
+	</div>
+	<div class='col-lg-2'>
+	  <label for="id_date">Дата регистрации</label>
+	</div>
+	<div class='col-lg-4'>
+		<div class="control-group"><div class="controls">
+		    <input id="id_date" type="text" name="date" disabled 
+		     class="form-control input-lg" value="{% now "d.m.Y" %}" />
+		</div></div>
+	</div>
+</div>
+<div class="form-group">
+	<div class='col-lg-2'>
+	  <label for="id_firstname">Имя</label>
+	  <span class="glyphicon glyphicon-flash"></span>
+	</div>
+	<div class='col-lg-4'>
+		<div class="control-group"><div class="controls">
+		    <input id="id_firstname" type="text" name="firstname" required
+		     class="form-control input-lg" />
+		</div></div>
+	</div>
+	<div class='col-lg-2'>
+	  <label for="id_manager">Менеджер</label>
+	</div>
+	<div class='col-lg-4'>
+		<div class="control-group"><div class="controls">
+		    <input id="id_manager" type="text" name="manager" disabled
+		     class="form-control input-lg" 
+		     value="{{ request.user.get_full_name }}" />
+		</div></div>
+	</div>
+</div>
+<div class="form-group">
+	<div class='col-lg-2'>
+	  <label for="id_patronymic">Отчество</label>
+	  <span class="glyphicon glyphicon-flash"></span>
+	</div>
+	<div class='col-lg-4'>
+		<div class="control-group"><div class="controls">
+		    <input id="id_patronymic" type="text" name="patronymic" required
+		     class="form-control input-lg" />
+		</div></div>
+	</div>
+	<div class='col-lg-2'>
+	  <label for="id_">По приглашению</label>
+	</div>
+	<div class="col-lg-4">
+		<div class="input-group">
+	        <input class="form-control input-lg" type="text" id="id_query">
+	        <span class="input-group-addon" id="clnt_query">
+	            <span class="glyphicon glyphicon-search"></span>
+	        </span>
+	    </div>
+	</div>
+</div>
+<div class="form-group">
+	<div class='col-lg-2'>
+	  <label for="id_born">Дата рождения</label>
+	  <span class="glyphicon glyphicon-flash"></span>
+	</div>
+	<div class='col-lg-4'>
+		<div class="control-group"><div class="controls">
+		<div class='input-group date' id='born' data-date-format="DD.MM.YYYY">
+            <input type="text" name="born" class="form-control input-lg" />
+            <span class="input-group-addon">
+            	<span class="glyphicon glyphicon-time"></span>
+        	</span>
+    	</div></div></div>
+	</div>
+	<div class="col-lg-2">
+		<label for="id_contract">Клиент</label>
+	</div>
+	<div class='col-lg-4'>
+			<div class="control-group"><div class="controls">
+				<select id="id_contract" name="contract" class="selectpicker"
+					data-width="100%">
+						<option></option>
+				</select>
+			</div>
+		</div>
+	</div>
+
+</div>
+<div class="form-group">
+	<div class='col-lg-2'>
+	  <label for="id_phone">Телефон</label>
+	  <span class="glyphicon glyphicon-flash"></span>
+	</div>
+	<div class='col-lg-4'>
+		<div class="control-group"><div class="controls">
+		    <input id="id_phone" type="text" name="phone" required
+		     class="form-control input-lg"  
+		     data-validation-regex-regex="^79[0-9]{9}$|^812[0-9]{7}$" 
+		     data-validation-regex-message="мобильный 79... городской 812..."/>
+		</div></div>
+	</div>
+	<div class='col-lg-2'>
+	  .
+	</div>
+	<div class='col-lg-4'>
+	      <table class="table">
+	      <thead><tr>
+	    		<th>Дата</th><th>Гость</th>
+			</tr>
+		   </thead>
+		   <tbody id="used_invite">
+		   	<!-- used invite -->
+		   </tbody>
+	      </table>
+     </div>
+</div>
+
+<div>
+    <a href="{{ b_url }}" class="btn btn-info" role="button">
+        Назад
+    </a>
+    <button class="btn btn-success" type="submit">
+        Сохранить
+    </button>
+</div>
+</form>
+{% endblock %}
+{% block extrafoot %}
+<script src="{% static "ReactiveRaven/jqBootstrapValidation.js" %}">
+</script>
+<script>
+  $(function () { 
+  	$("input,select,textarea").not("[type=submit]").jqBootstrapValidation(); 
+  });
+</script>
+
+<script type="text/javascript" src="{% static "bootstrap-select/bootstrap-select.js" %}"></script>
+<script type="text/javascript" src="{% static "bootstrap-select/i18n/defaults-ru-RU1.js" %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static "bootstrap-select/bootstrap-select.css" %}">
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$('.selectpicker').selectpicker();
+	$('#born').datetimepicker({
+        // language: 'ru',
+        pickTime: false,
+        defaultDate: "01/01/2009"
+    });
+    $("#clnt_query").click(function() {
+	  	var query = $('#id_query').val()
+	  	$.ajax({
+	  		// "{% url 'clientinvite' %}",
+	  		url: "/reception/clientinvite/?query=" + query,
+	  		success: function (data) {
+	  			$("select[name*='contract']").empty().append(data)
+	  			$('.selectpicker').selectpicker('refresh');
+	  		},
+	  	})
+	});
+	$("#id_contract").change(function() {
+		var used_invite = $('#id_contract option:selected').attr("id").split('/')
+		var tbody = '<tr></tr>'
+		if (used_invite[0]<= used_invite[1]){
+			$('.btn-success').prop("disabled", "True")
+		} else {
+			$('.btn-success').prop("disabled", "")
+		}
+		if (used_invite.length > 2) {
+			tbody = '<tr><td>'+ used_invite[2] + '</td><td>' 
+					+ used_invite[3] + '</td></tr>'
+		}
+		if (used_invite.length > 4) {
+			tbody = tbody + '<tr><td>'+ used_invite[4] + '</td><td>' 
+					+ used_invite[5] + '</td></tr>'
+		}
+		$('#used_invite').html(tbody)
+	});
+
+});
+</script>
+<script language="JavaScript" src="{% static "ScriptCam/swfobject.js" %}"></script>
+<script language="JavaScript" src="{% static "ScriptCam/scriptcam.js" %}"></script>
+<script language="JavaScript"> 
+	$(document).ready(function() {
+		$("#webcam").scriptcam({
+			showMicrophoneErrors:false,
+			onError:onError,
+			cornerRadius:20,
+			cornerColor:'e3e5e2',
+			onWebcamReady:onWebcamReady,
+			uploadImage:'{% static "img/upload.gif" %}',
+			onPictureAsBase64:base64_tofield_and_image
+		});
+	});
+	function cameraclick() {
+		if ( $('#photodiv').attr('class') === 'hide') {
+			$('#photodiv').show();
+			$('#photodiv').attr('class','show');
+		} else {
+			$('#photodiv').hide();
+			$('#photodiv').attr('class','hide');
+		}
+	}
+	function base64_tofield() {
+		$('#formfield').val($.scriptcam.getFrameAsBase64());
+		$('#image').attr("src","data:image/png;base64,"+$.scriptcam.getFrameAsBase64());
+	};
+
+	function base64_tofield_and_image(b64) {
+		$('#formfield').val(b64);
+		$('#image').attr("src","data:image/png;base64,"+b64);
+	};
+	function changeCamera() {
+		$.scriptcam.changeCamera($('#cameraNames').val());
+	}
+	function onError(errorId,errorMsg) {
+		$( "#btn1" ).attr( "disabled", true );
+		$( "#btn2" ).attr( "disabled", true );
+		alert(errorMsg);
+	}			
+	function onWebcamReady(cameraNames,camera,microphoneNames,microphone,volume) {
+		$.each(cameraNames, function(index, text) {
+			$('#cameraNames').append( $('<option></option>').val(index).html(text) )
+		}); 
+		$('#cameraNames').val(camera);
+	}
+</script> 
+{% endblock %}

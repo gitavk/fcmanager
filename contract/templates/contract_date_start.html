@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Даты по договору{% endblock %}
+{% block extrahead %}
+
+{% endblock %}
+{% block content %}
+<form method="POST" class="form-horizontal">
+{% csrf_token %}{{ form.errors }}
+	<legend>
+		Обновление даты начала по договору {{ contract.number }} клиент: {{ contract.client.initials }}
+	</legend>
+	<div class="form-group">
+		<div class='col-lg-2'>
+			  <label for="id_note">Дата начала</label>
+		</div>
+		<div class='col-lg-4'>
+			<div class='input-group date' id='id_date_start' data-date-format="DD.MM.YYYY">
+                <input id="id_date_start" type="text" name="date_start" class="form-control input-lg" />
+                <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>
+            </span>
+		  </div>
+        </div>
+        <div class='col-lg-2'>
+              <label for="id_note">Дата окончания</label>
+        </div>
+        <div class='col-lg-4'>
+                <label class="date-end">{{ contract.date_finish|date:"d.m.Y" }}</label>
+                <input type="hidden" name="date_end" value="{{ contract.date_finish|date:"d.m.Y" }}" />
+            </span>
+        </div>
+
+	</div>
+  	<a href="{{ b_url }}" class="btn btn-info" role="button">
+        Назад
+    </a>
+    <button class="btn btn-success" type="submit">
+        Сохранить
+    </button>
+</form>
+{% endblock %}
+
+{% block extrafoot %}
+<script>
+    $('#id_date_start').datetimepicker({
+        // language: 'ru',
+        pickTime: false,
+        defaultDate: '{{ contract.date_start|date:"m/d/Y" }}'
+    });
+
+    $("#id_date_start").on("dp.change",function (e) {
+       d1 = $('#id_date_start').data("DateTimePicker").getDate();
+       var end_d = new Date(d1 + {{ contract.days_period|add:-1 }} * 86400000)
+       var day = end_d.getDate();
+       var month = end_d.getMonth() + 1;
+       var year = end_d.getFullYear();
+       var str_date_end = day + '.' + month + '.' + year
+       $('.date-end').html(str_date_end)
+       $('[name=date_end]').val(str_date_end)
+    });
+
+</script>
+{% endblock %}

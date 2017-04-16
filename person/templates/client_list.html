@@ -1,0 +1,6 @@
+<option ></option>
+{% for l in lst %}
+<option value="{{ l.pk }}">
+	{{ l.last_name }} {{ l.first_name }} {{ l.patronymic }}
+</option>
+{% endfor %}

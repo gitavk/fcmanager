@@ -1,0 +1,36 @@
+{% load staticfiles %}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" 
+  "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+   <title>{% block title %} {% endblock %}
+</title>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
+        <!-- DateTime picker -->
+    <link href="{% static "datetimepicker/css/bootstrap-datetimepicker.min.css" %}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static "css/printstyles.css" %}" />
+    <link href="{% static "font-awesome-4.1.0/css/font-awesome.min.css" %}" rel="stylesheet">
+        {% block extrahead %}{% endblock %}
+
+</head>
+
+<body>
+    {% block menu %}
+{% if b_url %}
+<a href="{{ b_url }}" class="btn btn-info" role="button">
+    <i class="fa fa-step-backward"></i>Назад
+</a>
+{% endif %}
+    {% endblock %}
+
+    {% block content %}{% endblock %}
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="{% static "bootstrap/js/jquery.js" %}"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src= "{% static "bootstrap/js/bootstrap.min.js" %}"></script>
+        {% block extrafoot %}{% endblock %}
+</body>
+</html> 

@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Органайзер{% endblock %}
+
+{% block menu %}
+<div class="row">
+<div class="col-lg-4">
+	<a href="{% url "o_guest" %}" class="btn btn-success">
+    	<div class="icontext">Гость</div>
+	</a>
+</div>
+<div class="col-lg-4">
+	<a href="{% url "o_note" %}" class="btn btn-warning">
+    	<div class="icontext">Напоминание</div>
+	</a>
+</div>
+<div class="col-lg-4">
+  <a href="{% url "o_note_list" %}" class="btn btn-info">
+      <div class="icontext">Входящие</div>
+  </a>
+</div>
+<div class="col-lg-4">
+.
+</div>
+</div>
+{% endblock %}
+{% block content %}
+{% if db_update %}
+<div class="alert alert-succes">
+  Данные обновлены успешно
+  <span class="glyphicon glyphicon-remove-circle"></span>
+</div>
+{% endif %}
+{% if scnt == 0 %}
+<div class="alert alert-danger">
+  Совпадений не найдено
+  <span class="glyphicon glyphicon-remove-circle"></span>
+</div>
+{% endif %}
+<div class="col-lg-2">
+{% if page > 0 %}
+  <a href="{% url 'o_menu' page|add:'-1' %}" class='btn btn-default'>назад</a>
+{% endif %}
+</div>
+<div class="col-lg-2">
+  <form class="form-search" action="" method="get">
+      <div class="input-group">
+          <input class="form-control" placeholder="Страница"
+          id="id_page" type="text" name="page">
+      </div>
+  </form>
+</div>
+<div class="col-lg-6">
+  <form class="form-search" action="" method="get">
+      <div class="input-group">
+          <input class="form-control" placeholder="Поиск по номеру телефона"
+          id="id_query" type="text" name="query">
+          <span class="input-group-btn">
+              <button type="submit" class="btn btn-search">Поиск</button>
+          </span>
+      </div>
+  </form>
+</div>
+<div class="col-lg-2">
+  <a href="{% url 'o_menu' page|add:1 %}" class='btn btn-default pull-right'>
+    вперед
+  </a>
+</div>
+
+<table class="table">
+<thead>
+  <tr><th>
+	<div class="col-lg-1"><strong>#</strong></div>
+	<div class="col-lg-2"><strong>Дата</strong></div>
+  <div class="col-lg-4"><strong>фио</strong></div>
+  <div class="col-lg-2"><strong>вид</strong></div>
+	<div class="col-lg-3"><strong>телефон</strong></div>
+  </th></tr>
+</thead>
+{% for g in lst %}
+<tr 
+{% if g.is_client %}
+	style="background-color:yellow;" 
+{% endif %}
+><td>
+<a data-toggle="collapse" data-parent="#accordion" href="#collapse{{ g.pk }}">
+	<div class="col-lg-1">{{ g.id }}</div>
+	<div class="col-lg-2">{{ g.date|date:"d/m/Y"}}</div>
+  <div class="col-lg-4">{{ g.get_full_name }}</div>
+  <div class="col-lg-2">{{ g.gtype_str }}</div>
+	<div class="col-lg-3">{{ g.phone }}</div>
+</a>
+ 
+    <div id="collapse{{ g.pk }}" class="collapse">
+      <div class="panel-body">
+      <table class="table">
+        <thead>
+          <tr>
+    		<th width="30%">менеджер</th><th width="50%">заметка</th><th></th>
+		  </tr>
+  	   </thead>
+  	   	<tr>
+  	   		<td>{{ g.manager.get_full_name }}</td><td>{{ g.note }}</td>
+  	   		<td><a href="{% url "o_guest_edit" g.pk %}" class="btn btn-warning">
+	  	   			<span class="glyphicon glyphicon-pencil"></span>
+	  	   			Редактировать
+  	   			</a>
+  	   		</td>
+  	   	</tr>
+    </table>
+    </div>
+  </div>
+</td></tr>
+{% endfor %}
+</table>
+{% endblock %}
+{% block extrafoot %}
+<script type="text/javascript">
+  $(document).ready(function() {
+      $(".glyphicon-remove-circle").on( "click", function() {
+        $(this).parent().hide();
+      });
+  });
+</script>
+{% endblock %}

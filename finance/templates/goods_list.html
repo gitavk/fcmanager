@@ -1,0 +1,9 @@
+{% load extra_filtrs %}
+["{{ cnt }}",
+{% if cnt == 1 %}
+"{{ res|title }}|{{ res.price|replace:"/,/." }}|{{ res.pk }}{% if res.goods_type.name == '1PTT' %}::T{% elif res.client_only %}::C{% endif %}|{{ res.on_market }}",
+{% else %}
+"{% for g in res %}{% if g.goods_type.name == '1PTT' %}{{ g|title }}|{{ g.price|replace:"/,/." }}|{{ g.pk }}::T|{{ g.on_market }}|{% elif g.client_only %}{{ g|title }}|{{ g.price|replace:"/,/." }}|{{ g.pk }}::C|{{ g.on_market }}|{% else %}{{ g|title }}|{{ g.price|replace:"/,/." }}|{{ g.pk }}|{{ g.on_market }}|{% endif %}{% endfor %}",
+{% endif %}
+ "{{ f }}"
+ ]

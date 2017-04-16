@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static %}
+{% load extra_filtrs %}
+{% block title %}Напоминания{% endblock %}
+
+{% block menu %}
+<div class="col-xs-3">
+	<a href="{% url "r_menu" %}">
+		<img src="{% static "img/cash.png"%}" alt="Ресепшен">
+	 	<div class="icontext">Рецепция</div>
+	 </a>
+</div>
+<div class="col-xs-3">
+	<a href="{% url "reminder_add" %}">
+		<img src="{% static "img/reminder_add.png"%}" alt="Добавить">
+	 	<div class="icontext">Добавить</div>
+	 </a>
+</div>
+<div class="col-xs-3">
+
+</div>
+<div class="col-xs-3">
+
+</div>
+{% endblock %}
+{% block content %}
+<table class="table">
+<thead>
+	<tr>
+		<th>Текст</th><th>Время</th><th>Период</th><th></th>
+	</tr>
+</thead>
+{% for v,wl in lst %}
+	<tr>
+		<td>			
+			{{ v.text }}
+		</td><td>
+			{{ v.time|time:"H:i" }}
+		</td id="td{{ v.pk }}"><td>
+			{% if wl == 1 %}
+				каждый день
+			{% elif wl == 2 %}
+			{{ v.date|date:"d.m.Y" }}
+			{% else %}
+				<a href="#td{{ v.pk }}" class="wd" data-toggle="popover" 
+				   data-placement="bottom"
+				        data-content="{% for w in wl %}
+									{{ week|lookup:w }}, 
+									{% endfor %}">
+									дни недели
+				</a>
+			{% endif %}
+		</td>
+		<td>
+			<a href="#td{{ v.pk }}" class="btn btn-sm btn-danger"
+	        role="button" data-toggle="popover" title="Удалить {{ ru.name }}"
+	        data-html="true"
+	        data-content="<a href='{% url 'reminder_del' v.pk %}'
+	             class='btn btn-sm btn-success' role='button'>да</a>
+	            <a href='#td{{ v.pk }}' 
+	            class='btn btn-sm btn-info pull-right' role='button' id='close'>нет</a>">
+	            <span class="glyphicon glyphicon-remove"></span> Удалить
+	    	</a>
+	    </td>
+	</tr>
+{% endfor %}
+</table>
+{% endblock %}
+
+{% block extrafoot %}
+ <script>
+$(function (){ 
+  $(".wd").popover();
+  $(".btn-danger").popover();
+  $( document ).on( "click", '#close', function() {
+    $(".btn-danger").popover('hide');
+    $(".wd").popover('hide');
+  });
+});
+</script>
+{% endblock %}

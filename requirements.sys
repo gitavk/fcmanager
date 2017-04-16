@@ -1,0 +1,3 @@
+# for building psycopg2
+python-dev
+postgresql-server-dev-X.Y

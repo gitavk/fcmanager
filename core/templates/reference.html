@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Справочники{% endblock %}
+
+{% block menu %} 
+<div class="row">
+	<div class="col-xs-4">
+	<a href="{% url "core.views.main_menu" %}">
+	    <img src="{% static "img/home.png"%}" alt="Главное меню">
+	 	<div class="icontext">Главное меню</div>
+	</a>
+	</div>
+	<div class="col-xs-4">
+	<a href="{% url "contract.views.contract_menu" %}">
+	    <img src="{% static "img/contract.png"%}" alt="настройки договоров">
+	 	<div class="icontext">настройки договоров</div>
+	</a>
+	</div>
+	<div class="col-xs-4">
+		<a href="{% url "ptt" %}">
+		    <img src="{% static "img/personal_trainer.png"%}" alt="услуги">
+		 	<div class="icontext">персональные тренировки</div>
+		</a>
+	</div>
+</div>
+<div class="row">
+    <div class="span4">
+
+    </div>
+    <div class="span3 offset2">
+    	    	<p>.</p>
+    </div>
+</div>
+<div class="row">
+	<div class="col-xs-4">
+		<a href="{% url "products_menu" %}">
+		    <img src="{% static "img/box.png"%}" alt="товары">
+		 	<div class="icontext">товары</div>
+		</a>
+	</div>
+	<div class="col-xs-4">
+		<a href="{% url "service" %}">
+		    <img src="{% static "img/service.png"%}" alt="услуги">
+		 	<div class="icontext">услуги</div>
+		</a>
+	</div>
+	<div class="col-xs-4">
+		<a href="{% url "provider" %}">
+		    <img src="{% static "img/provider.png"%}" alt="поставщики">
+		 	<div class="icontext">поставщики</div>
+		</a>
+	</div>
+</div>
+<div class="row">
+    <div class="span4">
+
+    </div>
+    <div class="span3 offset2">
+    	    	<p>.</p>
+    </div>
+</div>
+<div class="row">
+
+	<div class="col-xs-4">
+	</div>
+	<div class="col-xs-4">
+	</div>
+</div>
+{% endblock %}
+{% block content %}
+{% endblock %}
+{% block extrafoot %}
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Посещения клуба{% endblock %}
+{% block menu %}
+<div class="col-lg-3">
+	<a href="{% url "employees" %}">
+		<img src="{% static "img/groupsmeeting.png"%}" alt="Сотрудники">
+	 	<div class="icontext">Работа с персоналом</div>
+	</a>
+</div>
+<div class="col-lg-4 col-lg-offset-2">
+	<strong>
+		{{ e.lastname|title }}
+		{{ e.firstname|title }}
+		{{ e.patronymic|title }}
+	</strong>
+</div>
+<div class="col-lg-3">
+</div>
+{% endblock %}
+{% block content %}
+<table class="table">
+<thead>
+	<th>Дата</th>
+	<th>Приход</th>
+	<th>Уход</th>
+</thead>
+{% for v in online %}
+	<tr >
+		<td>{{ v.date_start|date:"d.m.Y" }}</td>
+		<td>{{ v.date_start|time:"H:i" }}</td>
+		<td>{{ v.date_end|time:"H:i" }}</td>	</tr>
+{% endfor %}
+</table>
+{% endblock %}

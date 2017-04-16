@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Отчеты{% endblock %}
+
+{% block menu %} 
+<div class="row">
+	<div class="col-lg-3">
+	<a href="{% url "core.views.main_menu" %}"
+	class="btn btn-primary">
+	    <i class="fa fa-home"></i> Главное меню
+	</a>
+	</div>
+	<div class="col-lg-3">
+		<a href="{% url "r_departments_names" %}" 
+			class="btn btn-primary"><i class="fa fa-bars"></i>
+		 	Название отделов
+		</a>
+	</div>
+	<div class="col-lg-3">
+		<strong>Иное </strong><input type="checkbox" id="other">
+	</div>
+</div>
+<div class="row"><div class='col-lg-3'>.</div></div>
+<div class="row">
+	<div class='col-lg-3'>
+		<label for="id_contract_date">Начало: </label>
+	</div>
+	<div class='col-lg-3'>
+		<div class='input-group date' id='date_start' 
+		data-date-format="DD.MM.YYYY">
+	        <input id="date_start" type="text" name="date_start" 
+	        class="form-control input-lg" />
+	        <span class="input-group-addon">
+	        	<i class="fa fa-calendar"></i>
+	        </span>
+	    </div>
+	</div>
+	<div class='col-lg-3'>
+		<label for="id_contract_date">Окончание: </label>
+	</div>
+	<div class='col-lg-3'>
+		<div class='input-group date' id='date_end' 
+		data-date-format="DD.MM.YYYY">
+	        <input id="date_end" type="text" name="date_end" 
+	        class="form-control input-lg" />
+	        <span class="input-group-addon">
+	        	<i class="fa fa-calendar"></i>
+	        </span>
+	    </div>
+	</div>
+</div>
+<div class="row"><div class='col-lg-3'>.</div></div>
+<div class="row">
+	<div class="col-lg-3">
+		<a id='r_sells' href="{% url "r_sells" Y m 0 %}" 
+			class="btn btn-success btn-block">
+			Продажи за месяц
+		</a>
+	</div> 
+	<div class="col-lg-3">
+		<a id='r_visits' href="{% url "r_visits" Y m d Y m d %}" 
+			class="btn btn-info btn-block">
+			посещения клиентами
+		</a>
+	</div>
+	<div class="col-lg-3">
+		<a id='r_e_visits' href="{% url "r_e_visits" Y m d Y m d %}" 
+			class="btn btn-primary btn-block">
+			посещения персоналом
+		</a>
+	</div>
+	<div class="col-lg-3">
+		<a id='r_ptt' href="{% url "r_ptt" Y m d Y m d %}" 
+			class="btn btn-warning btn-block">
+			персональные тренировки
+		</a>
+	</div>
+</div>
+<div class="row"><div class='col-lg-3'>.</div></div>
+<div class="row">
+	<div class="col-lg-3">
+		<a id='r_manager' href="{% url "r_manager" Y m %}" 
+			class="btn btn-warning btn-block">
+			отчет менеджера
+		</a>
+	</div>
+	<div class="col-lg-3">
+		<a id='r_employees' href="{% url "r_employees" %}" 
+			class="btn btn-success btn-block">
+			справочник сотрудников
+		</a>
+	</div>
+	<div class="col-lg-3">
+		<a id='r_trainer_ptt' href="{% url "r_trainer_ptt" Y m d Y m d %}" 
+			class="btn btn-primary btn-block">
+			статистика по тренеру
+		</a>
+	</div>
+	<div class="col-lg-3">
+		<a id='r_reception' href="{% url "r_reception" Y m d 0 %}" 
+			class="btn btn-info btn-block">
+			отчет рецепциониста
+		</a>
+	</div>
+</div>
+<div class="row"><div class='col-lg-3'>.</div></div>
+<div class="row">
+  <div class="col-lg-3">
+	<a href="{% url "r_debtors_menu"%}" class="btn btn-success  btn-block">
+	  отчет по задолжности 
+	</a>
+  </div>
+  <div class="col-lg-3">
+	<a id='r_contract_end' href="{% url "r_contract_end" Y m d Y m d %}" 
+	class="btn btn-danger btn-block">
+	  отчет об окончании 
+	</a>
+  </div>
+  <div class="col-lg-3">
+	<a id='r_manager_sells' href="{% url "r_manager_sells" Y m d Y m d %}" 
+	class="btn btn-success btn-block">
+	  продажи менеджеров 
+	</a>
+  </div>
+  <div class="col-lg-3">
+    <a id='r_organizer' href="{% url "r_organizer" Y m d Y m d %}" 
+    class="btn btn-primary btn-block">
+      Органайзер
+    </a>
+  </div>
+<div class="row"><div class='col-lg-3'>.</div></div>
+  <div class="col-lg-3">
+    <a id='r_organizer_f' href="{% url "r_organizer_f" %}" 
+    class="btn btn-warning btn-block">
+      Органайзер весь список
+    </a>
+  </div>
+</div>
+{% endblock %}
+{% block extrafoot %}
+
+<script type="text/javascript">
+$(document).ready(function(){
+
+$('#other').click(function(){
+    r_sells = $('#r_sells').attr('href').split('/')
+    r_reception = $('#r_reception').attr('href').split('/')
+	if($(this).is(':checked')){
+ 		// r_sells
+    	r_sells[5] = 1
+    	// r_reception
+    	r_reception[6] = 1
+	} else {
+		r_sells[5] = 0
+    	r_reception[6] = 0
+	}
+    $('#r_sells').attr('href',r_sells.join('/'))
+    $('#r_reception').attr('href',r_reception.join('/'))
+});
+
+$('#date_start').datetimepicker({
+    pickTime: false,
+   	defaultDate: '{% now "m/d/Y" %}'
+});
+
+$('#date_end').datetimepicker({
+    pickTime: false,
+   	defaultDate: '{% now "m/d/Y" %}'
+});
+
+    $('#date_start').change(function() {
+     	date = new Date($(this).data("DateTimePicker").getDate());
+     	day = date.getDate()
+     	month = date.getMonth() + 1
+     	if(month < 10) {
+		    month = '0' + month;
+		} else {
+		    month = '' + month;
+		}
+     	if(day < 10) {
+		    day = '0' + day;
+		} else {
+		    day = '' + day;
+		}
+ 		year =  date.getFullYear();
+ 		// r_sells
+        r_sells = $('#r_sells').attr('href').split('/')
+        r_sells[4] = month
+        r_sells[3] = year
+        $('#r_sells').attr('href',r_sells.join('/'))
+        // r_visits
+        r_visits = $('#r_visits').attr('href').split('/')
+        r_visits[3] = year
+        r_visits[4] = month
+        r_visits[5] = day
+        $('#r_visits').attr('href',r_visits.join('/'))
+        // r_e_visits
+        r_e_visits = $('#r_e_visits').attr('href').split('/')
+        r_e_visits[3] = year
+        r_e_visits[4] = month
+        r_e_visits[5] = day
+        $('#r_e_visits').attr('href',r_e_visits.join('/'))
+        // r_ptts 
+        r_ptt = $('#r_ptt').attr('href').split('/')
+        r_ptt[3] = year
+        r_ptt[4] = month
+        r_ptt[5] = day
+        $('#r_ptt').attr('href',r_ptt.join('/'))
+        // r_manager
+        r_manager = $('#r_manager').attr('href').split('/')
+        r_manager[3] = year
+        r_manager[4] = month
+        $('#r_manager').attr('href',r_manager.join('/'))
+        // r_trainer_ptt 
+        r_trainer_ptt = $('#r_trainer_ptt').attr('href').split('/')
+        r_trainer_ptt[3] = year
+        r_trainer_ptt[4] = month
+        r_trainer_ptt[5] = day
+        $('#r_trainer_ptt').attr('href',r_trainer_ptt.join('/'))
+        // r_reception
+        r_reception = $('#r_reception').attr('href').split('/')
+        r_reception[3] = year
+        r_reception[4] = month
+        r_reception[5] = day
+        $('#r_reception').attr('href',r_reception.join('/'))
+        // r_contract_end
+        r_contract_end = $('#r_contract_end').attr('href').split('/')
+        r_contract_end[3] = year
+        r_contract_end[4] = month
+        r_contract_end[5] = day
+        $('#r_contract_end').attr('href',r_contract_end.join('/'))
+        // r_manager_sells
+        r_manager_sells = $('#r_manager_sells').attr('href').split('/')
+        r_manager_sells[3] = year
+        r_manager_sells[4] = month
+        r_manager_sells[5] = day
+        $('#r_manager_sells').attr('href',r_manager_sells.join('/'))
+        // r_organizer
+        r_organizer = $('#r_organizer').attr('href').split('/')
+        r_organizer[3] = year
+        r_organizer[4] = month
+        r_organizer[5] = day
+        $('#r_organizer').attr('href',r_organizer.join('/'))
+	});
+
+    $('#date_end').change(function() {
+     	date = new Date($(this).data("DateTimePicker").getDate());
+     	day = date.getDate()
+     	month = date.getMonth() + 1
+     	if(month < 10) {
+		    month = '0' + month;
+		} else {
+		    month = '' + month;
+		}
+     	if(day < 10) {
+		    day = '0' + day;
+		} else {
+		    day = '' + day;
+		}
+ 		year =  date.getFullYear();
+        // r_visits
+        r_visits = $('#r_visits').attr('href').split('/')
+        r_visits[6] = year
+        r_visits[7] = month
+        r_visits[8] = day
+        $('#r_visits').attr('href',r_visits.join('/'))
+        // r_e_visits
+        r_e_visits = $('#r_e_visits').attr('href').split('/')
+        r_e_visits[6] = year
+        r_e_visits[7] = month
+        r_e_visits[8] = day
+        $('#r_e_visits').attr('href',r_e_visits.join('/'))
+        // r_ptts
+        r_ptt = $('#r_ptt').attr('href').split('/')
+        r_ptt[6] = year
+        r_ptt[7] = month
+        r_ptt[8] = day
+        $('#r_ptt').attr('href',r_ptt.join('/'))
+        // r_trainer_ptt
+        r_trainer_ptt = $('#r_trainer_ptt').attr('href').split('/')
+        r_trainer_ptt[6] = year
+        r_trainer_ptt[7] = month
+        r_trainer_ptt[8] = day
+        $('#r_trainer_ptt').attr('href',r_trainer_ptt.join('/'))
+        //r_contract_end
+        r_contract_end = $('#r_contract_end').attr('href').split('/')
+        r_contract_end[6] = year
+        r_contract_end[7] = month
+        r_contract_end[8] = day
+        $('#r_contract_end').attr('href',r_contract_end.join('/'))
+        //r_manager_sells
+        r_manager_sells = $('#r_manager_sells').attr('href').split('/')
+        r_manager_sells[6] = year
+        r_manager_sells[7] = month
+        r_manager_sells[8] = day
+        $('#r_manager_sells').attr('href',r_manager_sells.join('/'))
+        //r_organizer
+        r_organizer = $('#r_organizer').attr('href').split('/')
+        r_organizer[6] = year
+        r_organizer[7] = month
+        r_organizer[8] = day
+        $('#r_organizer').attr('href',r_organizer.join('/'))
+   	});
+});
+</script>
+{% endblock %}

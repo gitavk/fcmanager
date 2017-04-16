@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} {% endblock %}
+{% block menu %}
+<div id="trasModal" class="modalDialog">
+  <div class="confirm">
+    <a href="" title="Close" class="close"></a>
+    <center id="cashinfo">
+      <h3>  <span id="question"></span> ? </h3>
+      <div class="btn-confirm">
+        <button class="btn btn-warning btn-yes">да</button>
+        <button class="btn btn-info btn-no-close">нет</button>
+      </div>
+    </center>
+  </div>
+</div>
+
+<div class="col-lg-3">
+  <a href="{% url "r_menu" %}">
+    <img src="{% static "img/cash.png"%}" alt="Ресепшен">
+    <div class="icontext">Рецепция</div>
+   </a>
+</div>
+<div class='col-lg-3'>
+  <div class='input-group date' id='date' 
+  data-date-format="DD.MM.YYYY">
+        <input id="date" type="text" name="date" 
+        class="form-control input-lg" />
+        <span class="input-group-addon">
+          <i class="fa fa-calendar"></i>
+        </span>
+    </div>
+</div>
+<div class="col-lg-3">
+  <a id='r_refresh' href="{% url "reception_day" Y m d %}" 
+    class="btn btn-info">
+    обновить
+  </a>
+</div>
+<div class="col-lg-3">
+</div>
+{% endblock %}
+{% block content %}
+<div class="col-lg-12 col-md-offset-4">
+<label> {{ title }} за: {{ d }}.{{ m }}.{{ Y }}  </label>
+</div>
+<table class="table">
+<thead>
+  <tr>
+    <th>Время</th>
+    <th>Клиент</th>
+    <th>Номер</th>
+    <th>Количество</th>
+    <th>Сумма</th>
+    <th>Вид оплаты</th>
+    <th>Возврат</th>   
+  </tr>
+</thead>
+<tbody class="check-list">
+  {% for check in lst %}
+  <tr class="check-head">
+    <td>{{ check.date|time:"H:i" }}</td>
+    <td>{{ check.username|title }}</td>
+    <td>{{ check.number }}</td>
+    <td>{{ check.count }}</td>
+    <td>{{ check.amount }}</td>
+    <td>
+    {% if check.payment_type == 1 %}
+        безнал
+    {% elif check.payment_type == 2 %}
+        иное
+    {% else %}
+      наличными
+    {% endif %}
+    </td>
+    {% if check.cash_rollback == 2 %}
+    <td>Отменен</td>
+    {% elif check.cash_rollback == 1 %}
+    <td class="not-colspan">
+        <button id='rollback' class="btn btn-sm btn-warning"
+         value="{{ check.credits_list_str }}"
+         chpk="{{ check.pk }}"
+         buyer="{{ check.username|title }}" 
+         cht="{{ check.cash_payment_type }}"
+         title="откат чека" 
+         disabled>
+          откат чека
+        </button>
+        <button class="btn btn-default btn-circle btn-on"></button>       
+      </td>
+    {% else %}
+      <td></td>
+    {% endif %}
+    </tr>
+  <tr class="hidden"><td colspan="7">
+    <table class="table">
+    <thead>
+      <tr>
+        <th width="300px">Товар</th>
+        <th>Кол-во</th>
+        <th>Цена</th>
+        <th>Сумма</th>
+        <th>Вид оплаты</th>
+        <th>Возврат</th>   
+      </tr>
+    </thead>
+    {% for ch in check.credits_list %}
+      <tr>
+        <td>{{ ch.goodsname }} </td>
+        <td>{{ ch.count }}</td>
+        <td>{{ ch.goodsprice }}</td>
+        <td>{{ ch.amount }}</td>
+    <td>
+    {% if ch.payment_type == 1 %}
+        безнал
+    {% elif ch.payment_type == 2 %}
+        иное
+    {% else %}
+      наличными
+    {% endif %}
+    </td>
+    {% if ch.cash_rollback == 2 %}
+    <td>Отменен</td>
+    {% elif ch.cash_rollback == 1 %}
+    <td>
+        <button id='rollback' class="btn btn-sm btn-danger"
+   value="cr{{ ch.pk }}|{{ ch.cash_name|title }}|{{ ch.count }}|{{ ch.amount }}|{{ ch.cash_department }}|"
+   chpk="{{ ch.pk }}" buyer="{{ ch.username|title }}" 
+   cht="{{ ch.cash_payment_type }}" title="Откат платежа">
+          Откат платежа
+        </button>
+      </td>
+    {% else %}
+      <td></td>
+    {% endif %}
+      </tr>
+    {% endfor %}
+    </table>
+    </td>
+  </tr>
+  {% endfor %}
+</tbody>
+</table>
+<label class="bg-primary">Итого: {{ total }}</label><br/>
+{% for d, dsumm, cash, cashless, other in dtotal %}
+  {% if dsumm > 0 %}
+    <label class="bg-info">отдел №{{ d }}</label><br/>
+    <label>всего: {{ dsumm }} </label><br/>
+    {% if cash > 0 %}
+      <label>наличными: {{ cash }} </label><br/>
+    {% endif %}
+    {% if cashless > 0 %}
+      <label>безнал: {{ cashless }} </label><br/>
+    {% endif %}
+    {% if other > 0 %}
+      <label>иное: {{ other }} </label><br/>
+    {% endif %}
+  {% endif %}
+{% endfor %}
+{% endblock %}
+{% block extrafoot %}
+<script type="text/javascript">
+$(document).ready(function(){
+
+  $('.btn-on').on("click", function() {
+    $(this).prev().prop('disabled', function(i, v) { return !v; });
+  });
+
+  $('tbody.check-list').on( "click", 'td', function() {
+    if($(this).hasClass('not-colspan')){
+      return
+    } else {
+      checkdata = $(this).parent().next();
+      checkdata.toggleClass("hidden");
+      data = checkdata.find('.btn-danger');
+    }
+  });
+
+  $('.btn-no-close').on( "click", function() {
+    location.href = ('')
+  });
+
+  $( document ).on( "click", "#rollback", function(e) {
+    $('#question').html($(this).attr("title"))
+    $('.btn-yes').attr("value", $(this).attr("value"))
+    $('.btn-yes').attr("buyer", $(this).attr("buyer"))
+    $('.btn-yes').attr("cht", $(this).attr("cht"))
+    $('.btn-yes').attr("chpk", $(this).attr("chpk"))
+    location.href = ('#trasModal')
+  });
+
+  $('.btn-yes').on( "click", function() {
+      $('#cashinfo').html('<div class="alert alert-info">\
+              <h3>печать чека</h3>\
+            </div>')
+    var ch_id = $(this).attr("value") // full info
+    var sale = encodeURI(ch_id)
+    var buyer = encodeURI($(this).attr("buyer"))
+    var cht = encodeURI($(this).attr("cht"))
+    var chpk = $(this).attr("chpk") // id only
+    var gurl = 'http://{{ cashhost }}:8000/cgi-bin/returnsale.py'
+    $.ajax({
+      url: encodeURI(gurl),
+      crossDomain: true,
+      timeout: 10000,
+      cache: false,
+      async: false,
+      data: ({sales: sale, chtype: cht, clnt:buyer}),
+      dataType: 'jsonp',
+      success: function (data) {
+        $('#cashinfo').html('<div class="alert alert-success">\
+                    <h3>сохранение в базу</h3>\
+                </div>')
+        $.ajax({
+          url: encodeURI("{% url 'esc_credit'%}" ),
+          data: ({ch_id: chpk}),
+          dataType: "json",
+          success: function (data) {
+            if (parseInt(data['res'], 10) > 0){
+              $('#cashinfo').html('<div class="alert alert-success">\
+                              <h3>данные сохранены</h3>\
+                            </div>')
+              location.href = ('')
+            }
+          },
+          error: function(){
+            $('#cashinfo').html('<div class="alert alert-danger">\
+            <h3>ошибка базы данных</h3>\
+          </div>')
+          }
+        });
+      },
+      error: function(){
+        $('#cashinfo').html('<div class="alert alert-danger">\
+                    <h3>ошибка печати чека</h3>\
+                </div>')
+      }
+    });
+  });
+
+    $('#date').datetimepicker({
+        pickTime: false,
+        defaultDate: '{{ m }}/{{ d }}/{{ Y }}'
+    });
+
+    $('#date').change(function() {
+      date = new Date($(this).data("DateTimePicker").getDate());
+      day = date.getDate()
+      month = date.getMonth() + 1
+      if(month < 10) {
+          month = '0' + month;
+      } else {
+          month = '' + month;
+      }
+        if(day < 10) {
+          day = '0' + day;
+      } else {
+          day = '' + day;
+      }
+      year =  date.getFullYear();
+        // r_refresh
+        r_refresh = $('#r_refresh').attr('href').split('/')
+        r_refresh[3] = year
+        r_refresh[4] = month
+        r_refresh[5] = day
+        $('#r_refresh').attr('href',r_refresh.join('/'))
+    });
+});
+</script>
+{% endblock %}

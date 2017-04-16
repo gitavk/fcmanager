@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}ФОТО{% endblock %}
+{% block extrahead %}
+
+{% endblock %}
+{% block content %}
+<form method="POST" class="form-horizontal">
+{% csrf_token %}{{ form.errors }}
+	<legend>
+		Фотография  для {{ clnt.get_full_name|title }}
+	</legend>
+	<div class="form-group">
+		{% include 'camera.html' %}
+	</div>
+  	<a href="{{ b_url }}" class="btn btn-info" role="button">
+        Назад
+    </a>
+    <button class="btn btn-success" type="submit">
+        Сохранить
+    </button>
+</form>
+{% endblock %}
+
+{% block extrafoot %}
+<script language="JavaScript" src="{% static "ScriptCam/swfobject.js" %}"></script>
+<script language="JavaScript" src="{% static "ScriptCam/scriptcam.js" %}"></script>
+<script language="JavaScript"> 
+	$(document).ready(function() {
+		$("#webcam").scriptcam({
+			showMicrophoneErrors:false,
+			onError:onError,
+			cornerRadius:20,
+			cornerColor:'e3e5e2',
+			onWebcamReady:onWebcamReady,
+			uploadImage:'{% static "img/upload.gif" %}',
+			onPictureAsBase64:base64_tofield_and_image
+		});
+	});
+	function cameraclick() {
+		if ( $('#photodiv').attr('class') === 'hide') {
+			$('#photodiv').show();
+			$('#photodiv').attr('class','show');
+		} else {
+			$('#photodiv').hide();
+			$('#photodiv').attr('class','hide');
+		}
+	}
+	function base64_tofield() {
+		$('#formfield').val($.scriptcam.getFrameAsBase64());
+		$('#image').attr("src","data:image/png;base64,"+$.scriptcam.getFrameAsBase64());
+	};
+
+	function base64_tofield_and_image(b64) {
+		$('#formfield').val(b64);
+		$('#image').attr("src","data:image/png;base64,"+b64);
+	};
+	function changeCamera() {
+		$.scriptcam.changeCamera($('#cameraNames').val());
+	}
+	function onError(errorId,errorMsg) {
+		$( "#btn1" ).attr( "disabled", true );
+		$( "#btn2" ).attr( "disabled", true );
+		alert(errorMsg);
+	}			
+	function onWebcamReady(cameraNames,camera,microphoneNames,microphone,volume) {
+		$.each(cameraNames, function(index, text) {
+			$('#cameraNames').append( $('<option></option>').val(index).html(text) )
+		}); 
+		$('#cameraNames').val(camera);
+	}
+</script> 
+{% endblock %}

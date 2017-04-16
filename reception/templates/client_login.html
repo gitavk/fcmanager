@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+{% load url from future %}
+
+{% block title %}Вход{% endblock %}
+{% block menu %}
+<form class="form-horizontal col-lg-12" method="post" action="">
+  {% csrf_token %}
+  <div id="legend">
+      <legend class="">Вход</legend>
+  </div>
+    <div class="form-group">
+      <!-- Username -->
+      <div class='col-lg-4'>
+      <label class="control-label"  for="lastname">Фамилия/номер карты</label>
+      </div>
+      <div class="controls col-lg-6">
+        <input id="id_lastname" name="lastname" maxlength="50" type="text" 
+        class="form-control input-lg" required>
+      </div>
+    </div>
+
+    <div class="form-group col-lg-6">
+    <a href="{% url "r_menu" %}" class="btn btn-info">назад</a>
+    </div>
+      <div class="form-group col-lg-6">
+          <button class="btn btn-success">дальше</button>
+      </div>
+</form>
+{% endblock %}
+{% block content %} 
+{% if request.method == 'POST' %}
+  <table class="table">
+  {% for e in employees %}
+    <tr class="info" ><td>
+      <a href="{% url "e_comein" e.pk %}">{{ e.initials }}</a>
+    </td></tr>
+  {% endfor %}  
+    {% for p in lst %}
+    <tr><td>
+      <a href="{% url "person_card" p.pk %}">
+      {{ p.last_name|title }} {{ p.first_name|title }} 
+      {{ p.patronymic|title }}
+      </a>
+    </td></tr>
+    {% empty %}
+    {% if not employees %}
+    <tr>
+      <td>
+        <div class="alert alert-danger">
+          Совпадений не найдено
+          <span class="glyphicon glyphicon-remove-circle"></span>
+        </div>
+      </td>
+    </tr>
+    {% endif %}
+  {% endfor %}
+  </table>
+{% endif %}
+{% endblock %}
+{% block extrafoot %}
+<script type="text/javascript">
+  $(document).ready(function() {
+      $('#id_lastname').focus();
+
+      $(".glyphicon-remove-circle").on( "click", function() {
+        $(this).parent().hide();
+      });
+  });
+</script>
+{% endblock %}

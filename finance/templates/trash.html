@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Внутреннее списание{% endblock %}
+
+{% block menu %}
+<div class="row">
+	<div class="col-xs-4">
+    <a href="{% url "warehouse" %}">
+        <img src="{% static "img/warehouse.png"%}" alt="склад">
+      <div class="icontext">склад</div>
+    </a>
+	</div>
+	<div class="col-xs-4">
+	<a href="{% url "trash_add" %}">
+	    <img src="{% static "img/trash_add.png"%}" alt="Добавить">
+	 	<div class="icontext">Добавить</div>
+	</a>
+	</div>
+	<div class="col-sm-3 col-xs-12 col-lg-4">
+    <form class="form-search" action="{% url "trash" %}" method="get">
+        <div class="input-group">
+            <input class="form-control " d="id_query" type="text" name="query" disabled>
+            <span class="input-group-btn">
+                <button type="submit" class="btn btn-search">Поиск</button>
+            </span>
+        </div>
+    </form>
+  </div>
+</div>
+  {% if but_all %}
+  <div class="col-lg-12">
+    <a href="{% url "issuance" %}" class="btn btn-success btn-xs" role="button">
+        весь список
+    </a>
+  </div>
+  {% endif %}
+{% endblock %}
+{% block content %}
+{% if res %}
+<div class="alert alert-danger" >{{ res }}</div> 
+{% endif %}
+<table class="table">
+{% for t, goods in lst %}
+<tr><td>
+  <div class="col-lg-4">
+    <a data-toggle="collapse" data-parent="#accordion" 
+    href="#collapse{{ t.pk }}">
+      {{ t.date|date:'d.m.Y'}} № {{ t.number }}
+    </a>
+   </div>
+    <div class="col-lg-4">
+    <a data-toggle="collapse" data-parent="#accordion" 
+    href="#collapse{{ t.pk }}">
+      {{ t.market.name|lower }}
+    </a>
+   </div>
+    <a href="{% url 'trash_edit' t.pk %}" 
+    class="btn btn-sm btn-warning" role="button">
+        <i class="fa fa-pencil"></i> Редактировать</a>
+
+    <button data-html="true" data-placement="top"
+      class="btn btn-sm btn-danger" data-toggle="popover"
+      title="Удалить {{ s.value }}
+      <i class='fa fa-times' id='close'></i>"
+      data-content="<div class='col-lg-12' id='delinfo'>
+          <button class='btn btn-sm btn-success' pk='{{t.pk}}'
+           id='Y'>да</button>
+          <button class='btn btn-sm btn-info pull-right'
+          id='close'>нет</button>
+          </div>">
+      <i class="fa fa-minus"></i> Удалить </button>
+
+    <div id="collapse{{ t.pk }}" class="collapse">
+      <div class="panel-body">
+        <table class="table">
+          <thead>
+            <tr>
+          		<th>Дата</th><th>Торговая точка</th><th>Списал</th>
+      		  </tr>
+    	   </thead>
+          <tr>
+          	<td>{{ t.date|date:"d.m.Y"|default:"" }}</td>
+          	<td>{{ t.market|default:"" }}</td>
+            <td>{{ t.manager.get_full_name|default:"" }}</td>
+          </tr>
+        </table>
+        <table class="table">
+          <thead>
+            <tr>
+              <th width="200px">товар</th>
+              <th width="100px">Кол-во</th>
+              <th>Примечание</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for g in goods%}
+          <tr>
+            <td>{{ g.goods.name }}</td>
+            <td>{{ g.count }}</td>
+            <td>{{ g.note }}</td>
+          </tr>
+          {% endfor %}  
+          </tbody>
+          
+        </table>
+      </div>
+    </div>
+</td></tr>
+{% endfor %}
+</table>
+{% endblock %}
+{% block extrafoot %}
+ <script>
+$(function (){
+  $( document ).on( "click",'#Y', function(){
+    var pk = $(this).attr('pk')
+    $.ajax({
+          url: encodeURI("{% url 'trash_del' %}"),
+          data: ({id: pk, }),
+          success: function (data) {
+            res = parseInt(data['res'], 10);
+            if (res > 0) {
+              $('#delinfo').html('<div class="alert alert-success">\
+                                  <h3>Удалено</h3></div>')
+              window.setTimeout('location.reload()', 1000);
+            } else {
+              $('#delinfo').html('<div class="alert alert-danger">\
+                                  <h3>Нельзя удалить</h3></div>')
+            }          
+          },
+          error: function(){
+            $('#delinfo').html('<div class="alert alert-danger">\
+                              <h3>Ошибка базы данных</h3></div>')
+          }
+      })
+  });
+
+  $(".btn-danger").popover();
+  $( document ).on( "click", '#close', function() {
+    $(".btn-danger").popover('hide');
+  });
+});
+</script>
+{% endblock %}

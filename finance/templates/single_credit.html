@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% load static %}
+{% load extra_filtrs %}
+{% load url from future %}
+{% block title %}Чек{% endblock %}
+{% block content %}
+<div class='col-lg-12' id='cashinfo'>
+
+</div>
+<div class='col-lg-2 col-lg-offset-3'>
+  <a class='btn btn-sm btn-warning' role='button' id='cash' name='cash'>
+    нал
+  </a>
+</div>
+<div class='col-lg-2'>
+<label>Всего: {{ amount }}</label>
+</div>
+<div class='col-lg-2 text-right'>
+  <a class='btn btn-sm btn-danger' role='button' id='card' name='card'>
+    безнал
+  </a>
+</div>
+  <table class="table">
+  <thead>
+    <th>Товар</th>
+    <th>Цена</th>
+    <th>Количество</th>
+  </thead>
+  <tbody id="goods_table">
+  {% for g, count in lst %}
+    <tr>
+      <td>
+      {{ g|title }}
+<input name="cr0|{{ g.cash_name|title }}|{{ count }}|{{ g.price }}|{{ g.department }}"
+type="hidden" id="credit" value="{{ g.pk }}">
+       </td>
+      <td>{{ g.price }}</td>
+      <td>{{ count }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+  </table>
+{% endblock %}
+
+{% block extrafoot %}
+<script type="text/javascript">
+$(document).ready(function() {
+    $(document).on("click", '[name=card]', function(){
+      $('#cash').hide()
+      $('#card').hide()
+      $('#cashinfo').html("<div class='alert alert-info'>\
+                  <h3><div class='col-lg-12'>\
+                    <span class='glyphicon glyphicon-warning-sign'>\
+                    </span>\
+                    </div>\
+                    <div class='center-block'>\
+                        снять деньги с карты\
+                    <span class='glyphicon glyphicon-phone'>\
+                    </span>\
+                      </div>\
+                    </h3>\
+                </div>\
+                <div class='col-lg-12'>\
+                      <a class='btn btn-sm btn-danger'\
+                       role='button' id='cash'\
+                      name='card'>пробить чек</a>\
+                    </div>")
+  })
+
+  $( document ).on( "click",'#cash', function(){
+    $('#cash').hide()
+    $('#card').hide()
+    $('#cashinfo').html('<div class="alert alert-info">\
+                  <h3>печать чека</h3>\
+              </div>');
+    var cht = '';
+    if ($(this).attr('name') === 'cash'){
+      cht = '1'
+    } else {
+      cht = '2'
+    }
+    // check cash status
+    var status = 0
+    curl = 'http://{{ cashhost }}:8000/cgi-bin/check.py'
+    $.when(
+      $.ajax({
+          url: encodeURI(curl),
+          crossDomain: true,
+          timeout: 10000,
+          cache: false,
+          async: false,
+          dataType: 'jsonp',
+          success: function (data) {
+              status = parseInt(data['res'], 10)
+          },
+      })
+    ).then(function() {
+      if ( [4, 2].indexOf(status) < 0 ) {
+        $('#cashinfo').html('<div class="alert alert-danger">\
+            <h3>Проверьте:</h3>\
+            <h3>- ленту</h3>\
+            <h3>- подключение</h3>\
+            <h3>- замятие ленты</h3>\
+            <h3>Перезапустите кассу</h3>\
+          </div>');
+        return
+      };
+      var gchecked = $("[id=credit]").get()
+      var sal = ''
+      var glist = ''
+      for (var i = 0; i < gchecked.length; i++) {
+        sal += gchecked[i].name + '|'
+        glist += gchecked[i].value + '|'
+      }
+      sal = encodeURI(sal)
+      var buyer = encodeURI('')
+      var gurl = 'http://{{ cashhost }}:8000/cgi-bin/single_sale.py'
+      $.ajax({
+            url: encodeURI(gurl),
+            crossDomain: true,
+            timeout: 10000,
+            cache: false,
+            async: false,
+            data: ({sales: sal, chtype: cht, clnt:buyer }),
+            dataType: 'jsonp',
+            success: function (data) {
+              $('#cashinfo').html('<div class="alert alert-success">\
+                        <h3>сохранение в базу</h3>\
+                    </div>');
+            },
+            error: function(){
+              $('#cashinfo').html('<div class="alert alert-danger">\
+                        <h3>ошибка печати чека</h3>\
+                    </div>')
+            }
+      });
+      var crurl = '{% url "close_credit" %}'
+      $.ajax({
+        url: crurl,
+        cache: false,
+        async: false,
+        timeout: 10000,
+        dataType: 'json',
+        data:({crlist: sal, chtype: cht, glist: glist}),
+        success: function (data) {
+              $('#cashinfo').html('<div class="alert alert-success">\
+                                    <h3>данные сохранены</h3>\
+                                  </div>');
+          window.location.replace('{% url "client_login" %}');
+        },
+        error: function(){
+              $('#cashinfo').html('<div class="alert alert-danger">\
+                                    <h3>ошибка базы данных</h3>\
+                                  </div>');
+            }
+      });
+    });
+
+  });
+
+});
+</script>
+{% endblock %}

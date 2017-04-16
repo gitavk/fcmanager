@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Гости{% endblock %}
+
+{% block menu %}
+<div class="row">
+	<div class="col-lg-4">
+		<a href="{% url "r_menu" %}">
+			<img src="{% static "img/cash.png"%}" alt="Ресепшен">
+			<div class="icontext">Рецепция</div>
+		</a>
+	</div>
+	<div class="col-lg-4">
+		<a href="{% url "r_guest_add" %}">
+		    <img src="{% static "img/guest_add.png"%}" alt="Добавить">
+		 	<div class="icontext">Добавить</div>
+		</a>
+	</div>
+	<div class="col-lg-4">
+	  <form class="form-search" action="" method="get">
+	      <div class="input-group">
+	          <input class="form-control " id="id_query" type="text" name="query">
+	          <span class="input-group-btn">
+	              <button type="submit" class="btn btn-search">Поиск</button>
+	          </span>
+	      </div>
+	  </form>
+	</div>
+</div>
+<div class="row">
+  <div class="btn-group btn-group-sm">
+    {% for letter in abc %}
+      <a href="{% url 'r_guest' %}{{forloop.counter0 }}" class="btn btn-default">
+         {{ letter }}
+      </a>
+    {% endfor %}
+    {% if id > -1 %}
+    <a href="{% url 'r_guest' %}" type="button" class="btn btn-primary">Все</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block content %}
+<table class="table">
+<tbody>
+{% for l in lst %}
+<tr><td>
+	{{ l.lastname|title }} {{ l.firstname|title }} {{ l.patronymic|title }}
+	</td>
+	<td>
+		<a href="{% url "p_guest" l.pk %}" 
+        	class="btn btn-sm btn-info" role="button"
+        	{% if l.is_client %} disabled
+        	{% endif %}>
+        	Регистрация договора
+      	</a>
+      	<a href="{% url 'guest_credit' l.pk %}"
+      	 class="btn btn-sm btn-warning" role="button">Повесить долг</a>
+      	<a href="{% url "r_guest_card" l.pk %}" 
+      		class="btn btn-sm btn-success" role="button">
+      		Личная карта
+      	</a>
+	</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}

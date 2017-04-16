@@ -1,0 +1,76 @@
+{% load static %}
+<!-- custom pay plan -->
+<script type="text/javascript" src="{% static "jquery-calx/jquery-calx-1.1.9.min.js" %}"></script>
+ <script>
+$(document).ready(function(){
+ var cnt = 2;
+ $('#tbl').calx();
+   	var stepdate = new Date();
+	  stepdate.setDate((new Date).getDate() + cnt*30);
+	  var dd = stepdate.getDate();
+	  var mm = stepdate.getMonth();
+	  if(dd<10){dd='0'+dd}
+	  if(mm<10){mm='0'+mm}
+	  var Y = stepdate.getFullYear();
+	$('#secondstep').text(dd + '.' + mm + '.' + Y);
+
+ $("#anc_add").click(function(){
+  cnt++;
+  var $calx = $('#tbl');
+  var stepdate = new Date();
+  stepdate.setDate((new Date).getDate() + cnt*30);
+  var dd = stepdate.getDate();
+  var mm = stepdate.getMonth();
+  if(dd<10){dd='0'+dd}
+  if(mm<10){mm='0'+mm}
+  var Y = stepdate.getFullYear();
+
+
+  $calx.append('<tr >\
+        <td><strong><input type="hidden" value="'+cnt+'" name="id'+cnt+'">'+cnt+'</strong></td>\
+        <td><strong>'+ dd + '.' + mm + '.' + Y + '</strong></td>\
+        <td><div class="control-group">\
+        <div class="controls">\
+        <input id="E'+cnt+'" name="price'+cnt+'" data-validation-number-message="Числовое поле" type="number" min="0" class="form-control input-lg pp_price" value="0" required/>\
+        </div></div>\
+        </td>\
+        </tr>');
+    
+    //update total formula 
+    $('#id_pp_amount').attr('data-formula','SUM($E1,$E'+cnt+')');
+    $calx.calx('refresh');
+
+  // validate amount
+    if ($('#id_pp_amount').val() != $('#id_amount').val()){
+      $('#custom_pp_err').show();
+    } else {
+      $('#custom_pp_err').hide();
+    }
+
+ });
+
+$("#anc_rem").click(function(){
+    if( cnt > 2 ) {
+        $('#tbl tbody tr').last().remove();
+        cnt--;
+        //update total formula SUM($id_price1,$id_price1)
+        $('#id_pp_amount').attr('data-formula','SUM($E1,$E'+cnt+')');
+        $('#tbl').calx('refresh');
+    }
+
+  // validate amount
+    if ($('#id_pp_amount').val() != $('#id_amount').val()){
+      $('#custom_pp_err').show();
+    } else {
+      $('#custom_pp_err').hide();
+    }
+
+ });
+
+{% if contract.pay_plan.plantype == 2 %} 
+	$("#id_custom").click();
+  cnt = $('.pay-plan-body tr').length;
+{% endif %}
+
+});
+ </script>

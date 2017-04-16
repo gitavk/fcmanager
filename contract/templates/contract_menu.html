@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Свойства договоров{% endblock %}
+
+{% block menu %}
+	<div class="col-xs-3">
+	<a href="{% url "core.views.reference" %}">
+	    <img src="{% static "img/books.png"%}" alt="справочники">
+	 	<div class="icontext">справочники</div>
+	</a>
+	</div>
+	<div class="col-xs-3">
+
+	</div>
+	<div class="col-xs-3">
+
+	</div>
+	<div class="col-xs-3">
+
+	</div>
+	<div class="col-xs-3">
+	<a href="{% url "ctype" %}">
+	    <img src="{% static "img/document.png"%}" alt="Вид контракта">
+	    <div class="icontext">Вид контракта</div>
+	</a>
+	</div>
+	<div class="col-xs-3">
+	<a href="{% url "period" %}">
+	    <img src="{% static "img/calendar.png"%}" alt="Время посещения">
+	    <div class="icontext">Время посещения</div>
+	</a>
+	</div>
+	<div class="col-xs-3">
+	<a href="{% url "pay_plan" %}">
+	    <img src="{% static "img/kchart.png"%}" alt="Схема рассрочки">
+	    <div class="icontext">Схема рассрочки</div>
+	</a>
+	</div>
+	<div class="col-xs-3">
+	<a href="{% url "contract.views.contract_text" %}">
+	    <img src="{% static "img/edit.png"%}" alt="Текст договора">
+	    <div class="icontext">Текст договора</div>
+	</a>
+	</div>
+	<div class="col-xs-3">
+	<a href="{% url "discount" %}">
+	    <img src="{% static "img/sale.png"%}" alt="Текст договора">
+	    <div class="icontext">Скидки</div>
+	</a>
+	</div>
+
+{% endblock %}
+{% block content %}
+{{ lst }}
+{% endblock %}

@@ -1,0 +1,13 @@
+<option id="1/0"></option>
+{% for l, invites in lst %}
+<option value="{{ l.pk }}" 
+{% if l.contract_type.period_days == 182 %}
+	id="1/{% elif l.contract_type.period_days == 365 %}
+	id="2/{% endif %}{{ invites|length }}{%for i in invites %}/{{i.date|date:'d.m.Y'}}/{{ i.guest|title }}{%endfor%}"
+>
+	{{ l.client.last_name|title }} {{ l.client.first_name|title }} {{ l.client.patronymic|title }}
+	{% if l.contract_type.period_days == 182 %}
+		(1{% else %}
+		(2{% endif %}/{{ invites|length }})
+</option>
+{% endfor %}

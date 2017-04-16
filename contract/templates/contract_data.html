@@ -1,0 +1,4 @@
+["{% for v in visits %}<tr><td>{{ v.date_start|date:'d.m.Y' }}</td><td>{{ v.date_start|time:"H:i" }}</td><td>{{ v.date_end|time:"H:i" }}</td><td>{{ v.locker }}</td><td><a href='{% url 'visitdel' v.pk %}' class='btn btn-sm btn-warning' role='button'><span class='glyphicon glyphicon-remove'></span>Удалить</a></td></tr>{% endfor %}",
+ "{% for f in freeze %}<tr><td>{{ f.date_start|date:'d.m.Y' }}</td><td>{{ f.date_end|date:'d.m.Y' }}</td><td>{{ f.days }} </td></tr>{% endfor %}",
+ "{% for c in ch %}<tr><td>{{ c.date|date:'d.m.Y' }}</td><td>{{ c.amount }}</td></tr>{% endfor %}"
+ ]

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Отчеты должники{% endblock %}
+{% block menu %} 
+<div class="row">
+	<div class="col-xs-4">
+	<a href="{% url "reports_menu" %}">
+		<img src="{% static "img/notepad.png"%}" alt="Отчеты">
+	 	<div class="icontext">Отчеты</div>
+	</a>
+	</div>
+</div>
+{% endblock %}
+{% block content %}
+<div class="row">
+	<div class='col-sm-4'>
+	  <label for="id_manager">Менеджер</label>
+	</div>
+	<div class='col-sm-8'>
+	  <select id="id_manager" name="manager" 
+	   class="selectpicker" data-width="100%">
+	   <option value="0"> Ничего не выбрано</option>
+		   {% for u in m_list %}
+		  	<option value="{{ u.pk }}">
+		  		{{ u.last_name }}
+		  	</option>
+			   {% endfor %}
+		</select>
+	</div>
+</div>
+<div class="row">
+	<div class="col-lg-3">
+		<a id='r_debtors' href="{% url "r_debtors" 0 %}" 
+			class="btn btn-success">
+			должники
+		</a>
+	</div>
+</div>
+{% endblock %}
+{% block extrafoot %}
+
+<script type="text/javascript" src="{% static "bootstrap-select/bootstrap-select.js" %}"></script>
+<script type="text/javascript" src="{% static "bootstrap-select/i18n/defaults-ru-RU1.js" %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static "bootstrap-select/bootstrap-select.css" %}">
+
+<script type="text/javascript">
+$(document).ready(function(){
+
+	$('.selectpicker').selectpicker();
+
+	$("#id_manager").change(function() {
+        r_debtors = $('#r_debtors').attr('href').split('/')
+		manager = $('#id_manager :selected').val()
+      	r_debtors[3] = manager
+      	$('#r_debtors').attr('href',r_debtors.join('/'))
+	})
+
+
+});
+</script>
+{% endblock %}

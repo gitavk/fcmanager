@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load static %}
+{% load extra_filtrs %}
+{% block title %}Схема рассрочки{% endblock %}
+
+{% block menu %}
+<div class="row">
+	<div class="col-xs-4">
+	<a href="{% url "core.views.main_menu" %}">
+	    <img src="{% static "img/home.png"%}" alt="Главное меню">
+	    <div class="icontext">Главное меню</div>
+	</a>
+	</div>
+	<div class="col-xs-4">
+	<a href="{% url "contract.views.contract_menu" %}">
+	    <img src="{% static "img/contract.png"%}" alt="Договора">
+	    <div class="icontext">Договора</div>
+	</a>
+	</div>
+	<div class="col-xs-4">
+	<a href="{% url "pay_planadd" %}">
+	    <img src="{% static "img/kchart_add.png"%}" alt="Добавить">
+	    <div class="icontext">Добавить</div>
+	</a>
+	</div>
+</div>
+{% endblock %}
+
+{% block content %}
+{% for id, name, amount, pplansteps in lst %}
+<div class="panel panel-default">
+  <div class="panel-heading"><center>
+    <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{ id }}">
+      {{ name }} {{ amount }}
+    </a></center>
+    </div>
+    <div id="collapse{{ id }}" class="panel-collapse collapse">
+      <div class="panel-body">
+      <table class="table">
+      <thead><tr>
+    		<th># платежа</th><th>Дата</th><th>Сумма</th>
+		</tr>
+	   </thead>
+      {% for p in pplansteps %}
+      <tr>
+      	<td>{{ p.number }}</td>
+      	<td>{{ p.number|multiplication:30 }} дней</td>
+      	<td>{{ p.amount }}</td>
+      </tr>
+      {% endfor %}
+      </table>
+      </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

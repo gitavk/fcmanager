@@ -1,0 +1,8 @@
+{% extends "errbase.html" %}
+{% load static %}
+
+{% block title %}{{ form.errors }}{% endblock %}
+
+{% block content %}
+<div class="alert alert-danger">Клиент не найден</div>
+{% endblock %}

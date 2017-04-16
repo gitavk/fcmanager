@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Товары{% endblock %}
+
+{% block menu %}
+<div class="row">
+	<div class="col-xs-4">
+    <a href="{% url "products_menu" %}">
+      <img src="{% static "img/box.png"%}" alt="товары">
+      <div class="icontext">товары</div>
+    </a>
+	</div>
+	<div class="col-xs-4">
+	<a href="{% url "goods_add" %}">
+	    <img src="{% static "img/products_add.png"%}" alt="Добавить">
+	 	<div class="icontext">Добавить</div>
+	</a>
+	</div>
+</div>
+{% endblock %}
+{% block content %}
+<table class="table">
+{% for g in lst %}
+<tr><td>
+  <div class="col-xs-6">
+      {{ g.name|title }} <strong>[ {{ g.price }} руб. ]</strong>
+  </div>
+  <div class="col-xs-3">
+      {{ g.note }}
+  </div>
+    <a href="{% url 'goods_edit' g.pk %}" class="btn btn-sm btn-warning" 
+        role="button">
+            <span class="glyphicon glyphicon-pencil"></span> Редактировать
+    </a>
+    <a href="{% url 'goods_del' g.pk %}" class="btn btn-sm btn-danger" 
+        role="button">
+            <span class="glyphicon glyphicon-remove"></span> Удалить
+    </a>
+    </div>
+</td></tr>
+{% endfor %}
+</table>
+{% endblock %}

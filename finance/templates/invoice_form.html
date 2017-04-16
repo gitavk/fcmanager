@@ -1,0 +1,398 @@
+{% extends "base.html" %}
+{% load static %}
+{% load extra_filtrs %}
+{% block title %}{{p_title}}{% endblock %}
+{% block extrahead %}
+
+{% endblock %}
+{% block menu %}
+{% endblock %}
+{% block content %}
+<form id="period" class="form-horizontal" action="" method="post">
+    {% csrf_token %} {{ form.errors }} {{ g_form.errors }}
+<!-- Form Name -->
+<legend>{{p_title}}
+	<a href="{% url "invoice" %}" class="btn btn-info" role="button">
+        Назад
+    </a>
+    <button class="btn btn-success" type="submit">
+        Сохранить
+    </button>
+</legend>
+<div class="form-group">
+	<div class='col-sm-2'>
+	  <label for="id_number">Номер </label>
+	  <span class="glyphicon glyphicon-flash"></span>
+	</div>
+	<div class='col-sm-4'>
+		<div class="control-group">
+		    <div class="controls">
+		    	<input id="id_number" type="text" name="number"
+		    	value="{{ i|default:""}}" 
+		    	class="form-control input-lg" required/>
+			</div>
+		</div>
+	</div>
+	<div class="col-lg-2">
+		<label for="id_date">Дата </label>
+	</div>
+	<div class="col-lg-4 control">
+		<div class='input-group date' id='date' data-date-format="DD.MM.YYYY">
+			<input type="text" name="date" 
+			 class="form-control input-lg" />
+			<span class="input-group-addon">
+				<span class="glyphicon glyphicon-calendar"></span>
+        	</span>
+		</div>
+	</div>
+</div>
+<div class="form-group">
+	<div class='col-sm-2'>
+	  <label for="id_provider">Поставщик</label>
+	</div>
+	<div class='col-sm-4'>
+		<div class="control-group">
+		   <div class="controls">
+		   	{% if not edit %}
+				<select id="id_provider" name="provider" class="selectpicker"
+				 data-width="100%">
+				  	<option ></option>
+				   {% for p in p %}
+				  	<option value="{{ p.pk }}">
+				  		{{ p.name }}
+				  	</option>
+	      		   {% endfor %}
+				</select>
+			{% else %}
+				<input id="id_provider" type="text" name="provider" 
+				 class="form-control input-lg" value ="{{ i.provider }}" disabled />
+			{% endif %}
+			</div>
+		</div>
+	</div>
+	<div class='col-sm-2'>
+	  <label for="id_register_units">Сумма</label>
+	</div>
+	<div class='col-sm-4'>
+		<div class="control-group">
+		    <div class="controls">
+		    	<input id="id_summ" type="text" name="summ"
+		    	value="{{ i.summ|default:""}}"
+		    	class="form-control input-lg" disabled/>
+			</div>
+		</div>
+	</div>	
+</div>
+<div class="form-group">
+	<div class='col-sm-2'>
+	  <label for="id_manager">Принял</label>
+	</div>
+	<div class='col-sm-4'>
+	    <input id="id_manager" type="text" name="manager" class="form-control input-lg"
+	      value ="{{ manager|default:request.user.get_full_name }}" disabled />
+	</div>
+	<div class='col-sm-2'>
+	  <label for="id_mix_measure">Примечания</label>
+	</div>
+	<div class='col-sm-4'>
+		<div class="control-group">
+	    	<div class="controls">
+			    <input id="id_note" type="text" name="inote" 
+		    	value="{{ i.note|default:""}}" 
+			    class="form-control input-lg"
+			    data-validation-minlength-message="Не менее 2 символов"
+			    minlength="2"/>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="form-group col-lg-12">
+<strong>Список товаров </strong>
+	<input type="hidden" id="id_goods_cnt" name="goods_cnt" 
+			{% if edit %}
+				{% if g|length > 0 %}
+				  value="{{ g|length }}">
+				{% else %}
+				  value="0">
+				{% endif %}
+			{% else %}
+				value="0">
+			{% endif %}
+<a href="#t_goods" class="btn btn-primary btn" role="button" id="goods_add">
+	добавить
+	<span class="glyphicon glyphicon-plus-sign"></span>
+</a>
+<table class="table" id="t_goods">
+  <thead>
+	<tr>
+		<th width="275px">Наименование</th>
+		<th width="95px">Кол-во</th>
+		<th width="115px">Себес-сть</th>
+		<th width="155px">Годен до</th>
+		<th width="190px">Примечание</th>
+	</tr>
+  </thead>
+  <tbody>
+  {% for g in g %}
+	<tr>
+		<td>
+			<div class="control-group">
+				<select id="id_goods{{forloop.counter0}}" 
+				  name="goods{{forloop.counter0}}" class="selectpicker"
+					data-width="100%">
+				  	<option ></option>
+				</select>
+			</div>
+		</td>
+		<td>
+			<input type="number" class="form-control input" 
+			name="cnt{{forloop.counter0}}" id="id_cnt"
+			value="{{ g.count }}"
+			min="0">
+		</td>
+		<td>
+			<input type="number" step="0.01" class="form-control input" 
+			name="cost{{forloop.counter0}}" id="id_cost" 
+			value="{{ g.cost|replace:"/,/." }}"
+			min="0">
+		</td>
+		<td>
+			<div class='input-group date' 
+			id='date_expiry{{forloop.counter0}}'
+			   data-date-format="DD.MM.YYYY">
+				<input type="text" name="date_expiry{{forloop.counter0}}" 
+				 class="form-control input" />
+					<span class="input-group-addon">
+						<span class="glyphicon glyphicon-calendar"></span>
+		        	</span>
+			</div>
+		</td>
+		<td>
+			<input type="text" class="form-control input" 
+			name="note{{forloop.counter0}}"
+				     value="{{ g.note }}">
+		</td>
+		<td valign="middle" align="center">
+			<a href="#t_goods" class="btn btn-danger btn-xs" role="button" 
+			     id="goods_rem">
+			     <!-- удалить -->
+	        	<span class="glyphicon glyphicon-minus-sign"></span>
+			</a>
+		</td>
+	</tr>
+  {% empty %}
+	<tr>
+		<td>
+			<div class="control-group">
+				<select id="id_goods" name="goods0" class="selectpicker"
+					data-width="100%">
+				  	<option ></option>
+				</select>
+			</div>
+		</td>
+		<td>
+			<input type="number" class="form-control input" 
+			name="cnt0" id="id_cnt" value="{{ g.cnt }}"
+			min="0">
+		</td>
+		<td>
+			<input type="number" step="0.01" class="form-control input" 
+			name="cost0" id="id_cost" value="{{ g.cost|replace:"/,/." }}"
+			min="0">
+		</td>
+		<td>
+			<div class='input-group date' id='date_expiry' 
+			data-date-format="DD.MM.YYYY">
+				<input type="text" name="date_expiry0" 
+				 class="form-control input" />
+					<span class="input-group-addon">
+						<span class="glyphicon glyphicon-calendar"></span>
+		        	</span>
+			</div>
+		</td>
+		<td>
+			<input type="text" class="form-control input" name="note0"
+				     value="{{ g.note }}">
+		</td>
+		<td valign="middle" align="center">
+			<a href="#t_goods" class="btn btn-danger btn-xs" role="button" 
+			     id="goods_rem">
+			     <!-- удалить -->
+	        	<span class="glyphicon glyphicon-minus-sign"></span>
+			</a>
+		</td>
+	</tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+</form>
+{% endblock %}
+
+{% block extrafoot %}
+<script src="{% static "ReactiveRaven/jqBootstrapValidation.js" %}">
+</script>
+<script>
+  $(function () { 
+  	$("input,select,textarea").not("[type=submit]").jqBootstrapValidation();
+  });
+</script>
+
+<script type="text/javascript" src="{% static "bootstrap-select/bootstrap-select.js" %}"></script>
+<script type="text/javascript" src="{% static "bootstrap-select/i18n/defaults-ru-RU1.js" %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static "bootstrap-select/bootstrap-select.css" %}">
+
+<script>
+$(document).ready(function(){
+	var goods_cnt = $('#id_goods_cnt').val();
+	var new_tr = '<tr>\
+		<td>\
+			<div class="control-group">\
+				<select id="id_goods" name="goods" class="selectpicker"\
+					data-width="100%">\
+				  	<option ></option>\
+				</select>\
+			</div>\
+		</td>\
+		<td>\
+			<input type="number" class="form-control input" name="cnt" id="id_cnt">\
+		</td>\
+		<td>\
+			<input type="number" step="0.01" class="form-control input"\
+			name="cost" id="id_cost">\
+		</td>\
+		<td>\
+			<div class="input-group date" id="date_expiry" data-date-format="DD.MM.YYYY" \
+			  name="date_expiry">\
+				<input type="text" name="date_expiry"\
+				 class="form-control input" />\
+					<span class="input-group-addon">\
+						<span class="glyphicon glyphicon-calendar"></span>\
+		        	</span>\
+			</div>\
+		</td>\
+		<td>\
+			<input type="text" class="form-control input" name="note">\
+		</td>\
+		<td valign="middle" align="center">\
+			<a href="#t_goods" class="btn btn-danger btn-xs" role="button" \
+			     id="goods_rem">\
+	        	<span class="glyphicon glyphicon-minus-sign"></span>\
+			</a>\
+		</td>\
+	</tr>'
+	var new_option = ""
+
+{% if not edit %}
+  	$('.selectpicker').selectpicker();
+	$("#id_provider").change(function() {
+	  	var prov_id = $('#id_provider option:selected').val()
+	  	$.ajax({
+	  		// "{% url 'provider_goods' 5 %}",
+	  		url: "/products/provider/goods/" + prov_id,
+	  		success: function (data) {
+	  			$("select[name*='goods']").empty().append(data)
+	  			new_option = data
+	  			$('.selectpicker').selectpicker('refresh');
+	  		}
+	  	})
+	  })
+{% else %}
+  	var prov_id = {{ i.provider.pk }}
+  	$.ajax({
+  		url: "/products/provider/goods/" + prov_id,
+  		success: function (data) {
+  			$("select[name*='goods']").empty().append(data);
+  			new_option = data;
+  			{% for g in g %}
+  				$("select[name='goods{{forloop.counter0}}']").val('{{ g.goods.pk }}');
+  				{% if g.balance < g.count %}
+  				$("select[name='goods{{forloop.counter0}}']").attr('disabled', true)
+  				{% endif %}
+			{% endfor %}
+				$('.selectpicker').selectpicker();
+  		}
+  	})
+{% endif %}
+
+	$('#goods_add').click(function(){
+		goods_cnt++;
+		$('#id_goods_cnt').val(goods_cnt);
+		$('#t_goods').append(new_tr);
+		$("select[name='goods']").empty().append(new_option);
+		$("select[name='goods']").attr( 'name', 'goods' + goods_cnt );
+		$("input[name='cnt']").attr( 'name','cnt'  + goods_cnt );
+		$("input[name='cost']").attr( 'name','cost'  + goods_cnt );
+		$("input[name='date_expiry']").attr( 'name','date_expiry'  + goods_cnt );
+		$("#date_expiry").attr( 'id','date_expiry'  + goods_cnt );
+        $("div[name*='date_expiry']").datetimepicker({
+            pickTime: false,
+            minDate: '{% now "m/d/Y" %}',
+            defaultDate: '{% now "m/d/Y" %}'
+        });
+		$("input[name='note']").attr( 'name','note'  + goods_cnt );
+		$('.selectpicker').selectpicker('refresh');
+	})
+	
+	$( document ).on( "click", '#goods_rem', function() {
+		$(this).parent().parent().remove();
+	});
+
+	$( document ).on( "change", '#id_cnt', function() {
+		$('#id_cost').change()
+	});
+
+	$( document ).on( "change", '#id_cost', function() {
+		var rows = $("tbody td input[type='number']").get()
+		var summ = 0
+		for (var i = 0; i < rows.length / 2; i++){
+			var cost = $("input[name='cost" + i + "']").val()
+			var cnt = $("input[name='cnt" + i + "']").val()
+			summ = summ + cnt * cost;
+		}
+		summ = Math.round(summ*100)/100
+		$('#id_summ').val(summ)
+	});
+
+	$( '#period' ).submit(function( event ) {
+		$('select').attr('disabled', false);
+		$('.selectpicker').selectpicker('refresh');
+	});
+});
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        $('#date').datetimepicker({
+            // language: 'ru',
+            pickTime: false,
+            minDate: '{% now "m/d/Y" %}',
+        {% if not edit %}
+            defaultDate: '{% now "m/d/Y" %}'
+        {% else %}
+            defaultDate: '{{ i.date|date:"m/d/Y" }}'
+        {% endif %}
+        });
+    });
+    $(function () {
+{% if not edit %}
+        $('#date_expiry').datetimepicker({
+            // language: 'ru',
+            pickTime: false,
+            minDate: '{% now "m/d/Y" %}',
+            defaultDate: '{% now "m/d/Y" %}'
+                });
+{% else %}
+	{% for g in g %}
+        $('#date_expiry{{forloop.counter0}}').datetimepicker({
+            // language: 'ru',
+            pickTime: false,
+            minDate: '{% now "m/d/Y" %}',
+            defaultDate: '{{ g.expirydate|date:"m/d/Y" }}'
+        });
+	{% endfor %}
+{% endif %}
+    });
+</script>
+{% endblock %}

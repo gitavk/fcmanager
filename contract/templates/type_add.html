@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Новый вид договоров{% endblock %}
+{% block extrahead %}
+
+{% endblock %}
+{% block menu %}
+{{ res }}
+{% endblock %}
+{% block content %}
+<form id="period" class="form-horizontal" action="{% url "ctypeadd" %}" method="post">
+    {% csrf_token %}
+    {{ form.errors }}
+<!-- Form Name -->
+<legend>Свойства договорa</legend>
+<div class="form-group">
+	<div class='col-sm-3'>
+	  <label for="id_name">Название</label>
+	</div>
+	<div class='col-sm-3'>
+	<div class="control-group">
+	    <div class="controls">
+	    	<input id="id_name" type="text" name="name" 
+	    	class="form-control input-lg" required/>
+		</div>
+	</div>
+	</div>
+
+	<div class='col-sm-3'>
+	  <label for="id_name">Время посещения</label>
+	</div>
+	<div class='col-sm-3'>
+	<div class="control-group">
+	    <div class="controls">
+			<select id="id_period_time_type" name="period_time_type" 
+			  class="selectpicker" required>
+			  	<option value=""></option>
+			   {% for t in ptypes %}
+			  	<option value="{{ t.pk }}">{{ t.name }}</option>
+      		   {% endfor %}
+			</select>
+		</div>
+	</div>
+	</div>
+</div>
+<div class="form-group">
+	<div class='col-sm-3'>
+	  <label for="id_name">Срок действия(дней)</label>
+	</div>
+	<div class='col-sm-3'>
+	<div class="control-group">
+	    <div class="controls">
+	    	<input name="period_days" id="id_period_days"
+	    	 data-validation-number-message="Числовое поле"
+	    	 type="number" min="0" class="form-control input-lg" required/>
+		</div>
+	</div>
+	</div>
+
+	<div class='col-sm-3'>
+	  <label for="on" >Безлимитное посещений</label>
+	  <input type="radio" name="group1" id="on" value="1" checked>
+	</div>
+</div>
+<div class="form-group">
+	<div class='col-sm-3'>
+	  <label for="id_price">Цена(руб.)</label>
+	</div>
+	<div class='col-sm-3'>
+	<div class="control-group">
+	    <div class="controls">
+	    	<input id="id_price" name="price" 
+	    	 data-validation-number-message="Числовое поле"
+	    	 step="0.01"
+	    	 type="number" min="0" class="form-control input-lg" required/>
+		</div>
+	</div>
+	</div>
+
+	<div class='col-sm-3'>
+	  <label for="off" >Ограниченно посещений</label>
+	  <input type="radio" name="group1" id="off" value="0">
+	</div>
+	<div class='col-sm-3'>
+	<div class="control-group">
+	    <div class="controls">
+	    	<input id="id_max_visit" name="max_visit"
+	    	 data-validation-number-message="Числовое поле"
+	    	 type="number" min="0" max="99999" class="form-control input-lg"/>
+		</div>
+	</div>
+	</div>
+</div>
+<div class="form-group">
+	<div class='col-sm-3'>
+	  <label for="id_period_freeze">Лимит заморозки</label>
+	</div>
+	<div class='col-sm-3'>
+	<div class="control-group">
+	    <div class="controls">
+	    	<input id="id_period_freeze" name="period_freeze" data-validation-number-message="Числовое поле" type="number" min="0" class="form-control input-lg" required/>
+		</div>
+	</div>
+	</div>
+	<div class='col-sm-3'>
+		 	<label for="is_child">Детский</label>
+	</div>
+	<div class='col-sm-3'>
+		<input type="checkbox" id="is_child" name="is_child">
+	</div>
+</div>
+<div class="form-group">
+	<div class='col-sm-3'>
+	  <label for="id_name">Срок активации(дней)</label>
+	</div>
+	<div class='col-sm-3'>
+	<div class="control-group">
+	    <div class="controls">
+	    	<input id="id_period_activation" name="period_activation" 
+	    	 data-validation-number-message="Числовое поле"
+	    	 type="number" min="0" class="form-control input-lg" required/>
+		</div>
+	</div>
+	</div>
+</div>
+
+    <a href="{% url "ctype" %}" class="btn btn-info" role="button">
+        Назад
+    </a>
+    <button class="btn btn-success" type="submit">
+        Добавить
+    </button>
+</form>
+{% endblock %}
+{% block extrafoot %}
+<script type="text/javascript" src="{% static "bootstrap-select/bootstrap-select.js" %}"></script>
+<script type="text/javascript" src="{% static "bootstrap-select/i18n/defaults-ru-RU1.js" %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static "bootstrap-select/bootstrap-select.css" %}">
+
+<script>
+  $(function () { $('.selectpicker').selectpicker(); });
+</script>
+
+<script type="text/javascript">
+$(function () {
+	$('#id_max_visit').prop("disabled", true);
+	$("#on").click(function() { $("#id_max_visit").prop("disabled", true); });
+	$("#off").click(function() { $("#id_max_visit").prop("disabled", false); });
+});
+</script>
+
+<script src="{% static "ReactiveRaven/jqBootstrapValidation.js" %}">
+</script>
+<script>
+  $(function () { 
+  	$("input,select,textarea").not("[type=submit]").jqBootstrapValidation(); 
+  });
+</script>
+{% endblock %}

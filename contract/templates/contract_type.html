@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Свойства договоров{% endblock %}
+
+{% block menu %}
+<div class="row">
+<div class="col-xs-4">
+<a href="{% url "core.views.main_menu" %}">
+    <img src="{% static "img/home.png"%}" alt="Главное меню">
+    <div class="icontext">Главное меню</div>
+</div>
+<div class="col-xs-4">
+<a href="{% url "contract.views.contract_menu" %}">
+    <img src="{% static "img/contract.png"%}" alt="Договора">
+    <div class="icontext">Договора</div>
+</a>
+</div>
+<div class="col-xs-4">
+	<a href="{% url "ctypeadd" %}">
+    <img src="{% static "img/document_add.png"%}" alt="Добавить">
+    <div class="icontext">Добавить</div>
+</a>
+</div>
+</div>
+{% endblock %}
+{% block content %}
+<table class="table">
+<tr><th>
+  <a href="
+        {% if all %}{% url "ctype"  %}{% else %}{% url "ctypeall" %}{% endif%}
+        " class="btn btn-info" role="button">
+        {% if all %}Активные{% else %}Все{% endif%} 
+    </a>
+</th>
+</tr>
+{% if all %}
+  {% include 'all_type.html' %}
+{% else %}
+  {% include 'active_type.html' %}
+{% endif%} 
+
+</table>
+{% endblock %}

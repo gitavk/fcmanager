@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load static %}
+{% load extra_filtrs %}
+{% block title %}Расписаниие тренеров{% endblock %}
+
+{% block menu %}
+<div class="row">
+  <div class="col-lg-3">
+    <a href="{% url "employees" %}">
+      <img src="{% static "img/groupsmeeting.png"%}"
+      alt="Работа с персоналом">
+      <div class="icontext">Работа с персоналом</div>
+    </a>
+  </div>
+</div>
+{% endblock %}
+{% block content %}
+<div class="col-lg-3">
+{% if week == 1 %}
+  <a href="{% url 'e_timetable' year|add:'-1' lastw_b 0%}"
+    class='btn btn-default'>
+{% else %}
+  <a href="{% url 'e_timetable' year week|add:'-1' 0%}"
+    class='btn btn-default'>
+{% endif %}
+  назад</a>
+</div>
+{% if act == 'edit' %}
+<button class="btn btn-success col-lg-6 " type="submit"
+form="timetable">
+    Сохранить
+</button>
+{% else %}
+<div class="col-lg-2">
+  <a href="{% url 'e_shift' %}" class='btn btn-primary'>
+  смены</a>
+</div>
+<div class="col-lg-2">
+  <a href="{% url 'e_timetable' year week 'edit' %}"
+  class='btn btn-warning'>
+  редактировать</a>
+</div>
+<div class="col-lg-2">
+  <a href="{% url 'e_timetable' year week 'copy' %}"
+  class='btn btn-info'>
+  копировать</a>
+</div>
+{% endif %}
+<div class="col-lg-3">
+{% if week == lastw %}
+  <a href="{% url 'e_timetable' year|add:1 1 0 %}"
+    class='btn btn-default pull-right'>
+{% else %}
+  <a href="{% url 'e_timetable' year week|add:1 0 %}"
+    class='btn btn-default pull-right'>
+{% endif %}
+    вперед
+  </a>
+</div>
+{% if act == 'edit' %}
+<form class="form-horizontal" method="post" id="timetable" 
+action="{% url 'e_timetable' year week 0%}">
+{% csrf_token %}
+<div class="form-group">
+{% endif %}
+  <table class="table">
+  <thead>
+    <tr>
+    <th width="100">Дата</th>
+    <th width="100">День недели</th>
+      {% for s in shifts %}
+      <th>
+        {{forloop.counter}} смена 
+        {{ s.time_start|time:"H:i" }} - 
+        {{ s.time_end|time:"H:i" }}
+      </th>
+      {% endfor %}
+    </tr>
+  </thead>
+  {% for d in dates %}
+    <tr>
+    <td>{{ d|date:"d.m.Y"}}</td>
+    <td>{{ d|date:"l"}}</td>
+      {% for s in shifts %}
+      <td>
+      {% if act == 'edit' %}
+        <div class="col-lg-10 control">
+            <select id="id_positions" name="employees" 
+            class="selectpicker" data-width="100%">
+            <option value="0">Ничего не выбрано</option>
+              {% for e in employees %}
+                <option 
+                {% if e.pk == d|shift_trainer_pk:s %}
+                selected
+                {% endif %}
+                value="{{ e.pk }}">
+                  {{ e.initials }}
+                </option>
+              {% endfor %}
+            </select>
+        </div>
+      {% else %}
+      {{ d|shift_trainer:s }}
+      {% endif %}
+      </td>
+      {% endfor %}
+    </tr>
+  {% endfor %}
+  </table>
+{% if act == 'edit' %}
+</div>
+</form>
+{% endif %}
+
+{% endblock %}
+{% block extrafoot %}
+<script type="text/javascript" src="{% static "bootstrap-select/bootstrap-select.js" %}"></script>
+<script type="text/javascript" src="{% static "bootstrap-select/i18n/defaults-ru-RU1.js" %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static "bootstrap-select/bootstrap-select.css" %}">
+<script type="text/javascript">
+$(document).ready(function() {
+    $('.selectpicker').selectpicker();
+});
+</script>
+{% endblock %}

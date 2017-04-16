@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Поставщики{% endblock %}
+
+{% block menu %}
+<div class="row">
+	<div class="col-xs-4">
+    <a href="{% url "core.views.reference" %}">
+        <img src="{% static "img/books.png"%}" alt="справочники">
+      <div class="icontext">справочники</div>
+    </a>
+	</div>
+	<div class="col-xs-4">
+	<a href="{% url "provider_add" %}">
+	    <img src="{% static "img/provider_add.png"%}" alt="Добавить">
+	 	<div class="icontext">Добавить</div>
+	</a>
+	</div>
+	<div class="col-sm-3 col-xs-12 col-lg-4">
+      <form class="form-search" action="{% url "person.views.person_menu" %}" method="get">
+          <div class="input-group">
+              <input class="form-control " d="id_query" type="text" name="query">
+              <span class="input-group-btn">
+                  <button type="submit" class="btn btn-search">Поиск</button>
+              </span>
+          </div>
+      </form>
+    </div>
+
+</div>
+{% endblock %}
+{% block content %}
+<table class="table">
+{% for p in lst %}
+<tr><td>
+  <div class="col-xs-3">
+    <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{ p.pk }}">
+      {{ p.name|lower|capfirst }} </a>
+   </div>
+  <div class="col-xs-4">
+    <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{ p.pk }}">
+      {{ p.note }} </a>
+   </div>
+    <a href="{% url 'provider_edit' p.pk %}" class="btn btn-sm btn-warning" role="button">
+            <span class="glyphicon glyphicon-pencil"></span> Редактировать</a>
+    <div id="collapse{{ p.pk }}" class="collapse">
+      <div class="panel-body">
+        <table class="table">
+          <thead>
+            <tr>
+          		<th width="450">адрес</th>
+              <th width="200">Вид деятельности</th>
+              <th width="150">Примечания</th>
+      		  </tr>
+    	   </thead>
+          <tr>
+          	<td>{{ p.address|default:"" }}</td>
+          	<td>{{ p.activity|default:"" }}</td>
+          	<td>{{ p.note|default:"" }}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+</td></tr>
+{% endfor %}
+</table>
+{% endblock %}

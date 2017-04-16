@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Скидки{% endblock %}
+
+{% block menu %}
+<div class="row">
+	<div class="col-xs-4">
+	<a href="{% url "core.views.main_menu" %}">
+	    <img src="{% static "img/home.png"%}" alt="Главное меню">
+	    <div class="icontext">Главное меню</div>
+	</a>
+	</div>
+	<div class="col-xs-4">
+	<a href="{% url "contract.views.contract_menu" %}">
+	    <img src="{% static "img/contract.png"%}" alt="Договора">
+	    <div class="icontext">Договора</div>
+	</a>
+	</div>
+	<div class="col-xs-4">
+	<a href="{% url "discountadd" %}">
+	    <img src="{% static "img/sale_add.png"%}" alt="Добавить">
+	    <div class="icontext">Добавить</div>
+	</a>
+	</div>
+</div>
+{% endblock %}
+
+{% block content %}
+<table class="table">
+<thead><tr>
+	<th>Величина</th><th>начало</th><th>окончание</th>
+</tr>
+</thead>
+{% for s in lst %}
+<tr>
+	<td>{{ s.value }}</td>
+	<td>{{ s.date_start|date:'d.m.Y' }}</td>
+	<td>{{ s.date_end|date:'d.m.Y'|default:"Нет окончания" }}</td>
+	{% if request.user.is_superuser %}
+	<td>
+		<button data-html="true" data-placement="top"
+	    class="btn btn-sm btn-danger" data-toggle="popover"
+	    title="Удалить {{ s.value }}
+	    <i class='fa fa-times' id='close'></i>"
+	    data-content="<div class='col-lg-12' id='delinfo'>
+	        <button class='btn btn-sm btn-success' pk='{{s.pk}}''
+	         id='Y'>да</button>
+	        <button class='btn btn-sm btn-info pull-right'
+	        id='close'>нет</button>
+	        </div>">
+	    <i class="fa fa-minus"></i> Удалить </button>
+	</td>{% endif %}
+</tr>
+{% endfor %}
+</table>
+{% endblock %}
+{% block extrafoot %}
+ <script>
+$(function (){
+  $( document ).on( "click",'#Y', function(){
+    var pk = $(this).attr('pk')
+    $.ajax({
+          url: encodeURI("{% url 'discount_del' %}"),
+          data: ({id: pk, }),
+          success: function (data) {
+            res = parseInt(data['res'], 10);
+            if (res > 0) {
+              $('#delinfo').html('<div class="alert alert-success">\
+                                  <h3>Удалено</h3></div>')
+              window.setTimeout('location.reload()', 1000);
+            } else if (res === -10) {
+              $('#delinfo').html('<div class="alert alert-danger">\
+                                  <h3>Не найдено данных</h3></div>')
+            } else if (res === -100) {
+              $('#delinfo').html('<div class="alert alert-danger">\
+                                <h3>Скидки уже применены</h3></div>')
+            }            
+          },
+          error: function(){
+            $('#delinfo').html('<div class="alert alert-danger">\
+                              <h3>Ошибка базы данных</h3></div>')
+          }
+      })
+  });
+
+  $(".btn-danger").popover();
+  $( document ).on( "click", '#close', function() {
+    $(".btn-danger").popover('hide');
+  });
+});
+</script>
+{% endblock %}

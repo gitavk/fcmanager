@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Клиенты в клубе{% endblock %}
+
+{% block menu %}
+<div class="col-xs-3">
+	<a href="{% url "r_menu" %}">
+		<img src="{% static "img/cash.png"%}" alt="Ресепшен">
+	 	<div class="icontext">Рецепция</div>
+	 </a>
+</div>
+<div class="col-xs-3">
+
+</div>
+<div class="col-xs-3">
+
+</div>
+<div class="col-xs-3">
+
+</div>
+{% endblock %}
+{% block content %}
+<table class="table">
+<caption><strong>Клиенты</strong></caption>
+<thead>
+	<th>ФИО</th>
+	<th>Время прихода</th>
+	<th>Шкафчик</th>
+</thead>
+{% for d, v in lst %}
+	<tr  {% if d %} class="danger"{% else %} class="success"{% endif %}>
+		<td>			
+		  <a href="{% url "person_card" v.contract.client.pk %}">
+				{{ v.contract.client.last_name|title }}
+				{{ v.contract.client.first_name|title }}
+				{{ v.contract.client.patronymic|title }}
+		  </a>
+		</td>
+		<td>{{ v.date_start|time:"H:i" }}</td>
+		<td>{{ v.locker }}</td>
+	</tr>
+{% endfor %}
+</table>
+
+<table class="table table-bordered">
+<caption><strong>Гости</strong></caption>
+<thead>
+	<th>ФИО</th>
+	<th>Время прихода</th>
+	<th>Шкафчик</th>
+</thead>
+{% for d, v in glst %}
+	<tr  {% if d %} class="danger"{% else %} class="success"{% endif %}>
+		<td>			
+		  <a href="{% url "r_guest_card" v.guest.pk %}">
+				{{ v.guest.lastname|title }}
+				{{ v.guest.firstname|title }}
+				{{ v.guest.patronymic|title }}
+		  </a>
+		</td>
+		<td>{{ v.date_start|time:"H:i" }}</td>
+		<td>{{ v.locker }}</td>
+	</tr>
+{% endfor %}
+</table>
+
+<table class="table">
+<caption><strong>Тренерский состав</strong></caption>
+<thead>
+	<th>ФИО</th>
+	<th>Время прихода</th>
+	<th></th>
+</thead>
+{% for v in elst %}
+	<tr class="success">
+		<td><a href="{% url 'e_comein' v.employee.pk %}">			
+				{{ v.employee.lastname|title }}
+				{{ v.employee.firstname|title }}
+				{{ v.employee.patronymic|title }}
+		  </a>
+		</td>
+		<td>{{ v.date_start|time:"H:i" }}</td>
+		<td></td>
+	</tr>
+{% endfor %}
+</table>
+{% endblock %}

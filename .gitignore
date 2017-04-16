@@ -1,3 +1,12 @@
+# old hgtignore
+db.sqlite3
+*.pyc
+*.log
+*.csv
+settings.py
+media/*
+static/bootstrap302/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

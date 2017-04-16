@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Товары - Ассортимент{% endblock %}
+
+{% block menu %}
+<div class="row">
+	<div class="col-xs-3">
+		<a href="{% url "core.views.reference" %}">
+	        <img src="{% static "img/books.png"%}" alt="справочники">
+	      <div class="icontext">справочники</div>
+	    </a>
+	</div>
+	<div class="col-xs-3">
+		<a href="">
+		    <img src="" alt="">
+		    <div class="icontext"></div>
+		</a>
+	</div>
+	<div class="col-xs-3">.
+	<a href="">
+	    <img src="" alt="">
+	    <div class="icontext"></div>
+	</a>
+	</div>
+	<div class="col-xs-3">
+	<a href="">
+	    <img src="" alt="">
+	    <div class="icontext"></div>
+	</a>
+	</div>
+</div>
+	<div class="col-xs-3">
+	<a href="{% url "goods" %}">
+	    <img src="{% static "img/products.png"%}" alt="ассортимент">
+	 	<div class="icontext">ассортимент</div>
+	</a>
+	</div>
+	<div class="col-xs-3">
+	<a href="{% url "goods_type" %}">
+	    <img src="{% static "img/product_type.png"%}" alt="виды товаров">
+	 	<div class="icontext">виды товаров</div>
+	</a>	
+	</div>
+	<div class="col-xs-3">
+	<a href="{% url "measure" %}">
+	    <img src="{% static "img/tape_measure.png"%}" alt="единицы измерения">
+	 	<div class="icontext">единицы измерения</div>
+	</a>
+	</div>
+
+{% endblock %}
+{% block content %}
+{{ lst }}
+{% endblock %}

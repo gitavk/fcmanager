@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Товародвижение{% endblock %}
+
+{% block menu %}
+	<div class="col-xs-3">
+
+	</div>
+	<div class="col-xs-3">
+		<a href="{% url "warehouse" %}">
+		    <img src="{% static "img/warehouse.png"%}" alt="склад">
+		 	<div class="icontext">склад</div>
+		</a>	
+	</div>
+	<div class="col-xs-3">
+	<a href="{% url "market" %}">
+	    <img src="{% static "img/tradepoint.png"%}" alt="торговые точки">
+	 	<div class="icontext">торговые точки</div>
+	</a>
+	</div>
+	<div class="col-xs-3">
+
+	</div>
+	<div class="col-xs-3">
+	<a href="">
+	    <img src="" alt="">
+	    <div class="icontext"></div>
+	</a>
+	</div>
+	<div class="col-xs-3">
+	<a href="">
+	    <img src="" alt="">
+	    <div class="icontext"></div>
+	</a>
+	</div>
+	<div class="col-xs-3">
+	<a href="">
+	    <img src="" alt="">
+	    <div class="icontext"></div>
+	</a>
+	</div>
+	<div class="col-xs-3">
+	<a href="">
+	    <img src="" alt="">
+	    <div class="icontext"></div>
+	</a>
+	</div>
+	<div class="col-xs-3">
+	<a href="{% url "discount" %}">
+	    <img src="" alt="">
+	    <div class="icontext"></div>
+	</a>
+	</div>
+
+{% endblock %}
+{% block content %}
+{{ lst }}
+{% endblock %}

@@ -1,0 +1,509 @@
+{% extends "base.html" %}
+{% load static %}
+{% load extra_filtrs %}
+{% block title %}{{p_title}}{% endblock %}
+{% block extrahead %}
+
+{% endblock %}
+{% block menu %}
+{{ res }}
+{% endblock %}
+{% block content %}
+<form id="period" class="form-horizontal" action="" method="post">
+    {% csrf_token %}
+<!-- Form Name -->
+<legend>{{p_title}}     
+<a href="{% url "goods" %}" class="btn btn-info" role="button">
+        Назад
+    </a>
+    <button class="btn btn-success btn-save" type="submit">
+        Сохранить
+    </button></legend>
+<div class="form-group">
+	<div class='col-sm-2'>
+	  <label for="id_name">Название</label>
+	  <span class="glyphicon glyphicon-flash"></span>
+	</div>
+	<div class='col-sm-4'>
+		<div class="control-group">
+		    <div class="controls">
+		    	<input id="id_name" type="text" name="name"
+		    	value="{{ g.name|default:""|title}}" 
+		    	class="form-control input-lg" required/>
+			</div>
+		</div>
+	</div>
+	<div class='col-sm-2'>
+	  <label for="id_goods_type">Вид товара</label>
+	</div>
+	<div class='col-sm-4'>
+		<div class="control-group">
+		   <div class="controls">
+				<select id="id_goods_type" name="goods_type" class="selectpicker"
+				 data-width="100%">
+				  	<option ></option>
+				   {% for gt in gt %}
+				  	<option value="{{ gt.pk }}">
+				  		{{ gt.name }}
+				  	</option>
+	      		   {% endfor %}
+				</select>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="form-group">
+	<div class='col-sm-2'>
+	  <label for="id_measure">Единица измерения</label>
+	</div>
+	<div class='col-sm-4'>
+		<div class="control-group">
+		   <div class="controls">
+				<select id="id_measure" name="measure" class="selectpicker"
+				 data-width="100%">
+				  	<option ></option>
+				   {% for m in m %}
+				  	<option value="{{ m.pk }}">
+				  		{{ m.name }}
+				  	</option>
+	      		   {% endfor %}
+				</select>
+			</div>
+		</div>
+	</div>
+	<div class='col-sm-2'>
+	  <label for="id_mix_measure">Измерение для смеси</label>
+	</div>
+	<div class='col-sm-4'>
+		<div class="control-group">
+		   <div class="controls">
+				<select id="id_mix_measure" name="mix_measure" class="selectpicker"
+				 data-width="100%">
+				  	<option ></option>
+				   {% for m in m %}
+				  	<option value="{{ m.pk }}">
+				  		{{ m.name }}
+				  	</option>
+	      		   {% endfor %}
+				</select>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="form-group">
+	<div class='col-sm-2'>
+	  <label for="id_department">Отдел по кассе</label>
+	</div>
+	<div class='col-sm-4'>
+		<div class="control-group">
+		   <div class="controls">
+				<select id="id_department" name="department" class="selectpicker"
+				 data-width="100%">
+				  	<option ></option>
+				   {% for d in departments %}
+				  	<option value="{{ d }}">
+				  		отдел {{ d }}
+				  	</option>
+	      		   {% endfor %}
+				</select>
+			</div>
+		</div>
+	</div>
+	<div class="col-lg-3">
+		<label for="id_client_only">Только для клиентов</label>
+	</div>
+	<div class="col-lg-3 control">
+		<input type="checkbox" id="id_client_only" name="client_only"
+		{% if g.client_only %}checked{% endif %} >
+	</div>
+</div>
+
+<div class="form-group">
+	<div class="col-lg-3">
+		<label for="id_client_only">Платная заморозка</label>
+	</div>
+	<div class="col-lg-3 control">
+		<input type="checkbox" id="id_is_pay_freeze" name="is_pay_freeze"
+		{% if g.is_pay_freeze %}checked{% endif %} >
+	</div>
+
+	<div class='col-sm-2'>
+	  <label for="id_price">Дней заморозки</label>
+	</div>
+	<div class='col-sm-4'>
+		<div class="control-group">
+	    	<div class="controls">
+			    <input id="id_pay_days" type="number"
+			      name="pay_days" min="0" value="{{ g.pay_days| default:0 }}"
+			     class="form-control input-lg"/>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="form-group">	
+	<div class='col-sm-2'>
+	  <label for="id_price">Цена</label>
+	</div>
+	{% if not edit %}
+	<div class='col-sm-4'>
+		<div class="control-group">
+	    	<div class="controls">
+			    <input id="id_price" type="number" step="0.01"
+			      name="price" min="0" 
+			     class="form-control input-lg"/>
+			</div>
+		</div>
+	</div>
+	{% else %}
+	<div class='col-sm-4'>
+		<div class="control-group">
+	    	<div class="controls">
+			    <input id="id_price" type="number" name="price" min="0" 
+			     class="form-control input-lg" step="0.01"
+			     value="{{ g.price|replace:"/,/." }}" />
+
+			</div>
+		</div>
+	</div>
+	{% endif %}
+	<div class='col-sm-3'>
+	  <label for="id_contract_date">Дата начала действия</label>
+	</div>
+	<div class='col-sm-3'>
+		<div class='input-group date' id='date_start' data-date-format="DD.MM.YYYY">
+        <input id="date_start" type="text" name="date_start" class="form-control input-lg" />
+        <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>
+            </span></div>
+	</div>
+	{% if edit %}
+	<div class="col-lg-12">
+		<a href="#pricehistory" data-toggle="collapse">История</a>
+		<div id="pricehistory" class="collapse">
+			<div class="panel-body">
+				<table class="table">
+					<thead>
+						<tr>
+							<th>Цена</th>
+							<th>Дата начала</th>
+							<th>Дата окончания</th>
+						</tr>
+					</thead>
+					<tbody>
+					{% for p in price %}
+						<tr>
+							<td>{{ p.value }}</td>
+							<td>{{ p.date_start }}</td>
+							<td>{{ p.date_end|date:"d.m.Y"|default:"" }}</td>
+						</tr>
+					{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	{% endif %}
+</div>
+
+<div class="form-group col-lg-6">
+<table class="table" id="t_bcode">
+  <thead>
+	<tr>
+		<th>штрих код 
+		</th>
+		<th>
+			<a href="#t_bcode" class="btn btn-primary btn" role="button" 
+			id="bcode_add">
+			добавить
+	        <span class="glyphicon glyphicon-plus-sign"></span>
+	    	</a>
+	    </th>
+	</tr>
+  </thead>
+  <tbody>
+  {% for bcode in bcode %}
+	<tr>
+		<td>
+			<div class="control-group">
+		    	<div class="controls">
+				    <input id="id_bar_code" type="number" min="0"
+				     name="bar_code"
+				     class="bar-code form-control input-lg"
+				     value="{{ bcode.code }}" />
+				</div>
+			</div>
+		</td>
+		<td valign="middle" align="center">
+			<a href="#t_bcode" class="btn btn-danger btn-sm" role="button" 
+			     id="bcode_rem">
+			     удалить
+	        	<span class="glyphicon glyphicon-minus-sign"></span>
+			</a>
+		</td>
+	</tr>
+  {% empty %}
+	<tr>
+		<td>
+			<div class="control-group">
+		    	<div class="controls">
+				    <input id="id_bar_code" type="number" name="bar_code" min="0" 
+				     class="bar-code form-control input-lg"/>
+				</div>
+			</div>
+		</td>
+		<td valign="middle" align="center">
+			<a href="#t_bcode" class="btn btn-danger btn-sm" role="button" 
+			     id="bcode_rem">
+			     удалить
+	        	<span class="glyphicon glyphicon-minus-sign"></span>
+			</a>
+		</td>
+	</tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+<div class="form-group col-lg-6">
+<table class="table" id="t_prov">
+  <thead>
+	<tr>
+		<th>производитель
+			<input type="hidden" id="maxprov" name="maxprov" value="{{ prov|length }}">
+		</th>
+		<th>
+			<a href="#t_prov" class="btn btn-success btn" role="button" 
+			id="prov_add">
+	        добавить 
+	        <span class="glyphicon glyphicon-plus-sign"></span>
+	    	</a>
+	    </th>
+	</tr>
+  </thead>
+  <tbody>
+  {% for prov in prov %}
+	<tr>
+		<td>
+			<div class="control-group">
+		    	<div class="controls">
+				    <select id="id_provider{{ forloop.counter0 }}"
+				     name="provider{{ forloop.counter0 }}"
+				     class="selectpicker" data-width="100%">
+					  	<option ></option>
+					   {% for p in p %}
+					  	<option value="{{ p.pk }}">
+					  		{{ p.name }}
+					  	</option>
+			  		   {% endfor %}
+					</select>
+				</div>
+			</div>
+		</td>
+		<td class="vert-align">
+			<a href="#t_prov" class="btn btn-danger btn-sm" role="button" 
+			     id="prov_rem">
+			     удалить
+	        	<span class="glyphicon glyphicon-minus-sign"></span>
+			</a>
+		</td>
+	</tr>
+  {% empty %}
+	<tr>
+		<td>
+			<div class="control-group">
+		    	<div class="controls">
+				    <select id="id_provider0" name="provider0"
+				     class="selectpicker" data-width="100%">
+					  	<option ></option>
+					   {% for p in p %}
+					  	<option value="{{ p.pk }}">
+					  		{{ p.name }}
+					  	</option>
+			  		   {% endfor %}
+					</select>
+				</div>
+			</div>
+		</td>
+		<td class="vert-align">
+			<a href="#t_prov" class="btn btn-danger btn-sm" role="button" 
+			     id="prov_rem">
+			     удалить
+	        	<span class="glyphicon glyphicon-minus-sign"></span>
+			</a>
+		</td>
+	</tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+</form>
+{% endblock %}
+
+{% block extrafoot %}
+<script src="{% static "ReactiveRaven/jqBootstrapValidation.js" %}">
+</script>
+<script>
+  $(function () { 
+  	$("input,select,textarea").not("[type=submit]").jqBootstrapValidation();
+  });
+</script>
+
+<script type="text/javascript" src="{% static "bootstrap-select/bootstrap-select.js" %}"></script>
+<script type="text/javascript" src="{% static "bootstrap-select/i18n/defaults-ru-RU1.js" %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static "bootstrap-select/bootstrap-select.css" %}">
+
+<script>
+  $(function () { 
+  	$('.selectpicker').selectpicker();
+  	if ({{ g.goods_type.pk|default:"0" }} !== 0) {
+  		$('#id_goods_type').selectpicker('val', '{{ g.goods_type.pk }}')
+  	};
+  	if ({{ g.provider.pk|default:"0" }} !== 0) {
+  		$('#id_provider').selectpicker('val', '{{ g.provider.pk }}')
+  	};
+  	if ({{ g.department|default:"0" }} !== 0) {
+  		$('#id_department').selectpicker('val', '{{ g.department }}')
+  	};
+  	if ({{ g.measure.pk|default:"0" }} !== 0) {
+  		$('#id_measure').selectpicker('val', '{{ g.measure.pk }}')
+  	};
+  	if ({{ g.mix_measure.pk|default:"0" }} !== 0) {
+  		$('#id_mix_measure').selectpicker('val', '{{ g.mix_measure.pk }}')
+  	};
+  	 {% for prov in prov %}
+  	    $('#id_provider{{ forloop.counter0 }}').selectpicker('val', '{{ prov.provider.pk }}')
+  	 {% endfor %}
+  });
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	var max_prov = 0;
+	var max_bcode = 0;
+
+	$( document ).on( "change",'.bar-code', function(){
+		binput = $(this)
+		bcode = $(this).val()
+		var timeRepeated = 0;
+		$(".bar-code").each(function () {
+			if ($(this).val() == bcode ) {
+            	timeRepeated++; 
+	        }
+	    });
+	    if ( timeRepeated > 1 ){
+	    	title = 'Дубли на странице'
+    		binput.attr('title', title)
+    		binput.tooltip('destroy')
+			binput.tooltip({'delay': '500'})
+			binput.parent().addClass('has-error')
+			$('.btn-save').attr('disabled', true)
+
+	    } else {
+			{% if not g.pk %}
+			var gpk = 0
+			{% else %}
+			var gpk = {{ g.pk }}
+			{% endif %}
+			$.ajax({
+		        url: encodeURI("{% url 'p_bar_code' %}"),
+		        data: ({bcode: bcode, goods: gpk }),
+		        dataType: "json",
+		        success: function (data){
+		        	if (data['res'] == 1) {
+		        		title = 'Уже присвоено ' + data['goods']
+		        		binput.attr('title', title)
+		        		binput.tooltip('destroy')
+						binput.tooltip({'delay': '500'})
+						binput.parent().addClass('has-error')
+						$('.btn-save').attr('disabled', true)
+		        	} else {
+		        		binput.parent().removeClass('has-error')
+		        		binput.attr('title', '')
+		        		binput.tooltip('destroy')
+		        		if ( $('.has-error').length < 1 ) {
+		        			$('.btn-save').attr('disabled', false)
+		        		}
+		        	}
+
+		        }
+	    	})
+	    }
+	})
+
+	$('#bcode_add').click(function(){
+		var bcode_html ='<tr>\
+				<td>\
+					<div class="control-group">\
+				    	<div class="controls">\
+			<input id="id_bar_code" type="number" name="bar_code" min="0" \
+						     class="bar-code form-control input-lg"/>\
+						</div>\
+					</div>\
+				</td>\
+				<td valign="middle" align="center">\
+					<a href="#t_bcode" class="btn btn-danger btn-sm" role="button" \
+					     id="bcode_rem">\
+					     удалить\
+			        	<span class="glyphicon glyphicon-minus-sign"></span>\
+					</a>\
+				</td>\
+			</tr>';
+		$('#t_bcode').append(bcode_html);
+	});
+
+	$('#prov_add').click(function(){
+		max_prov++;
+		$('#maxprov').val(max_prov);
+		var prov_html = '<tr>\
+		<td>\
+			<div class="control-group">\
+		    	<div class="controls">\
+					<select id="id_provider" name="provider' + max_prov + 
+					'" class="selectpicker" data-width="100%">\
+					  	<option ></option>\
+					   {% for p in p %}\
+					  	<option value="{{ p.pk }}">\
+					  		{{ p.name }}\
+					  	</option>\
+			  		   {% endfor %}\
+					</select>\
+				</div>\
+			</div>\
+		</td>\
+		<td class="vert-align">\
+			<a href="#t_prov" class="btn btn-danger btn-sm" role="button" \
+			     id="prov_rem">\
+			     удалить\
+	        	<span class="glyphicon glyphicon-minus-sign"></span>\
+			</a>\
+		</td>\
+	</tr>'
+		$('#t_prov').append(prov_html);
+		$('.selectpicker').selectpicker();
+	});
+
+
+	$( document ).on( "click", '#prov_rem', function() {
+		$(this).parent().parent().remove();
+	});
+	$( document ).on( "click", '#bcode_rem', function() {
+		$(this).parent().parent().remove();
+	});
+});
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        $('#date_start').datetimepicker({
+            // language: 'ru',
+            pickTime: false,
+            minDate: '{% now "m/d/Y" %}',
+            {% if g.price_date %}
+            defaultDate: '{{ g.price_date|date:"m/d/Y" }}'
+            {% else %}
+            defaultDate: '{% now "m/d/Y" %}'
+			{% endif %}            
+        });
+    });
+</script>
+{% endblock %}

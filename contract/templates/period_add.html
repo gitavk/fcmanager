@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Время посещения{% endblock %}
+
+{% block extrahead %}
+
+ {% endblock %}
+{% block content %}
+<form id="period" class="form-horizontal" action="{% url "periodadd" %}" method="post">
+    {% csrf_token %}
+    {{ form.errors }}
+<!-- Form Name -->
+<legend>Время посещения</legend>
+<div class="form-group">
+	<div class='col-sm-2'>
+	  <label for="id_name">Название</label>
+	</div>
+	<div class='col-sm-3'>
+	    <input id="id_name" type="text" name="name" class="form-control input-lg"/>
+	</div>
+</div>
+<table class="table table-hover">
+<thead><tr>
+    <th>
+        <button class="btn btn-primary btn-xs" onclick="return checkall();">
+        		все
+            </button>
+         <button class="btn btn-warning btn-xs" onclick="return uncheckall();">
+         	cнять все
+         </button>
+    </th>
+    <th>начало</th><th>окончание</th>
+</tr></thead>
+{% for wday in week %}
+<tr><td>
+		<div class="checkbox">
+			<input name="wday{{forloop.counter0}}" type="checkbox" value="1">{{ wday }}
+		</div>
+	</td>
+	<td>
+	     <div class='input-group date' id='starttime{{forloop.counter0}}' data-date-format="HH:mm">
+            <input type="text" name="starttime{{forloop.counter0}}" class="form-control input-lg" />
+            <span class="input-group-addon"><span class="glyphicon glyphicon-time"></span>
+            </span>
+        </div>		
+	</td>
+	<td>
+	     <div class='input-group date' id='endtime{{forloop.counter0}}' data-date-format="HH:mm">
+            <input type="text" name="endtime{{forloop.counter0}}" class="form-control input-lg" />
+            <span class="input-group-addon"><span class="glyphicon glyphicon-time"></span>
+            </span>
+        </div>
+	</td>
+</tr>
+{% endfor %}
+</table>
+    <a href="{% url "period" %}" class="btn btn-info" role="button">
+        Назад
+    </a>
+    <button class="btn btn-success" type="submit">
+        Добавить
+    </button>
+</form>
+{% endblock %}
+{% block extrafoot %}
+{% for wday in week %}
+    <script type="text/javascript">
+    $(function () {
+        $('#starttime{{forloop.counter0}}').datetimepicker({
+            pickDate: false,
+            minuteStepping:30,
+            defaultDate:"2000/01/01"
+        });
+    });
+	</script>
+    <script type="text/javascript">
+    $(function () {
+        $('#endtime{{forloop.counter0}}').datetimepicker({
+            pickDate: false,
+            minuteStepping:30,
+            defaultDate:"2000/01/01 23:59"
+        });
+    });
+	</script>
+{% endfor %}
+<script type="text/javascript">
+	function checkall()
+	 {
+	     $('form#period input[type=checkbox]').prop('checked',true);
+	     return false;
+	 }
+	function uncheckall()
+	 {
+	     $('form#period input[type=checkbox]').prop('checked', false);
+	     return false;
+	 }
+	</script>
+{% endblock %}

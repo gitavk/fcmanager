@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{p_title}}{% endblock %}
+
+{% block menu %}
+<div class="row">
+{% if request.user.is_reception %}
+<div class="col-xs-12">
+  <a href="{% url "r_menu" %}">
+    <img src="{% static "img/cash.png"%}" alt="Ресепшен">
+    <div class="icontext">Рецепция</div>
+   </a>
+</div>
+{% else %}
+	<div class="col-xs-4">
+    <a href="{% url 'fin_menu' %}">
+      <img src="{% static "img/car.png" %}" alt="Товародвижение">
+      <div class="icontext">Товародвижение</div>
+    </a>
+	</div>
+	<div class="col-xs-4">
+  <a href="{% url "market_add" %}">
+      <img src="{% static "img/tradepoint_add.png"%}" alt="торговые точки">
+    <div class="icontext">Добавить</div>
+  </a>
+	</div>
+</div>
+{% endif %}
+{% endblock %}
+{% block content %}
+<table class="table">
+{% for m in lst %}
+<tr><td>
+  <div class="col-xs-4">
+      {{ m.name }}
+  </div>
+    <a href="{% url 'market_view' m.pk %}" class="btn btn-sm btn-primary" 
+        role="button">
+            <span class="glyphicon glyphicon-eye-open"></span> Просмотр
+    </a>
+    {% if not request.user.is_reception %}
+    <a href="{% url 'market_edit' m.pk %}" class="btn btn-sm btn-warning" 
+        role="button">
+            <span class="glyphicon glyphicon-pencil"></span> Редактировать
+    </a>
+    <a href="#" class="btn btn-sm btn-danger"
+        role="button" data-toggle="popover" title="Удалить {{ m.name }}"
+        data-html="true"
+        data-content="
+            <a href='{% url 'market_del' m.pk %}'
+             class='btn btn-sm btn-success' role='button'>да</a>
+            <a href='#' 
+            class='btn btn-sm btn-info pull-right' role='button' id='close'>нет</a>
+        ">
+            <span class="glyphicon glyphicon-remove"></span> Удалить
+    </a>
+    {% endif %}
+ </td></tr>
+{% endfor %}
+</table>
+{% endblock %}
+{% block extrafoot %}
+ <script>
+$(function (){ 
+  $(".btn-danger").popover();
+  $( document ).on( "click", '#close', function() {
+    $(".btn-danger").popover('hide');
+  });
+});
+</script>
+{% endblock %}

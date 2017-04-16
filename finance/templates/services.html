@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ p_title }}{% endblock %}
+
+{% block menu %}
+<div class="row">
+	<div class="col-xs-4">
+    <a href="{% url "core.views.reference" %}">
+        <img src="{% static "img/books.png"%}" alt="справочники">
+      <div class="icontext">справочники</div>
+    </a>
+	</div>
+	<div class="col-xs-4">
+	<a href="{% url "service_add" %}">
+	    <img src="{% static "img/service_add.png"%}" alt="Добавить">
+	 	<div class="icontext">Добавить</div>
+	</a>
+	</div>
+</div>
+{% endblock %}
+{% block content %}
+<table class="table">
+{% for g in lst %}
+<tr><td>
+  <div class="col-xs-5">
+      {{ g.name|title }} <strong>[ {{ g.price }} руб. ]</strong>
+  </div>
+  <div class="col-xs-3">
+      {{ g.note }}
+  </div>  
+    <a href="{% url 'service_edit' g.pk %}" class="btn btn-sm btn-warning" 
+        role="button">
+            <span class="glyphicon glyphicon-pencil"></span> Редактировать
+    </a>
+    <a href="{% url 'service_del' g.pk %}" class="btn btn-sm btn-danger" 
+        role="button">
+            <span class="glyphicon glyphicon-remove"></span> Удалить
+    </a>
+    </div>
+</td></tr>
+{% endfor %}
+</table>
+{% endblock %}

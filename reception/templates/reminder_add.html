@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{p_title}}{% endblock %}
+{% block extrahead %}
+
+{% endblock %}
+{% block menu %}
+{{ res }}
+{% endblock %}
+{% block content %}
+<form id="period" class="form-horizontal" action="" method="post">
+    {% csrf_token %}
+<!-- Form Name -->
+<legend>{{p_title}}</legend>
+<div class="form-group">
+	<div class='col-sm-2'>
+	  <label for="id_text">Текст</label>
+	  <span class="glyphicon glyphicon-flash"></span>
+	</div>
+	<div class='col-sm-8'>
+		<div class="control-group">
+		    <div class="controls">
+		    	<input id="id_text" type="text" name="text"
+		    	value="{{ ru.name|default:""}}" 
+		    	class="form-control input-lg" required/>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="form-group">
+	<div class='col-sm-2'>
+	  <label for="id_name">Время</label>
+	  <span class="glyphicon glyphicon-flash"></span>
+	</div>
+	<div class='col-sm-3'>
+		<div class='input-group date' id='time' data-date-format="HH:mm">
+            <input type="text" name="time" class="form-control input-lg" />
+            <span class="input-group-addon">
+            	<span class="glyphicon glyphicon-time"></span>
+        	</span>
+    	</div>
+	</div>
+</div>
+
+<table class="table">
+<thead></thead>
+<tbody>
+<tr>
+	<td>
+		всегда 
+	</td>
+	<td><input type="radio" name="group1" id="period1" value="1"></td>
+	<td colspan="8"></td>
+</tr>
+<tr>
+	<td>
+		дата 
+	</td>
+	<td><input type="radio" name="group1" id="period2" value="2" ></td>
+	<td colspan="2">
+		<div class='input-group date' id='date' data-date-format="DD.MM.YYYY">
+        <input id="date" type="text" name="date" class="form-control input" />
+          <span class="input-group-addon">
+           	<span class="glyphicon glyphicon-calendar"></span>
+          </span>
+    </td>
+	<td colspan="6"></td>
+</tr>
+<tr>
+<td>
+	день недели
+</td>
+	<td><input type="radio" name="group1" id="period3" value="3" ></td>
+	<td>все</td>
+{% for wday in week %}
+	<td width="14%">
+	  <div class="checkbox">
+		<input name="wday{{forloop.counter0}}" type="checkbox" value="1">{{ wday }}
+	  </div>
+	</td>
+{% endfor %}
+</tr>
+</tbody>
+</table>
+<div>
+    <a href="{{ b_url }}" class="btn btn-info" role="button">
+        Назад
+    </a>
+    <button class="btn btn-success" type="submit">
+        Сохранить
+    </button>
+</div>
+</form>
+{% endblock %}
+{% block extrafoot %}
+
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$( document ).on( "click", ':radio',function(){
+			$('table.table :input').attr('disabled', true)
+			$(':radio').attr('disabled', false)
+			$(this).parent().parent().find(':input').attr('disabled', false)
+		});
+
+		$('#date').datetimepicker({
+            // language: 'ru',
+            pickTime: false,
+            defaultDate: '{% now "m/d/Y" %}'
+        });
+        $('#time').datetimepicker({
+            pickDate: false,
+            minuteStepping:30,
+            defaultDate:"2000/01/01"
+        });
+
+		$('#period1').click()
+	});
+</script>
+
+<script src="{% static "ReactiveRaven/jqBootstrapValidation.js" %}">
+</script>
+<script>
+  $(function () { 
+  	$("input,select,textarea").not("[type=submit]").jqBootstrapValidation(); 
+  });
+</script>
+{% endblock %}

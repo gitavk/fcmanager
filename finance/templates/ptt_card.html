@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{p_title}}{% endblock %}
+{% block extrahead %}
+
+{% endblock %}
+{% block menu %}
+{{ res }}
+{% endblock %}
+{% block content %}
+<form id="employee" action="" method="post">
+    {% csrf_token %}
+<legend>Выдача карты</legend>
+<div class="alert alert-warning" id="clnt_note">
+    {{p_title}}
+</div>
+
+<div class="alert alert-success" id="clnt_note">
+    тренер {{ ptt.employee.initials }}
+</div>
+<div class="form-group">
+    <a href="{{ b_url }}" class="btn btn-info" role="button">
+        Отмена
+    </a>
+    {% if ptt.is_card %}
+    <a href="#" class="btn btn-danger" role="submit">
+        Уже выдана
+    </a>
+    {% else %}
+    <button class="btn btn-success" type="submit">
+    	Выдать
+    {% endif %}
+    </button>
+</div>
+</form>
+
+{% endblock %}
+{% block extrafoot %}
+<script type="text/javascript">
+$(document).ready(function() {
+		$('.btn-success').focus();
+
+    $(".glyphicon-remove-circle").on( "click", function() {
+        $(this).parent().hide();
+    });
+})
+</script>
+{% endblock %}

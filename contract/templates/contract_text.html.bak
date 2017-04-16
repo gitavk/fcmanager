@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Свойства договоров{% endblock %}
+{% block extrahead %}
+	<!-- 	<link href="{% static "summernote/summernote.css" %}" rel="stylesheet">
+		link href="{% static "summernote/summernote-bs3.css" %}" rel="stylesheet">
+		<link rel="stylesheet" type="text/css" href="{% static "css/font-awesome.min.css" %}" />
+-->
+ {% endblock %}
+{% block menu %}
+{% endblock %}
+{% block content %}
+<div class="btn-toolbar" data-role="editor-toolbar" data-target="#editor">
+  <a class="btn btn-large" data-edit="bold"><i class="icon-bold"></i></a>
+</div>
+<!-- <div id="summernote">summernote 1</div>
+ -->
+{% endblock %}
+{% block extrafoot %}
+<!-- include summernote css/js-->
+
+<script src="{% static "summernote/summernote.min.js" %}"></script>
+
+
+// <script type='text/javascript'> 
+// $(function(){
+// $('#summernote').summernote({height: 300});
+// }); 
+
+// </script>
+
+<script type="text/javascript">
+$(function(){	
+	$('#editor').wysiwyg({
+	  hotKeys: {
+	    'ctrl+b meta+b': 'bold',
+	    'ctrl+i meta+i': 'italic',
+	    'ctrl+u meta+u': 'underline',
+	    'ctrl+z meta+z': 'undo',
+	    'ctrl+y meta+y meta+shift+z': 'redo'
+	  }
+	});
+}); 	
+</script>
+
+{% endblock %}

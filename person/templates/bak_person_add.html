@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Новый клиент{% endblock %}
+
+{% block content %}
+<form class="form-horizontal" action="{% url "person.views.person_add" %}" method="post">
+    {% csrf_token %}
+    {{ form.errors }}
+<!-- Form Name -->
+<legend>Новый клиент</legend>
+	<div class="form-group">
+		<div class='col-sm-2'>
+		  <label for="id_last_name">Фамилия</label>
+		</div>
+		<div class='col-sm-4'>
+		    <input id="id_last_name" type="text" name="last_name" class="form-control input-lg"
+		       value ="{{ form.last_name.value|default_if_none:"" }}" />
+		</div>
+		<div class='col-sm-2'>
+		  <label for="id_number">номер договора</label>
+		</div>
+		<div class='col-sm-4'>
+		    <input id="id_number" type="text" name="number" class="form-control input-lg"
+		       value ="{{ contract.number.value|default_if_none:"" }}" />
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-sm-2'>
+		  <label for="id_first_name">Имя</label>
+		</div>
+		<div class='col-sm-4'>
+		    <input id="id_first_name" type="text" name="first_name" class="form-control input-lg"
+		      value ="{{ form.first_name.value|default_if_none:"" }}"/>
+		</div>
+		<div class='col-sm-2'>
+		  <label for="id_contract_date">Дата регистрации</label>
+		</div>
+		<div class='col-sm-4'>
+		    <input id="id_contract_date" type="text" name="contract_date" class="form-control input-lg"
+	       value ="{% if contract.date %} {{ contract.date }} {% else %} {% now 'Y-m-d' %} {% endif %}" disabled />
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-sm-2'>
+		  <label for="id_patronymic">Отчество</label>
+		</div>
+		<div class='col-sm-4'>
+		    <input id="id_patronymic" type="text" name="patronymic" class="form-control input-lg"
+		      value ="{{ form.patronymic.value|default_if_none:"" }}"/>
+		</div>
+		<div class='col-sm-2'>
+		  <label for="id_date_start">Дата начала</label>
+		</div>
+		<div class='col-sm-4'>
+		    <input id="id_date_start" type="text" name="date_start" class="form-control input-lg"
+	       value ="{% if contract.date_start %} {{ contract.date }} {% else %} {% now 'Y-m-d' %} {% endif %}" disabled />
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-sm-2'>
+		  <label for="id_born_date">Пол</label>
+		</div>
+		<div class='col-sm-4'>
+		     	<label for="on" >М</label>
+				<input type="radio" name="group1" id="on" value="0" checked>
+			    <label for="off" >Ж</label>
+				<input type="radio" name="group1" id="off" value="1">
+		</div>
+		<div class='col-sm-2'>
+		  <label for="id_date_end">Дата окончания</label>
+		</div>
+		<div class='col-sm-4'>
+		    <input id="id_date_end" type="text" name="date_end" class="form-control input-lg"
+	       value ="{% if contract.date_end %} {{ contract.date }} {% else %} {% now 'Y-m-d' %} {% endif %}" disabled />
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-sm-2'>
+		  <label for="id_born_date">Дата рождения</label>
+		</div>
+		<div class='col-sm-4'>
+		     <div class='input-group date' id='born_cal' data-date-format="YYYY-MM-DD">
+	            <input id="id_born_date" type="text" name="born_date" class="form-control input-lg" />
+	            <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>
+	            </span>
+	        </div>
+		</div>
+		<div class='col-sm-2'>
+		  <label for="id_contract_type">Вид договора</label>
+		</div>
+		<div class='col-sm-4'>
+			<div class="control-group">
+			   <div class="controls">
+					<select id="id_contract_type" name="contract_type" required class="selectpicker"
+					 data-width="100%">
+					  	<option value=""></option>
+					   {% for t in ctypes %}
+					  	<option value="{{ t.pk }}" 
+					  		{% if t == contract.contract_type %} "selected" {% endif %}>
+					  		{{ t.name }}
+					  	</option>
+		      		   {% endfor %}
+					</select>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-sm-2'>
+		  <label for="id_avatar">Фото</label>
+		</div>
+		<div class='col-sm-4'>
+		    <p>{{ form.avatar }}</p>
+		</div>
+		<div class='col-sm-2'>
+		  <label for="id_card">Номер карты</label>
+		</div>
+		<div class='col-sm-4'>
+		    <input id="id_card" type="number" name="card" class="form-control input-lg"
+		      value ="{{ contract.card |default_if_none:"" }}"/>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-sm-2'>
+		  <label for="id_address">Адрес</label>
+		</div>
+		<div class='col-sm-4'>
+		    <input id="id_address" type="text" name="address" class="form-control input-lg"
+		      value ="{{ form.address.value|default_if_none:"" }}"/>
+		</div>
+		<div class='col-sm-2'>
+		  <label for="id_discount">Скидка</label>
+		</div>
+		<div class='col-sm-4'>
+		    <input id="id_discount" type="number" name="discount" class="form-control input-lg"
+		      value ="{{ contract.discount |default_if_none:"" }}"/>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-sm-2'>
+		  <label for="id_phone">Телефон</label>
+		</div>
+		<div class='col-sm-4'>
+		    <input id="id_phone" type="text" name="phone" class="form-control input-lg"
+		      value ="{{ form.phone.value|default_if_none:"" }}"/>
+		</div>
+		<div class='col-sm-2'>
+		  <label for="id_installment_plan">Схема рассрочки</label>
+		</div>
+		<div class='col-sm-4'>
+			<div class="control-group">
+			   <div class="controls">
+					<select id="id_installment_plan" name="installment_plan" required class="selectpicker"
+					 data-width="100%">
+					  	<option value=""></option>
+					   {% for t in ctypes %}
+					  	<option value="{{ t.pk }}" 
+					  		{% if t == contract.installment_plan %} "selected" {% endif %}>
+					  		{{ t.name }}
+					  	</option>
+		      		   {% endfor %}
+					</select>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-sm-2'>
+		  <label for="id_email">E-mail</label>
+		</div>
+		<div class='col-sm-4'>
+		    <input id="id_email" type="text" name="email" class="form-control input-lg"
+		      value ="{{ form.email.value|default_if_none:"" }}"/>
+		</div>
+		<div class='col-sm-2'>
+		  <label for="id_payment_date">Дата оплаты</label>
+		</div>
+		<div class='col-sm-4'>
+		    <input id="id_payment_date" type="text" name="payment_date" class="form-control input-lg"
+	       value ="{% if contract.payment_date %} {{ contract.payment_date }} {% else %} {% now 'Y-m-d' %} {% endif %}" disabled />
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-sm-2'>
+		  <label for="id_passport">Паспорт</label>
+		</div>
+		<div class='col-sm-4'>
+		    <input id="id_passport" type="text" name="passport" class="form-control input-lg"
+		      value ="{{ form.passport.value|default_if_none:"" }}"/>
+		</div>
+		<div class='col-sm-2'>
+		  <label for="id_payment_type">Вид оплаты</label>
+		</div>
+		<div class='col-sm-4'>
+		     	<label for="cash" >Наличный</label>
+				<input type="radio" name="group2" id="cash" value="0" checked>
+			    <label for="cashless" >Безналичный</label>
+				<input type="radio" name="group2" id="cashless" value="1">
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-sm-2'>
+		  <label for="id_manager">Менеджер</label>
+		</div>
+		<div class='col-sm-4'>
+		    <input id="id_manager" type="text" name="manager" class="form-control input-lg"
+		      value ="{{ manager|default_if_none:"" }}" disabled />
+		</div>
+	</div>
+
+    <a href="{% url "person.views.person_menu" %}" class="btn btn-info" role="button">
+        Назад
+    </a>
+    <button class="btn btn-success" type="submit">
+        Добавить
+    </button>
+</form>
+
+<!--   <div class="form-group">
+    <label for="inputEmail3" class="col-sm-2 control-label">Email</label>
+    <div class="col-xs-4">
+      <input type="email" class="form-control" id="inputEmail3" placeholder="Email">
+    </div>
+  </div> -->
+
+{% endblock %}
+{% block extrafoot %}
+    <script type="text/javascript">
+    $(function () {
+        $('#born_cal').datetimepicker({
+            // language: 'ru',
+            pickTime: false,
+            minDate: '01/01/1930',
+            maxDate: '01/01/2009',
+            defaultDate: '{{ form.born_date.value|default_if_none:"01/01/2009" }}'
+        });
+    });
+	</script>
+<script type="text/javascript" src="{% static "bootstrap-select/bootstrap-select.js" %}"></script>
+<script type="text/javascript" src="{% static "bootstrap-select/i18n/defaults-ru-RU1.js" %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static "bootstrap-select/bootstrap-select.css" %}">
+
+<script>
+  $(function () { $('.selectpicker').selectpicker(); });
+</script>
+{% endblock %}

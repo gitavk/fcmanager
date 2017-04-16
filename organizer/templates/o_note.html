@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Напоминание{% endblock %}
+{% block extrahead %}
+
+{% endblock %}
+{% block menu %}
+
+{% endblock %}
+{% block content %}
+<form method="POST" class="form-horizontal">
+{% csrf_token %}{{ form.errors }}
+	<legend>
+		Напоминание
+	</legend>
+	<div class="form-group">
+		<div class="col-lg-2">
+			<label for="id_manager">Автор</label>
+		</div>
+		<div class="col-lg-4 control">
+			<input type="text" name="manager" id="id_manager" 
+			 class="form-control input-lg" disabled
+			 value="{{ request.user.get_full_name }}" />
+		</div>
+
+		<div class="col-lg-2">
+			<label for="id_date">Дата создания</label>
+		</div>
+		<div class="col-lg-4 control">
+			<input type="text" name="date" id="id_date" 
+			 class="form-control input-lg" disabled
+			 value="{{ form.date.value|date:"d.m.Y"}}" />
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-sm-2'>
+			  <label for="id_text">Текст</label>
+		</div>
+		<div class='col-sm-10'>
+			<div class="control-group">
+		    	<div class="controls">
+				    <input id="id_text" type="text" name="text" 
+				    class="form-control input-lg"
+				    data-validation-minlength-message="Не менее 8 символов" minlength="8"
+				    value ="{{ form.text.value|default:"" }}"/>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-lg-2">
+			<label for="id_datetodo">Дата исполнения</label>
+		</div>
+		<div class="col-lg-4 control">
+			<div class='input-group date' id='datetodo' data-date-format="DD.MM.YYYY">
+				<input type="text" name="datetodo" 
+				 class="form-control input-lg" />
+				<span class="input-group-addon">
+					<span class="glyphicon glyphicon-calendar"></span>
+            	</span>
+			</div>
+		</div>
+		<div class="col-lg-2">
+			<label for="id_self">Для себя</label>
+		</div>
+		<div class="col-lg-4 control">
+			<input type="checkbox" id="id_self" name="self">
+		</div>
+	</div>
+	<div class="form-group" style="display:none;" id="id_users">
+		<div class="col-lg-2">
+			<label for="id_user">Исполненитель</label>
+		</div>
+		<div class="col-lg-10 control">
+				<select id="id_user" name="user" class="selectpicker" multiple
+				 data-width="100%">
+				   {% for u in users %}
+				  	<option value="{{ u.pk }}">
+				  		{{ u.last_name }}
+				  	</option>
+	      		   {% endfor %}
+				</select>
+		</div>
+	</div>
+  	<a href="{% url "o_note_list" %}" class="btn btn-info" role="button">
+        Назад
+    </a>
+    <button class="btn btn-success" type="submit">
+        Сохранить
+    </button>
+</form>
+{% endblock %}
+
+{% block extrafoot %}
+<script type="text/javascript" src="{% static "bootstrap-select/bootstrap-select.js" %}">
+</script>
+<script type="text/javascript" src="{% static "bootstrap-select/i18n/defaults-ru-RU1.js" %}">
+</script>
+<link rel="stylesheet" type="text/css" href="{% static "bootstrap-select/bootstrap-select.css" %}">
+
+<script>
+  $(function () { 
+  	$('.selectpicker').selectpicker();
+  });
+</script>
+
+<script src="{% static "ReactiveRaven/jqBootstrapValidation.js" %}">
+</script>
+<script>
+  $(function () {
+  	$("input,select,textarea").not("[type=submit]").jqBootstrapValidation();
+  });
+</script>
+
+<script>
+$("#id_self").on( "click", function() {
+	if ($("#id_self").prop("checked")){
+		$('#id_users').hide();
+	} else {
+		$('#id_users').show();
+	}
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$(".glyphicon-remove-circle").on( "click", function() {
+		$(this).parent().hide();
+	});
+	$('#id_last_name').focus();
+	$('#id_self').click();
+
+});
+</script>
+
+<script type="text/javascript">
+$(function () {
+    $('#datetodo').datetimepicker({
+        // language: 'ru',
+        pickTime: false,
+        minDate: '{% now "m/d/Y" %}',
+        defaultDate: '{{ form.datetodo.value|date:"m/d/Y" }}'
+    });
+
+});
+</script>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Главное меню{% endblock %}
+
+{% block menu %}
+{% if request.user.is_reception %}
+<div class="row">
+	<div class="col-lg-4 col-lg-offset-4">
+		<a href="{% url "r_menu" %}">
+			<img src="{% static "img/cash.png"%}" alt="Ресепшен">
+		 	<div class="icontext">Рецепция</div>
+		 </a>
+	</div>
+</div>
+{% else %}
+<div class="row">
+	<div class="col-xs-4">
+	<a href="{% url "p_active" 0 %}">
+		<img src="{% static "img/users_group.png"%}" alt="Работа с клиентами">
+	 	<div class="icontext">Работа с клиентами</div>
+	</a>
+	</div>
+	<div class="col-xs-4">
+	<a href="{% url "r_menu" %}">
+		<img src="{% static "img/cash.png"%}" alt="Ресепшен">
+	 	<div class="icontext">Рецепция</div>
+	 </a>
+	</div>
+	<div class="col-xs-4">
+	<a href="{% url "reports_menu" %}">
+		<img src="{% static "img/notepad.png"%}" alt="Отчеты">
+	 	<div class="icontext">Отчеты</div>
+	</a>
+	</div>
+</div>
+<div class="row">
+    <div class="span4">
+    	<p></p>
+    </div>
+    <div class="span3 offset2">
+    	    	<p>.</p>
+    </div>
+</div>
+<div class="row">
+	<div class="col-xs-4">
+	<a href="{% url "core.views.reference" %}">
+	    <img src="{% static "img/books.png"%}" alt="справочники">
+	 	<div class="icontext">справочники</div>
+	</a>
+	</div>
+	<div class="col-xs-4">
+	<a href="{% url "employees" %}">
+		<img src="{% static "img/groupsmeeting.png"%}" alt="Сотрудники">
+	 	<div class="icontext">Работа с персоналом</div>
+	</a>
+	</div>
+	<div class="col-xs-4">
+		<img src="{% static "img/tools.png"%}" alt="Настройки">
+	 	<div class="icontext">Настройки</div>
+	</div>
+</div>
+<div class="row">
+    	    	<p>.</p>
+</div>
+<div class="row">
+	<div class="col-xs-4">
+		<a href="{% url "o_menu" %}">
+			<img src="{% static "img/5days.png" %}" alt="Органайзер">
+			<div class="icontext">Органайзер</div>
+		</a>
+	</div>
+	<div class="col-xs-4">
+		<a href="{% url 'fin_menu' %}">
+			<img src="{% static "img/car.png" %}" alt="Товародвижение">
+			<div class="icontext">Товародвижение</div>
+		</a>
+	</div>
+</div>
+{% endif %}
+{% endblock %}
+{% block content %}
+{% endblock %}
+{% block extrafoot %}
+{% endblock %}

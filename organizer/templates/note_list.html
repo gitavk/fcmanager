@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load static %}
+{% load extra_filtrs %}
+{% block title %}Органайзер{% endblock %}
+
+{% block menu %}
+<div class="row">
+  <div class="col-lg-3">
+    <a href="{% url "o_menu" %}" class="btn btn-primary">
+        Органайзер
+    </a>
+  </div>
+  <div class="col-lg-3">
+  	<a href="{% url "o_note" %}" class="btn btn-warning">
+      	<div class="icontext">Напоминание</div>
+  	</a>
+  </div>
+  <div class="col-lg-3">
+    <a href="{% url "o_note_list" %}" class="btn btn-info">
+        <div class="icontext">Входящие</div>
+    </a>
+  </div>
+  <div class="col-lg-3">
+    <a href="{% url "o_note_my" %}" class="btn btn-info">
+        <div class="icontext">Отправленные</div>
+    </a>
+  </div>
+</div>
+<div class="row">
+  <div class="col-lg-6">
+ 
+  </div>
+  <div class="col-lg-6">
+  {% if my %}
+    <a href="{% url "o_note_my_all" %}" class="btn btn-default">
+        <div class="icontext">Все</div>
+    </a>
+  {% else %}
+    <a href="{% url "o_note_list_all" %}" class="btn btn-default">
+        <div class="icontext">Все</div>
+    </a>
+  {% endif %}  
+  </div>
+</div>
+{% endblock %}
+{% block content %}
+<table class="table">
+<thead>
+  <tr><th>
+	<div class="col-lg-1"><strong>#</strong></div>
+	<div class="col-lg-2"><strong>Дата</strong></div>
+	<div class="col-lg-4"><strong>автор</strong></div>
+	<div class="col-lg-3"><strong>текст</strong></div>
+  </th></tr>
+</thead>
+{% for n, is_read in lst %}
+<tr {% if is_read %}
+      style="font-weight: bold;"
+    {% endif %}
+>
+<td>
+	<div class="col-lg-1">{{ n.id }}</div>
+	<div class="col-lg-2">{{ n.date|date:"d/m/Y"}}</div>
+	<div class="col-lg-4">{{ n.author.get_full_name }}</div>
+	<div class="col-lg-3">{{ n.text|truncatewords:3 }}</div>
+  <div class="col-lg-2">
+    <a href="{%url 'o_note_read' n.pk %}"
+    class="btn btn-warning">
+        <span class="glyphicon glyphicon-list-alt"></span>
+        Читать
+    </a>
+</td></tr>
+{% endfor %}
+</table>
+{% endblock %}

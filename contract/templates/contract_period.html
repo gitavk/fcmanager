@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+{% load extra_filtrs %}
+{% block title %}Свойства договоров{% endblock %}
+
+{% block menu %}
+<div class="row">
+	<div class="col-xs-4">
+	<a href="{% url "core.views.main_menu" %}">
+	    <img src="{% static "img/home.png"%}" alt="Главное меню">
+	    <div class="icontext">Главное меню</div>
+	</a>
+	</div>
+	<div class="col-xs-4">
+	<a href="{% url "contract.views.contract_menu" %}">
+	    <img src="{% static "img/contract.png"%}" alt="Договора">
+	    <div class="icontext">Договора</div>
+	</a>
+	</div>
+	<div class="col-xs-4">
+	<a href="{% url "periodadd" %}">
+	    <img src="{% static "img/calendar_add.png"%}" alt="Добавить">
+	    <div class="icontext">Добавить</div>
+	</a>
+	</div>
+</div>
+{% endblock %}
+
+{% block content %}
+{% for p_id, p_name, period in lst %}
+  <div class="panel panel-default">
+    <div class="panel-heading">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{ p_id }}">
+			{{ p_name }}
+        </a>
+    </div>
+    <div id="collapse{{ p_id }}" class="panel-collapse collapse">
+      <div class="panel-body">
+      <table class="table">
+      <thead><tr>
+    		<th>день недели</th><th>начало</th><th>окончание</th>
+		</tr>
+	   </thead>
+      {% for p in period %}
+      <tr>
+      	<td>{{ week|lookup:p.period_visit_wday }}</td>
+      	<td>{{ p.period_visit_start|time:'H:i' }}</td>
+      	<td>{{ p.period_visit_end|time:'H:i' }}</td>
+      </tr>
+      {% endfor %}
+      </table>
+      </div>
+    </div>
+  </div>
+{% endfor %}
+</table>
+{% endblock %}

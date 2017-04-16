@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Работа с персоналом{% endblock %}
+{% block menu %}
+<div class="row">
+	<div class="col-lg-3">
+    <a href="{% url "core.views.main_menu" %}">
+      <img src="{% static "img/home.png"%}" alt="Главное меню">
+      <div class="icontext">Главное меню</div>
+    </a>
+	</div>
+  <div class="col-lg-3">
+    <a href="{% url 'e_online' %}">
+      <img src="{% static "img/personal_trainer.png" %}" alt="Должности">
+      <div class="icontext">Сотрудники в клубе</div>
+    </a>
+  </div>
+  <div class="col-lg-3">
+    <a href="{% url 'e_timetable' year week 0 %}">
+      <img src="{% static "img/timetable.png" %}" alt="График дежурств">
+      <div class="icontext">График дежурств</div>
+    </a>
+  </div>
+  <div class="col-lg-3">
+    <a href="{% url 'e_view' %}">
+      <img src="{% static "img/employees.png" %}" alt="Архив сотрудников">
+      <div class="icontext">Архив сотрудников</div>
+    </a>
+  </div>
+</div>
+<div class="row">
+  <div class="col-lg-3 col-lg-offset-6">
+    <a href="{% url 'department' %}">
+      <img src="{% static "img/departments.png" %}" alt="Подразделения">
+      <div class="icontext">Подразделения</div>
+    </a>
+  </div>
+  <div class="col-lg-3">
+    <a href="{% url 'position' %}">
+      <img src="{% static "img/position.png" %}" alt="Должности">
+      <div class="icontext">Должности</div>
+    </a>
+  </div>
+</div>
+{% endblock %}
+{% block content %}
+{{ res }}
+<table class="table">
+<thead>
+  <tr>
+    <th>ФИО</th>
+    <th>Должность</th>
+  </tr>
+</thead>
+<tbody>
+  {% for e in lst %}
+  <tr>
+    <td>{{ e.lastname|title }} {{ e.firstname|title }} 
+    {{ e.patronymic|title }}</td>
+    <td>{{ e.currwork.wposition.position |title }}</td>
+  </tr>
+  {% endfor %}
+</tbody>
+</table>
+{% endblock %}

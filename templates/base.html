@@ -1,0 +1,119 @@
+{% load staticfiles %}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta charset="UTF-8">
+    <title>{% block title %}FCLUB_NAME{% endblock %}</title>
+            <!-- Bootstrap -->
+    <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
+        <!-- DateTime picker -->
+    <link href="{% static "datetimepicker/css/bootstrap-datetimepicker.min.css" %}" rel="stylesheet">
+
+    <link href="{% static "font-awesome-4.1.0/css/font-awesome.min.css" %}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static "css/styles.css" %}" />
+        {% block extrahead %}{% endblock %}
+
+</head>
+
+<body>
+<div class="ajaxload"><!-- Place at bottom of page --></div>
+
+    <div id="content" class="container">
+<div class="alert alert-info"> 
+    <div class="col-sm-4">
+       <h4>{% now "l, d.m.Y" %} </h4>
+    </div>
+{% if request.user.has_msg %}
+    <div class="col-lg-3">
+        <a href="/" >
+            <i class="fa fa-home fa-3x"></i>
+        </a>
+    </div>
+    <div class="col-sm-2">
+        <a href="{% url "o_note_list" %}">
+            <span class="badge pull-right">{{ request.user.has_msg }}</span>
+            <i class="pull-right fa fa-envelope-square fa-3x icon-danger">
+            </i>
+        </a>
+    </div>
+{% else %}
+    <div class="col-sm-5">
+        <center>
+            <a href="/">
+                <i class="fa fa-home fa-3x"></i>
+            </a>
+        </center>
+    </div>
+{% endif %}
+   <div style="text-align: right;">
+   {% if request.user %}
+        <a href="/logout/" >
+            {{ request.user.last_name }} {{ request.user.first_name }} 
+            <img src="{% static "img/gnome_application_exit.png" %}" alt="выход">
+        </a>
+    {% endif %}
+    </div>
+</div>
+      {% if request.user.is_reception %}
+        
+        {% for m in request.user.reminders %}
+        <div id="{{ m.pk }}" class="alert alert-warning"><h4>
+            <span class="glyphicon glyphicon-warning-sign "></span>
+            {{ m.time|time:"H:i" }} | {{ m.text }} 
+            <span id="reminder" class="glyphicon glyphicon-remove-circle"></span>
+        </h4></div>
+        {% endfor %}
+
+      {% endif %}
+
+            <center>{% block menu %}{% endblock %}</center>
+            {% block content %}{% endblock %}
+    </div>
+
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="{% static "bootstrap/js/jquery.js" %}"></script>
+    <!-- Use by date-time picker -->
+    <script type="text/javascript" src="{% static "datetimepicker/js/moment.min.js" %}"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src= "{% static "bootstrap/js/bootstrap.min.js" %}"></script>
+    <!-- Date-time picker -->  
+    <script type="text/javascript" src="{% static "datetimepicker/js/bootstrap-datetimepicker.min.js" %}"> </script>
+    <script type="text/javascript" src="{% static "datetimepicker/js/locales/bootstrap-datetimepicker.ru.js" %}"> </script>
+<!-- быстрая клавиша для всего приложения -->
+<script type="text/javascript">
+$(document).ready(function () {
+    $(document).keydown(function (e) { 
+        // alert(e.keyCode)
+        if ((e.which == 120) || (e.keyCode == 120)) {
+                // alert("F9");
+                document.location.href = "{% url "client_login" %}"
+        }
+    });
+    $(document).on( "click", '#reminder', function() {
+        var el = $(this).parent().parent()
+        var r_id = el.attr("id")
+        $.ajax({
+            url: "/reception/reminder/read/" + r_id,
+            success: function (data) {
+                el.remove();
+            }
+        })
+    });
+
+  $body = $("body");
+  $( "form" ).submit(function() {
+    $body.addClass("loading"); 
+  });
+  $(document).on({
+      ajaxStart: function() { $body.addClass("loading");    },
+      ajaxStop: function()  { $body.removeClass("loading"); }    
+  });
+
+});
+</script>
+        {% block extrafoot %}{% endblock %}
+</body>
+</html> 

@@ -1,0 +1,12 @@
+["{{ cnt }}",
+{% if cnt == 1 %}
+{% if res %}
+"{{ res.last_name|title }} {{ res.first_name|title }} {{ res.patronymic|title }}/{{ res.pk }}/C/",
+{% else %}
+"{{ gres.lastname|title }} {{ gres.firstname|title }} {{ gres.patronymic|title }}/{{ gres.pk }}/G/",
+{% endif %}
+{% else %}
+"{% for p in res %}{{ p.last_name|title }} {{ p.first_name|title }} {{ p.patronymic|title }}/{{p.pk }}/C/{% endfor %}{% for p in gres %}{{ p.lastname|title }} {{ p.firstname|title }} {{ p.patronymic|title }}/{{ p.pk }}/G/{% endfor %}",
+{% endif %}
+ "{{ f }}"
+ ]

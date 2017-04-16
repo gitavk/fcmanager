@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Работа с клиентами{% endblock %}
+
+{% block menu %}
+<div class="row">
+	<div class="col-xs-4">
+	<a href="{% url "core.views.main_menu" %}">
+	    <img src="{% static "img/home.png"%}" alt="Главное меню">
+	 	<div class="icontext">Главное меню</div>
+	</a>
+	</div>
+	<div class="col-xs-4">
+	<a href="{% url "person.views.person_add" %}">
+	    <img src="{% static "img/user_add.png"%}" alt="Добавить">
+	 	<div class="icontext">Добавить</div>
+	</a>
+	</div>
+	<div class="col-sm-3 col-xs-12 col-lg-4">
+      <form class="form-search" action="" method="get">
+          <div class="input-group">
+              <input class="form-control " id="id_query" type="text" name="query">
+              <span class="input-group-btn">
+                  <button type="submit" class="btn btn-search">Поиск</button>
+              </span>
+          </div>
+      </form>
+    </div>
+</div>
+<div class="row">
+  <div class="btn-group">
+    <a href="{% url "p_menu" 0 %}" type="button" class="btn btn-primary">Все</a>
+    <a href="{% url "p_active" 0 %}" type="button" class="btn btn-primary">Активные</a>
+    <a href="{% url "p_inactive" 0 %}" type="button" class="btn btn-primary">Нет контракта</a>
+  </div>
+</div>
+<div class="row">
+  <div class="btn-group btn-group-sm">
+    {% for letter in abc %}
+      <a href="{% if url == 'active' %}{% url 'p_active' %}{{forloop.counter0 }}
+               {% elif url == 'inactive' %}{% url 'p_inactive' %}{{forloop.counter0 }}
+               {% else %}{% url 'p_menu' %}{{forloop.counter0 }}
+               {% endif %}" class="btn btn-default">
+         {{ letter }}
+      </a>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}
+{% block content %}
+<table class="table">
+{% for p, curr_contract, contracts in lst %}
+<tr><td>
+  <div class="col-xs-4">
+    <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{ p.pk }}">
+{{ p.last_name|title }} {{ p.first_name|title }} {{ p.patronymic|title }}</a>
+   </div>
+      <a href="{% url "prolongation" p.pk %}" 
+        class="btn btn-sm btn-info" role="button">
+        Продление
+      </a>
+      <a href="{% url "contractfreeze" curr_contract %}" 
+        class="btn btn-sm btn-primary" role="button">
+        Заморозка
+      </a>
+      <a href="{% url "client_ptt" p.pk %}" class="btn btn-sm btn-warning" role="button">Блок ПТ</a>
+      <a href="{% url "person_card" p.pk %}" class="btn btn-sm btn-success" role="button">Личная карта</a>
+      <a href="{% url "person_note" p.pk %}" class="btn btn-sm btn-danger" role="button">Заметка</a>
+      <a href="{% url "contract_pay_freeze" curr_contract %}" 
+        class="btn btn-sm btn-default" role="button">
+        Платная заморозка
+      </a>
+    <div id="collapse{{ p.pk }}" class="collapse">
+      <div class="panel-body">
+      <table class="table">
+        <thead>
+          <tr>
+        		<th># договора</th>
+            <th>Дата</th>
+            <th>Сумма</th>
+            <th colspan="4"></th>
+    		  </tr>
+  	   </thead>
+       {% for c in contracts %}
+          <tr>
+          	<td>{{ c.number }}</td>
+          	<td>{{ c.date_joined|date:'d.m.Y' }}</td>
+          	<td>{{ c.amount }} руб.</td>
+            <td><a href="{% url "person.views.person_contract"  p.pk c.pk %}"
+             class="btn btn-sm btn-warning btn-block" role="button">
+                <i class="fa fa-file-text-o"></i> Просмотр</a>
+            </td>
+            <td><a href="{% url "c_bonus"  c.pk %}" 
+            class="btn btn-sm btn-success btn-block" role="button">
+                <i class="fa fa-smile-o"></i> Бонус </a>
+            </td>
+            <td><a href="{% url "c_exchange"  c.pk %}"
+              class="btn btn-sm btn-info btn-block" role="button">
+                 Переоформление </a>
+            </td>
+            <td><a href="{% url "c_ban"  c.pk %}"
+              class="btn btn-sm btn-danger btn-block" role="button">
+                <i class="fa fa-ban"></i> Расторжение </a>
+            </td>       {% endfor %}
+    </table>
+    </div>
+  </div>
+</td></tr>
+{% endfor %}
+</table>
+{% endblock %}

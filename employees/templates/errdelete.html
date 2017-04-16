@@ -1,0 +1,11 @@
+{% extends "errbase.html" %}
+{% load static %}
+
+{% block title %}Ошибка удаления{% endblock %}
+
+{% block content %}
+<div class="alert alert-danger">Нельзя удалить {{ o_name }}</div>
+<a href="{{ b_url }}" class="btn btn-info" role="button">
+        Назад
+    </a>
+{% endblock %}

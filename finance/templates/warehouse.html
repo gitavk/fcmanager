@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Склад{% endblock %}
+{% block menu %}
+<div class="row">
+	<div class="col-lg-3">
+    <a href="{% url 'fin_menu' %}">
+      <img src="{% static "img/car.png" %}" alt="Товародвижение">
+      <div class="icontext">Товародвижение</div>
+    </a>
+	</div>
+  <div class="col-lg-3">
+    <a href="{% url 'invoice' %}">
+      <img src="{% static "img/arrival.png" %}" alt="Приход">
+      <div class="icontext">Приход</div>
+    </a>
+  </div>
+  <div class="col-lg-3">
+    <a href="{% url 'issuance' %}">
+      <img src="{% static "img/issuance.png" %}" alt="Выдача">
+      <div class="icontext">Внутреннее перемещение</div>
+    </a>
+  </div>
+  <div class="col-lg-3">
+    <a href="{% url 'trash' %}">
+      <img src="{% static "img/trash.png" %}" alt="Списание">
+      <div class="icontext">Списание</div>
+    </a>
+  </div>
+</div>
+{% endblock %}
+{% block content %}
+{% if res %}
+<div class="alert alert-danger" >{{ res }}</div> 
+{% endif %}
+<table class="table">
+<thead>
+  <tr>
+    <th>Товар</th>
+    <th>Количество</th>
+  </tr>
+</thead>
+<tbody>
+  {% for g in lst %}
+  <tr>
+    <td>{{ g|lower|capfirst }}</td>
+    <td>{{ g.in_stock }}</td>
+  </tr>
+  {% endfor %}
+</tbody>
+</table>
+{% endblock %}

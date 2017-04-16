@@ -1,0 +1,208 @@
+{% extends "printbase.html" %}
+{% load static %}
+{% load extra_filtrs %}
+
+{% block title %}{% endblock %}
+{% block menu %}
+	<a href="{% url 'pers_cont' p.pk c.pk %}" class="no-print btn btn-info"
+	role="button">
+	       <i class="fa fa-step-backward"></i>  Назад
+    </a>
+    <a href="{% url 'person_card' c.client.pk %}" 
+    class="no-print btn btn-success" role="button">
+	       <i class="fa fa-male"></i>  Личная карта
+    </a>
+{% endblock %}
+{% block content %}
+<table border="1" media="print">
+	<tr>
+		<td colspan="3" width="200px">
+			Договор № {{ c.number }}
+		</td>
+		<td colspan="5" width="350px">
+			Карта № {{ c.card|default_if_none:"" }}
+		</td>
+		<td width="150px" rowspan="7" >
+			
+		<table border="3" width="100%" height="100%"><tr><td>
+<br/><br/><br/>
+				<center>
+					<img src="{% static "img/logo.png"%}" width="100px" alt="logo">
+				</center>
+<br/><br/><br/>
+		</td></tr></table>
+			
+			
+		</td>
+	</tr>
+	<tr>
+		<td colspan="8">
+			<strong>Персональные данные</strong>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			Фамилия
+		</td>
+		<td colspan="6">
+			{{ p.last_name }}
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			Имя
+		</td>
+		<td colspan="6">
+			{{ p.first_name }}
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			Отчество
+		</td>
+		<td colspan="6">
+			{{ p.patronymic }}
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			Дата рождения
+		</td>
+		<td colspan="6">
+			{{ p.born_date|date:'d.m.Y' }}
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			Телефон
+		</td>
+		<td colspan="6">
+			{{ p.phone }}
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<strong>Паспортные данные:</strong>
+		</td>
+		<td colspan="7">
+			{{ p.passport }}
+		</td>
+	</tr>
+	<tr>
+		<td colspan="9">
+			<strong>Адрес: </strong>
+			{{ p.address }}
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<strong>Членство</strong>
+		</td>
+		<td colspan="7">
+			{{ c.contract_type.name }}
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<strong>Ребенок</strong>
+		</td>
+		<td colspan="7">
+		{% if child %}
+			{{ child.last_name }} {{ child.first_name }} {{ child.patronymic}}
+		{% else %}
+			----
+		{% endif %}
+		</td>
+	</tr>
+
+	<tr>
+		<td colspan="7">
+			<center><strong>Часы посещения</strong></center>
+		</td>
+		<td rowspan="2" colspan="2">
+			<strong>Приостановление договора(заморозка)</strong>
+		</td>
+	</tr>
+	<tr>
+		<td><center><strong>ПН</strong></center></td>
+		<td><center><strong>ВТ</strong></center></td>
+		<td><center><strong>СР</strong></center></td>
+		<td><center><strong>ЧТ</strong></center></td>
+		<td><center><strong>ПТ</strong></center></td>
+		<td><center><strong>СБ</strong></center></td>
+		<td><center><strong>ВС</strong></center></td>
+	</tr>
+	<tr>{% for t in t %}
+		<td>{{ t.period_visit_start|time:"H:i" }}-{{ t.period_visit_end|time:"H:i" }}</td>
+		{% endfor %}
+		<td colspan="2">
+			<center>{{ c.contract_type.period_freeze }}</center>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="9"> <center>
+			Срок действия договора с {% if c.is_open_date %} __________
+									 {% else %}{{ c.date_start|date:"d.m.Y" }} 
+									 {% endif %}
+								   по {% if c.is_open_date %} __________
+									 {% else %}{{ c.date_finish|date:"d.m.Y" }}
+									 {% endif %} 
+		    без учета заморозки</center>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="9"> <center> <strong>
+			Стоимость услуг по договору 
+			<span style="font-size: 150%;">{{ c.amount|floatformat:2 }} руб.</span>
+			</strong></center>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="5"> <strong>
+			Схема оплаты: {{ pplan }}
+			</strong>
+		</td>
+		<td colspan="4"> <strong>
+			Вид оплаты: {{ pay }}
+			</strong>
+		</td>
+	</tr>
+	<tr>{% for pps in ppsteps %}
+				{% if ppsteps|length == 1 %}
+				<td colspan="5">
+				{% else %}
+				<td>{% endif %}
+				{{ c.date|planDeltaDays:pps.number|date:"d.m.Y" }}</td>
+
+		{% endfor %}
+	</tr>
+		<tr>
+		{% for pps in ppsteps %} 
+			{% if ppsteps|length == 1 %}
+				<td colspan="5">{{ c.amount }}
+				{% else %}
+			  <td>
+					{% if c.pay_plan.plantype == 1 %}
+					{{ c.amount|precent:pps.amount }}
+					{% else %}
+					{{ pps.amount }}
+					{% endif %}
+				{% endif %}
+			</td>
+
+		{% endfor %}
+	</tr>
+</table>
+
+<img src="{% get_media_prefix %}{{ text.firstpage }}" width="700px" alt="attach1_2">
+<div class="pagebreak" media="print"></div>
+<img src="{% get_media_prefix %}{{ text.secondpage }}" width="700px" alt="contr_text">
+
+{% endblock %}
+        {% block extrafoot %}
+ <script>
+ window.onload = function () {
+//    window.print();
+}
+  </script>
+        {% endblock %}

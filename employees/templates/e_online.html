@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Сотрудник в клубе{% endblock %}
+{% block menu %}
+<div class="col-xs-3">
+	<a href="{% url "employees" %}">
+		<img src="{% static "img/groupsmeeting.png"%}" alt="Сотрудники">
+	 	<div class="icontext">Работа с персоналом</div>
+	</a>
+</div>
+<div class="col-xs-3">
+
+</div>
+<div class="col-xs-3">
+
+</div>
+<div class="col-xs-3">
+
+</div>
+{% endblock %}
+{% block content %}
+<table class="table">
+{% for v in online %}
+	<tr class="success">
+		<td><a href="{% url 'e_card' v.employee.pk %}">			
+				{{ v.employee.lastname|title }}
+				{{ v.employee.firstname|title }}
+				{{ v.employee.patronymic|title }}
+		  </a>
+		</td>
+		<td>{{ v.date_start|time:"H:i" }}</td>
+	</tr>
+{% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% load static %}
+{% load extra_filtrs %}
+{% block title %}{{p_title}}{% endblock %}
+{% block extrahead %}
+
+{% endblock %}
+{% block menu %}
+{{ res }}
+{% endblock %}
+{% block content %}
+<form id="period" class="form-horizontal" action="" method="post">
+    {% csrf_token %} {{ form.errors }} {{ g_form.errors }}
+	<legend>{{p_title}}
+		<a href="{% url "trash" %}" class="btn btn-info" role="button">
+	        Назад
+	    </a>
+	    <button class="btn btn-success" type="submit">
+	        Сохранить
+	    </button>
+	</legend>
+<div class="form-group">
+	<div class='col-sm-2'>
+	  <label for="id_number">Номер </label>
+	</div>
+	<div class='col-sm-4'>
+		<div class="control-group">
+		    <div class="controls">
+		    	<input id="id_number" type="text" value="{{ trash.number }}"
+		    	class="form-control input-lg" disabled />
+			</div>
+		</div>
+	</div>
+	<div class="col-lg-2">
+		<label for="id_date">Дата</label>
+	</div>
+	<div class="col-lg-4 control">
+		<input type="text" class="form-control input-lg"
+		 value="{{ trash.date|date:"d.m.Y" }}" disabled/>
+	</div>
+</div>
+<div class="form-group">
+	<div class='col-sm-2'>
+	  <label for="id_market">Торговая точка</label>
+	</div>
+	<div class="col-lg-4 control">
+		<input type="text" class="form-control input-lg"
+		 value="{{ trash.market }}" disabled/>
+	</div>
+</div>
+<div class="form-group">
+	<div class='col-sm-2'>
+	  <label for="id_manager">Списал</label>
+	</div>
+	<div class='col-sm-4'>
+	    <input id="id_manager" type="text" 
+	    name="manager" class="form-control input-lg" disabled
+	    value ="{{ trash.manager.get_full_name| default:request.user.get_full_name }}"/>
+	</div>
+	<div class='col-sm-2'>
+	  <label for="id_mix_measure">Примечания</label>
+	</div>
+	<div class='col-sm-4'>
+		<div class="control-group">
+	    	<div class="controls">
+			    <input id="id_note" type="text" name="inote" 
+		    	value="{{ trash.note|default:""}}" 
+			    class="form-control input-lg"
+			    data-validation-minlength-message="Не менее 2 символов" minlength="2"/>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="form-group">
+	<strong>Список товаров </strong>
+	<input type="hidden" id="id_goods_cnt" name="goods_cnt" 
+	value="{{ trash.goods_lst.count }}">
+	<a href="#t_goods" class="btn btn-primary btn" role="button" id="goods_add">
+		добавить<span class="glyphicon glyphicon-plus-sign"></span>
+	</a>
+	<span id="m_err" style="display:none;color:red">
+		Не выбрана торговая точка
+	</span>
+	<table class="table" id="t_goods">
+	  <thead>
+		<tr>
+			<th width="500px">Наименование</th>
+			<th width="100px">Количество</th>
+			<th width="210px">Примечание</th>
+			<th width="100px">Удалить</th>
+		</tr>
+	  </thead>
+	  <tbody>
+	  	{% for g in trash.goods_lst %}
+	  	<tr>
+	  		<td>{{ g.goods }}</td>
+	  		<td>{{ g.count }}</td>
+	  		<td>{{ g.note }}</td>
+	  		<td valign="middle" align="center">
+			<button class="btn btn-danger btn-xs" type="button"
+			title="Удалить {{ s.value }}
+      		<i class='fa fa-times' id='close'></i>"
+			data-html="true" data-placement="top"
+			data-content="<div class='col-lg-12' id='delinfo'>
+	          <span class='btn btn-sm btn-success' pk='{{g.pk}}'
+	           id='Y'>да</span>
+	          <button class='btn btn-sm btn-info pull-right'
+	          id='close'>нет</button>
+	          </div>">
+	        	<span class="glyphicon glyphicon-minus-sign"></span>
+			</button>
+		</td>
+	  	</tr>
+	  	{% endfor %}
+	  </tbody>
+	</table>
+</div>
+</form>
+{% endblock %}
+
+{% block extrafoot %}
+<script type="text/javascript" src="{% static "bootstrap-select/bootstrap-select.js" %}"></script>
+<script type="text/javascript" src="{% static "bootstrap-select/i18n/defaults-ru-RU1.js" %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static "bootstrap-select/bootstrap-select.css" %}">
+
+<script>
+$(document).ready(function(){
+	$('.selectpicker').selectpicker();
+	var goods_cnt = $('#id_goods_cnt').val();
+	var new_tr = '<tr>\
+		<td>\
+			<div class="control-group">\
+				<select id="id_goods" name="goods" class="selectpicker"\
+					data-width="100%" >\
+				  	<option ></option>\
+				</select>\
+			</div>\
+		</td>\
+		<td>\
+			<input type="number" class="form-control input without-arrows" \
+			name="cnt" id="id_cnt" min="1">\
+		</td>\
+		<td>\
+			<input type="text" class="form-control input" name="note">\
+		</td>\
+		<td valign="middle" align="center">\
+			<a href="#t_goods" class="btn btn-danger btn-xs" role="button" \
+			     id="goods_rem">\
+	        	<span class="glyphicon glyphicon-minus-sign"></span>\
+			</a>\
+		</td>\
+	</tr>'
+	var options = []
+	options[0] = "<option value='0'></option>"
+	{% for g in marketgoods %}
+	ind = {{forloop.counter}}
+	options[ind] = "<option value='{{ g.pk }}' id='{{ g.pk }}' \
+					max='{{ g.on_market }}' > {{ g }} </option>"
+	{% endfor %}
+
+	$('#goods_add').click(function(){
+		if ($('#id_market').val() < 1){
+			$('#m_err').show()
+			return false
+		} else {
+			$('#m_err').hide()
+		}
+		goods_cnt++;
+		new_options = options.slice(0)
+		$('#t_goods :selected').each(function(){
+			delete new_options[$( this ).val()]
+		});
+		new_options[0] = "<option value='0'></option>"
+		$('#id_goods_cnt').val(goods_cnt);
+		$('#t_goods').append(new_tr);
+		$("select[name='goods']").empty().append(options);
+		$("select[name='goods']").attr( 'name', 'goods' + goods_cnt );
+		$("input[name='cnt']").attr( 'name','cnt'  + goods_cnt );
+		$("input[name='note']").attr( 'name','note'  + goods_cnt );
+		$("select[name='goods"+ goods_cnt+"']").trigger("change");
+		$('.selectpicker').selectpicker('refresh');
+	})
+
+    $( document ).on('change',"[name*='goods']", function(){
+    	var defcnt = $("option:selected", this).attr("max")
+    	$(this).parent().parent().parent().find('[type=number]').val(defcnt)
+    	$(this).parent().parent().parent().find('[type=number]').attr('max',defcnt)
+		$('#t_goods :selected').each(function(){
+			var old = $(this).parent().data('old')
+			$('option[id='+ old +']').attr("disabled",false)
+			$('option[id='+$(this).val()+']').attr("disabled",true)
+			$(this).parent().data('old',$(this).val());
+		})
+		$('.selectpicker').selectpicker('refresh');
+	});
+
+	$( document ).on( "click", '#goods_rem', function() {
+		$(this).parent().parent().remove();
+	});
+
+	$( '#period' ).submit(function( event ) {
+		$('#date', this).attr('disabled', false)
+		$('#t_goods :selected').attr('disabled', false)
+		$('.selectpicker').prop('disabled',false);
+		$('.selectpicker').selectpicker('refresh');
+	});
+
+  $( document ).on( "click",'#Y', function(){
+    var pk = $(this).attr('pk')
+    $.ajax({
+          url: encodeURI("{% url 'trash_g_del' %}"),
+          data: ({id: pk, }),
+          success: function (data) {
+            res = parseInt(data['res'], 10);
+            if (res > 0) {
+              $('#delinfo').html('<div class="alert alert-success">\
+                                  <h3>Удалено</h3></div>')
+              window.setTimeout('location.reload()', 500);
+            } else {
+              $('#delinfo').html('<div class="alert alert-danger">\
+                                  <h3>Нельзя удалить</h3></div>')
+            }          
+          },
+          error: function(){
+            $('#delinfo').html('<div class="alert alert-danger">\
+                              <h3>Ошибка базы данных</h3></div>')
+          }
+      })
+  });
+
+  $(".btn-danger").popover();
+  $( document ).on( "click", '#close', function() {
+    $(".btn-danger").popover('hide');
+  });
+
+});
+</script>
+
+{% endblock %}

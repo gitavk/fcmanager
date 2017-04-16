@@ -1,0 +1,22 @@
+@media screen {
+    body {
+    margin:0;
+    padding:0;
+ 
+   }
+}
+
+ @media print { /* Стиль для печати */
+    body {
+     font-family: Times, 'Times New Roman', serif; /* Шрифт с засечками */
+     font-size: 9pt;
+    }
+    .no-print, .no-print *
+    {
+        display: none !important;
+    }
+}
+
+.pagebreak {
+    page-break-after: always;
+}

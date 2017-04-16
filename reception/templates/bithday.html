@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}День рождения{% endblock %}
+
+{% block menu %}
+<div class="col-lg-3">
+	<a href="{% url "r_menu" %}">
+		<img src="{% static "img/cash.png"%}" alt="Ресепшен">
+	 	<div class="icontext">Рецепция</div>
+	 </a>
+</div>
+<div class="col-lg-6">
+<form id="bithday" method="POST"> {% csrf_token %}
+	<div class='input-group date col-lg-6' id='born_date' data-date-format="DD.MM">
+        <input id="born_date" type="text" name="born_date" class="form-control input-lg" />
+        <span class="input-group-addon">
+        	<span class="glyphicon glyphicon-calendar"></span>
+         </span>
+    </div>
+</div>
+<div class="col-lg-3">
+	<button form="bithday" class="btn btn-success">показать</button>
+</div>
+</form>
+{% endblock %}
+{% block content %}
+<table class="table">
+{% for p in lst %}
+	<tr>
+		<td>			
+		  <a href="{% url "person_card" p.pk %}">
+			<div class="col-lg-6">
+				{{ p.last_name }} {{ p.first_name }} {{ p.patronymic }}
+			</div>
+			<div class="col-lg-3">{{ p.born_date|date:"d.m.Y" }} </div>
+			<div class="col-lg-3">
+				{{ p.phone|slice:":-7" }}
+				{{ p.phone|slice:"-7:-4" }}
+				{{ p.phone|slice:"-4:-2" }}
+				{{ p.phone|slice:"-2:" }}
+			</div>
+		  </a>
+		</td>
+	</tr>
+{% endfor %}
+</table>
+{% endblock %}
+{% block extrafoot %}
+<script type="text/javascript">
+    $(function () {
+        $('#born_date').datetimepicker({
+            // language: 'ru',
+            pickTime: false,
+            defaultDate: '{{ rdate|date:"m/d/Y" }}'
+        });
+    });
+</script>
+{% endblock %}

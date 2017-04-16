@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ p_title }}{% endblock %}
+{% block menu %}
+<div class="row">
+	<div class="col-lg-3">
+    <a href="{% url "employees" %}">
+      <img src="{% static "img/groupsmeeting.png"%}" alt="Работа с персоналом">
+      <div class="icontext">Работа с персоналом</div>
+    </a>
+	</div>
+  <div class="col-lg-3">
+    <a href="{% url 'department_add' %}">
+      <img src="{% static "img/departments_add.png" %}" alt="Добавить">
+      <div class="icontext">Добавить</div>
+    </a>
+  </div>
+  <div class="col-lg-3">
+  </div>
+  <div class="col-lg-3">
+  </div>
+</div>
+{% endblock %}
+{% block content %}
+{{ res }}
+<table class="table">
+<thead>
+  <tr>
+    <th>Наименование</th>
+    <th></th>
+  </tr>
+</thead>
+<tbody>
+  {% for d in lst %}
+  <tr>
+    <td>{{ d|lower|capfirst }}</td>
+    <td>
+    <a href="{% url 'department_edit' d.pk %}" class="btn btn-sm btn-warning" 
+          role="button">
+              <i class="fa fa-pencil">
+              </i> Редактировать
+      </a>
+      <a href="#" class="btn btn-sm btn-danger"
+          role="button" data-toggle="popover" title="Удалить {{ ru.name }}"
+          data-html="true"
+          data-content="<div class='row'>
+              <a href='{% url 'department_del' d.pk %}'
+               class='btn btn-sm btn-success' role='button'>да</a>
+              <a href='#' 
+              class='btn btn-sm btn-info pull-right' role='button' id='close'>нет</a>
+              </div>
+          ">
+              <span class="glyphicon glyphicon-remove"></span> Удалить
+      </a>
+    </td>
+  </tr>
+  {% endfor %}
+</tbody>
+</table>
+{% endblock %}
+{% block extrafoot %}
+ <script>
+$(function (){ 
+  $(".btn-danger").popover();
+  $( document ).on( "click", '#close', function() {
+    $(".btn-danger").popover('hide');
+  });
+});
+</script>
+{% endblock %}

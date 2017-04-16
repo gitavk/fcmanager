@@ -1,0 +1,819 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Личная карта клиента{% endblock %}
+{% block content %} 
+{{ res }}
+{% if clnt.note %}
+	<div class="alert alert-danger" id="clnt_note">
+    	{{ clnt.note }}
+    	<span class="glyphicon glyphicon-remove-circle"></span>
+	</div>
+{% endif %}
+{% if visit_time_err %}
+	<div class="alert alert-danger" id="visit_time_err">
+    	<h3> Не допустимое время визита </h3>
+    	<span class="glyphicon glyphicon-remove-circle"></span>
+	</div>
+{% endif %}
+{% if first_visit %}
+	<div class="alert alert-warning" id="first_visit">
+    	Первый визит по договору # {{ first_visit }}
+    	<span class="glyphicon glyphicon-remove-circle"></span>
+	</div>
+	<input type="hidden" name="first_visit" value="1">
+{% endif %}
+{% if block_visit %} 
+	<div class="alert alert-warning" id="block_visit">
+    	Нет действующего договора
+	{% if last_contract.is_current == 3 %}
+		<div class="alert alert-danger" id="ban_info">
+	    	Расторгнут {{ last_contract.ban_info }}
+		</div>
+	{% endif %}
+    	<span class="glyphicon glyphicon-remove-circle"></span>
+	</div>
+{% endif %}
+<div class="alert alert-danger" id="id_ban_info" style="display:none;">
+	
+</div>
+{% if debts %}
+	<div class="alert alert-danger" id="block_visit">
+    	договор заблокирован за задолжность:
+    	<span class="glyphicon glyphicon-remove-circle"></span>
+    	<table class="table">
+    		<thead>
+    			<tr>
+    				<td>сумма</td><td>дата платежа</td>
+    			</tr>
+    		</thead>
+    		{% for d in debts%}
+    		<tr>
+    			<td>{{ d.amount}} руб.</td><td>{{ d.plan_date|date:'d.m.Y' }}</td>
+    		</tr>
+    		{% endfor %}
+    	</table>
+	</div>
+{% endif %}
+{% if contract_freeze %}
+	<div class="alert alert-success" id="contract_freeze">
+    	Договор в заморозке  до {{ contract_freeze|date:'d.m.Y' }} 
+    	<span class="glyphicon glyphicon-remove-circle"></span>
+	</div>
+	<input type="hidden" name="contract_freeze" value="1">
+{% endif %}    
+{% if has_debts %}
+	<div class="alert alert-extradanger" id="has_debts" >
+    	Есть не оплаченные долги
+    	<table class="table">
+    		<thead>
+    			<tr>
+    				<td>сумма</td><td>дата платежа</td>
+    			</tr>
+    		</thead>
+    		{% for d in has_debts %}
+    		<tr>
+    			<td>{{ d.amount}} руб.</td><td>{{ d.plan_date|date:'d.m.Y' }}</td>
+    		</tr>
+    		{% endfor %}
+    	</table>
+	</div>
+{% endif %}
+{% if contract_days_left %}
+	<div class="alert alert-success" id="contarct_days_left">
+    	До окончания договора осталось {{ contract_days_left }} дней
+    	<span class="glyphicon glyphicon-remove-circle"></span>
+	</div>
+{% endif %}
+{% if contract_visits_left %}
+	<div class="alert alert-success" id="contarct_days_left">
+    	До окончания договора осталось {{ contract_visits_left }} посещений
+    	<span class="glyphicon glyphicon-remove-circle"></span>
+	</div>
+{% endif %}
+<div class="row">
+<div class="col-lg-2">
+	<a href="{{ b_url }}" class="btn btn-info btn-block" role="button">
+	    Назад
+	</a>
+</div>
+{% if not request.user.is_reception %}
+<div class="col-lg-2">
+	<a href="{% url 'person_edit' clnt.pk %}" class="btn btn-warning btn-block" role="button">
+	    Редактировать
+	</a>
+</div>
+{% endif %}
+</div>
+<div class="col-lg-6">
+<form id="newpers" class="form-horizontal" action="" method="post" 
+ enctype="multipart/form-data">
+    {% csrf_token %}
+<!-- Form Name -->
+<legend>
+	{{ clnt.last_name|title }} {{ clnt.first_name|title }} 
+	{{ clnt.patronymic|title }}
+</legend>
+	<div class="form-group">
+		<div class='col-sm-4'>
+		  <label for="id_last_name">Фамилия</label>
+		</div>
+		<div class='col-sm-8'>
+		    <input id="id_last_name" type="text" name="last_name" class="form-control input-lg"
+		       value ="{{ clnt.last_name|title|default_if_none:"" }}" required/>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-sm-4'>
+		  <label for="id_first_name">Имя</label>
+		</div>
+		<div class='col-sm-8'>
+		    <input id="id_first_name" type="text" name="first_name" class="form-control input-lg"
+		      value ="{{ clnt.first_name|title|default_if_none:"" }}" required/>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-sm-4'>
+		  <label for="id_patronymic">Отчество</label>
+		</div>
+		<div class='col-sm-8'>
+		    <input id="id_patronymic" type="text" name="patronymic" class="form-control input-lg"
+		      value ="{{ clnt.patronymic|title|default_if_none:"" }}" required/>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-sm-4'>
+		  <label for="id_born_date">Дата рождения</label>
+		</div>
+		<div class='col-sm-8'>
+		     <div class='input-group date' id='born_cal' data-date-format="DD.MM.YYYY">
+	            <input id="id_born_date" type="text" name="born_date" class="form-control input-lg" />
+	            <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>
+	            </span>
+	        </div>
+		</div>	
+	</div>
+	<div class="form-group">
+	<div class='col-sm-4'>
+		  <label for="id_amount">Абонемент</label>
+		</div>
+		<div class='col-sm-8'>
+			<div class="control-group">
+			   <div class="controls">
+					<select id="id_c_list" name="c_list" class="selectpicker"
+					 data-width="100%">
+					 <option value="0" id="////////"></option>
+					   {% for c in c_list %}
+					  	<option value="{{ c.pk }}" 
+					  	id="{{ c.number }}/{{c.contract_type.max_visit}}/{{ c.card }}/{{ c.visits_use }}/{{ c.visits_left }}/{{ c.contract_type.period_freeze }}/{{ c.freeze_left }}/{{ c.date_start|date:'d.m.Y' }}/{{ c.date_finish|date:'d.m.Y' }}/{{c.ban_info}}"
+					  	>
+					  		{{ c.date_joined|date:"d.m.Y" }} {{ c.contract_type.name }} {{ c.amount }}
+					  	</option>
+		      		   {% endfor %}
+					</select>
+				</div>
+			</div>
+		</div>
+	<div class='col-sm-4'>
+		  <label for="id_number">номер договора</label>
+		</div>
+		<div class='col-sm-8'>
+			<div class="control-group">
+		    	<div class="controls">
+		    		<input id="id_number" type="text" name="number" 
+		    		class="form-control input-lg" 
+				    value ="{{ contract.number|default_if_none:"" }}" disabled/>
+				</div>
+			</div>
+		</div>
+		<div class='col-sm-4'>
+		  <label for="id_card">Номер карты</label>
+		</div>
+		<div class='col-sm-8'>
+			<div class="control-group">
+		    	<div class="controls">
+				    <input id="id_card" type="number" name="card" 
+				     class="form-control input-lg"
+				     data-validation-number-message="Числовое поле"
+				     value ="{{ contract.card |default_if_none:"0" }}"/>
+				</div>
+			</div>
+		</div>
+		<a data-toggle="collapse" data-parent="#freeze" href="#freeze">
+			<div class='col-sm-6'>
+			  <label for="freeze" id="period_freeze">
+			  	<!-- period_freeze -->
+			  </label>
+			</div>
+			<div class='col-sm-6'>
+			  <label for="freeze" id="freeze_left">
+			  	<!-- freeze_left -->
+			  </label>
+			</div>
+		</a>
+		<div class='col-sm-12'>
+		   <div id="freeze" class="panel-collapse collapse col-sm-12">
+		      <div class="panel-body">
+			      <table class="table">
+			      <thead><tr>
+			    		<th>Начало</th><th>Окончание</th><th>Дней</th>
+					</tr>
+				   </thead>
+				   <tbody id="c_freeze">
+				   	<!-- c_freeze -->
+				   </tbody>
+			      </table>
+		     </div>
+		   </div>
+		</div>
+		<a data-toggle="collapse" data-parent="#visits" href="#visits" id="a_visits">
+		<!-- visits -->
+		</a>
+		<div class='col-sm-12'>
+		   <div id="visits" class="collapse col-sm-12">
+		      <div class="panel-body">
+			      <table class="table">
+			      <thead><tr>
+			    		<th>Дата</th><th>Приход</th><th>Уход</th><th>Шкафчик</th>
+					</tr>
+				   </thead>
+				   <tbody id="c_visits">
+				   	<!-- visits list -->
+				   </tbody>
+			      </table>
+		     </div>
+		   </div>
+		</div>
+	</div>
+  </form>
+  <form id="manager" action="{% url 'change_m' clnt.pk %}" method="post">
+  {% csrf_token %}
+	<div class='col-sm-4'>
+	  <label for="id_manager">Менеджер</label>
+	</div>
+	<div class='col-sm-8'>
+	  <select id="id_manager" name="manager" 
+	   class="selectpicker" data-width="100%">
+		   {% for u in m_list %}
+		  	<option value="{{ u.pk }}">
+		  		{{ u.last_name }}
+		  	</option>
+			   {% endfor %}
+		</select>
+	</div>
+	{% if request.user.is_superuser %}
+	<div class='col-sm-4'>
+	  
+	</div>
+	<div class="col-sm-8">
+		<a href="#manager" id="change_m" class="btn btn-default">изменить</a>
+		<button id="btn_change_m" form="manager" 
+		class="btn btn-success" type="submit">
+    			применить
+		</button>
+	</div>
+	{% endif %}
+ </form>
+</div>
+
+<div class="col-lg-6">
+	<form id="inout" action="{% url 'inout' clnt.pk %}" method="post">
+	{% csrf_token %}
+		<div class='col-sm-4'>
+		  <label for="id_locker">номер шкафчика</label>
+		</div>
+		<div class='col-sm-4'>
+		  <div class="control-group">
+		    	<div class="controls">
+				    <input id="id_locker" form="inout" type="number"
+				    data-validation-number-message="Числовое поле"
+				     name="locker" min="0" class="form-control input-lg inout"
+				     value="{{ v.locker }}" required/>
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-4">
+		{% if clnt.is_online %}
+			<button form="inout" class="btn btn-warning inout" type="submit">
+    			Выйти из клуба
+			</button>
+		{% else %}
+			<button form="inout" class="btn btn-success inout" type="submit">
+    			Войти в клуб
+			</button>			
+		{% endif %}
+		</div>
+		<div class="col-sm-12">
+			<a href="{% url 'person_photo' clnt.pk %}" 
+				class="btn btn-primary">
+				<i class="fa fa-camera"></i> обновить фото
+			</a>
+		</div>
+		<div class='col-sm-12'>
+	      	<img src="{% get_media_prefix %}{{ clnt.avatar }}" 
+	      	 class="img-rounded img-responsive"
+	      	 style="width:280px;height:210px;"><br/>
+		</div>
+	</form>
+		<div class='col-sm-12'>
+		<a data-toggle="collapse" data-parent="#payments" href="#payments" id="a_payments">
+		<label>Платежи</label>
+		</a>
+		   <div id="payments" class="collapse">
+		      <div class="panel-body">
+			      <table class="table">
+			      <thead><tr>
+			    		<th>Дата</th><th>Сумма</th>
+					</tr>
+				   </thead>
+				   <tbody id="c_ch">
+				   	<!-- credits history -->
+				   </tbody>
+			      </table>
+		     </div>
+		   </div>
+		</div>
+	
+	<div class='col-sm-6'>
+		<div class="control-group">
+	  		<label for="id_born_date">Дата начала</label>
+            {% if request.user.is_superuser %}
+            <a href="{% url 'c_date_start' 0 %}" class="btn btn-xs btn-danger link-start-date">изменить</a>
+            {% endif %}
+		</div>
+		<div class='control-group'>
+	        <input id="id_start_date" type="text" class="form-control" disabled />
+		</div>
+
+	</div>
+	<div class='col-sm-6'>
+		<div class="control-group">
+		  <label for="id_born_date">Дата окончания</label>
+		</div>
+		<div class='control-group'>
+	        <input id="id_end_date" type="text" class="form-control" disabled />
+		</div>	
+	</div>
+</div>
+
+<div class="col-lg-6">
+	<div class="col-lg-12">
+		 <p class="text-center">
+		 <strong>Долги</strong>
+		 </p>
+	</div>
+	<div class="col-lg-6">
+		<a href="#paybut" class="btn btn-primary" type="button" id="paybut"
+			data-toggle="popover" data-placement="top"
+	        data-html="true"
+	        data-content="
+	        <div class='col-lg-12' id='cashinfo'>
+	        	Общая сумма:<strong>
+	        	<span id='paysumm'>0
+	        			</span></strong>
+	        </div>
+			<div class='col-lg-6'>
+	        	<a class='btn btn-sm btn-warning' role='button' id='cash'
+	        	 name='cash'>нал</a>
+	        </div>
+	        <div class='col-lg-6 text-right'>
+	        	<a class='btn btn-sm btn-danger' role='button' id='card'
+	        	name='card'>безнал</a>
+	        </div>	            
+	        ">
+			Оплатить
+		</a>
+	</div>
+	<div class="col-lg-6">
+		<a href="{% url 'p_clnt_credit' clnt.pk %}"
+		 class="btn btn-info" type="button">
+			Новый долг
+		</a>
+	</div>
+	<!-- Nav tabs -->
+<ul class="nav nav-tabs" id="credits_tab">
+  <li class="active">
+  	<a href="#services_credits" data-toggle="tab" name="sr">
+  		Товары услуги
+  	</a>
+  </li>
+  <li><a href="#contract_credits" data-toggle="tab" name="cr">Абонемент</a></li>
+</ul>
+
+<!-- Tab panes -->
+<div class="tab-content" id="tabcontent">
+  <div class="tab-pane active" id="services_credits">
+  <form id="sr">
+	<div class="col-lg-12">
+	<table class="table" id="credits">
+		<thead>
+			<th>
+				<a href="#credits" id="checkall" form="sr"
+				class="btn btn-primary btn-xs" >
+				все
+				</a>
+			</th>
+			<th>товар</th>
+			<th>цена</th>
+			<th>кол-во</th>
+		</thead>
+		<tbody>
+			{% for c in gcredits %}
+			<tr>
+				<td><input type="checkbox" value="{{ c.amount }}" form="sr"
+name="cr{{ c.pk }}|{{ c.goods.cash_name }}|{{ c.count }}|{{ c.g_amount }}|{{c.goods.department}}">
+				 </td>
+				<td>{{ c.goods|title }}</td>
+				<td>{{ c.amount }}</td>
+				<td>{{ c.count }}
+				{% if request.user.is_superuser %}
+					<a href="#credits" class="btn-sm btn-danger" 
+					 id="trash" value='{{ c.pk }}'>
+					<i class="fa fa-recycle"></i>
+					</a>
+				</td>
+				{% endif %}
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	</div>
+  </form>
+  </div>
+  <div class="tab-pane" id="contract_credits">
+  <form id="cr">
+  	<table class="table">
+	  	<tr>
+	  		<th>
+		        <a href="#contract_credits" form="cr" id="checkall"
+		           class="btn btn-primary btn-xs">
+		        		все
+		            </a>
+         	</th>
+	  		<th>Дата</th><th>Сумма</th>
+	  	</tr>
+	  {% for cr in credits %}
+	  	<tr>
+	  	{% if cr.contract.payment_type == 2 %}
+	  		<td></td>
+	  	{% else %}
+	  		<td>
+	  			<input form="cr" type="checkbox"  
+	  			value="{{ cr.amount }}" 
+	  			name="cr{{ cr.pk }}|Абонемент|1|{{ cr.amount }}|1">
+	  		</td>
+	  	{% endif %}
+	  		<td> {{ cr.plan_date|date:'d.m.Y' }}</td>
+	  		<td> {{ cr.amount }} руб.</td>
+	  	{% if request.user.is_manager and cr.contract.payment_type == 2 %}
+	  		<td>
+				<span class="btn-sm btn-danger pay"
+				data-html="true" data-placement="top"
+				class="btn btn-sm btn-danger" data-toggle="popover"
+				data-content=
+			    "<div class='col-lg-12 cashless-info'>
+			    	<div class='text-danger'>Погасить долг?
+			    		<i class='fa fa-times pop-close pull-right'></i>
+			    	</div>
+			        <span class='btn-sm btn-success pull-left pay-yes' 
+			        data-pk='{{cr.pk}}'
+			         >да</span>
+			        <span class='btn-sm btn-info pull-right pop-close'
+			        >нет</span>
+			     </div>">
+					<i class="fa fa-rub"></i>
+				</span>
+			</td>
+		{% endif %}
+	  	</tr>
+	  {% endfor %}
+  	</table>
+  </form>
+  </div>
+</div>
+
+</div>
+
+{% endblock %}
+{% block extrafoot %}
+<script type="text/javascript">
+$(function () {
+    $('#born_cal').datetimepicker({
+        // language: 'ru',
+        pickTime: false,
+        minDate: '01/01/1930',
+        maxDate: '01/01/2009',
+        defaultDate: '{{ clnt.born_date|date:"m/d/Y"|default:"01/01/2009" }}'
+    });
+});
+</script>
+<script type="text/javascript" src="{% static "bootstrap-select/bootstrap-select.js" %}"></script>
+<script type="text/javascript" src="{% static "bootstrap-select/i18n/defaults-ru-RU1.js" %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static "bootstrap-select/bootstrap-select.css" %}">
+
+
+<script type="text/javascript">
+$(document).ready(function(){
+// remove credit
+	$(document).on("click", '#trash', function(){
+		el = $(this)
+		cr_id = el.attr('value')
+		cr_url = '{% url 'esc_credit' %}'
+		$.ajax({
+        	url: encodeURI(cr_url),
+        	data: ({cr_id:cr_id}),
+        	success: function (data) {
+        		el.parent().parent().remove()
+        	}
+        });
+
+	});
+
+// close cashless payment
+	$(".pay").popover();
+	$( document ).on( "click", '.pop-close', function() {
+		$(".pay").popover('hide');
+	});
+
+	$( document ).on( "click", '.pay-yes', function() {
+			$('.cashless-info').html('<div class="alert alert-success">\
+                      сохранение в базу\
+                  </div>')
+			crid = $(this).attr('data-pk')
+            var crurl = '{% url "close_credit" %}'
+            $.ajax({
+              url: crurl,
+              cache: false,
+              async: false,
+              dataType: 'json',
+              data:({oway: 1, crid: crid}),
+              success: function (data) {
+                    $('.cashless-info').html('<div class="alert alert-success">\
+                  данные сохранены\
+                </div>')
+                window.location = '';
+              },
+              error: function(){
+                    $('.cashless-info').html('<div class="alert alert-danger">\
+                  ошибка базы данных\
+                </div>')
+                  }
+            })
+	});
+
+
+	$(document).on("click", '[name=card]', function(){
+		$('#cash').hide()
+		$('#card').hide()
+		$('#cashinfo').html("<div class='alert alert-info'>\
+							<h3><div class='col-lg-12'>\
+								<span class='glyphicon glyphicon-warning-sign'>\
+								</span>\
+								</div>\
+								<div class='center-block'>\
+									снять деньги с карты\
+								<span class='glyphicon glyphicon-phone'>\
+								</span>\
+								</div>\
+							</h3>\
+						</div>\
+						<div class='col-lg-12'>\
+				        	<a class='btn btn-sm btn-danger'\
+				        	 role='button' id='cash'\
+				        	name='card'>пробить чек</a>\
+				        </div>")
+})
+
+$( document ).on( "click",'#cash', function(){
+	$('#cash').hide()
+	$('#card').hide()
+	$('#cashinfo').html('<div class="alert alert-info">\
+							<h3>печать чека</h3>\
+						</div>');
+	var cht = '';
+	if ($(this).attr('name') === 'cash') {
+		cht = '1'
+	} else {
+		cht = '2'
+	};
+	// check cash status
+	var status = 0
+	curl = 'http://{{ cashhost }}:8000/cgi-bin/check.py'
+	$.when(
+	    $.ajax({
+	        url: encodeURI(curl),
+	        crossDomain: true,
+	        timeout: 10000,
+	        cache: false,
+	        async: false,
+	        dataType: 'jsonp',
+	        success: function (data) {
+	            status = parseInt(data['res'], 10)
+	        },
+	    })
+    ).then(function() {
+        if ( [4, 2].indexOf(status) < 0 ){
+			$('#cashinfo').html('<div class="alert alert-danger">\
+					<h3>Проверьте:</h3>\
+					<h3>- ленту</h3>\
+					<h3>- подключение</h3>\
+					<h3>- замятие ленты</h3>\
+					<h3>Перезапустите кассу</h3>\
+				</div>');
+			return
+        }
+		var gchecked = $("#tabcontent input:checked").get()
+		var sal = ''
+		for (var i = 0; i < gchecked.length; i++) {
+			sal += gchecked[i].name + '|'
+		}
+		sal = encodeURI(sal)
+		var buyer = encodeURI('Клиент : {{ clnt|title }}');
+		var gurl = 'http://{{ cashhost }}:8000/cgi-bin/sale.py'
+		$.ajax({
+	    	url: encodeURI(gurl),
+			crossDomain: true,
+			timeout: 10000,
+			cache: false,
+			async: false,
+			data: ({sales: sal, chtype: cht, clnt:buyer}),
+			dataType: 'jsonp',
+	    	success: function (data) {
+	    		$('#cashinfo').html('<div class="alert alert-success">\
+		    							<h3>сохранение в базу</h3>\
+									</div>')
+	    	},
+	    	error: function(){
+	    		$('#cashinfo').html('<div class="alert alert-danger">\
+		    							<h3>ошибка печати чека</h3>\
+									</div>');
+	    	}
+	    });
+        var crurl = '{% url "close_credit" %}'
+		$.ajax({
+			url: crurl,
+			cache: false,
+			async: false,
+			timeout: 10000,
+			dataType: 'json',
+			data:({crlist: sal, chtype: cht,}),
+			success: function (data) {
+				$('#cashinfo').html('<div class="alert alert-success">\
+					<h3>данные сохранены</h3>\
+				</div>')
+				$("#tabcontent input:checked").parent().parent().remove();
+				window.location.reload(true);
+			},
+			error: function(){
+				$('#cashinfo').html('<div class="alert alert-danger">\
+					<h3>ошибка базы данных</h3>\
+				</div>')
+			}
+		});
+	});
+});
+
+$( document ).on( "click", '#checkall', function() {
+	$('#tabcontent input[type=checkbox]').prop('checked', false);
+	if ($(this).attr("form") == 'sr') {
+		$("form#sr input[type=checkbox]").click();
+	} else {
+		$("form#cr input[type=checkbox]").click();
+	}
+});
+
+$("input[type=checkbox]").on( "click", function() {
+	var gchecked = $('#tabcontent input:checked').get();
+	var summ = 0
+	for (var i = 0; i < gchecked.length; i++) {
+		summ += parseInt(gchecked[i].value, 10)
+	}
+	$('#paysumm').html(summ)
+	var datacontent="\
+        <div class='col-lg-12' id='cashinfo'>\
+        	Общая сумма:<strong>\
+        	<span id='paysumm'>" + summ + 
+        	"</span></strong>\
+        </div>\
+		<div class='col-lg-6'>\
+        	<a class='btn btn-sm btn-warning' role='button' id='cash'\
+        	name='cash'>нал</a>\
+        </div>\
+        <div class='col-lg-6 text-right'>\
+        	<a class='btn btn-sm btn-danger' role='button' id='card'\
+        	name='card'>безнал</a>\
+        </div>"
+    $('#paybut').attr("data-content",datacontent)
+});
+
+	$('#paybut').popover({
+	title:'Оплата <span id="close" \
+			class="glyphicon glyphicon-remove-circle"></span>'
+	});
+	$( document ).on( "click", '#close', function() {
+    	$("#paybut").popover('hide');
+  	});
+	{% if clnt.age < 15 %}
+		$("body").css("background","#00FF00")
+	{% elif clnt.gender == 0 %}
+		$("body").css("background","#0000FF")
+	{% else %}
+		$("body").css("background","#FF00FF")
+	{% endif %}
+	$('.container').css('background','#F8F8F8')
+
+	if ( {{ block_visit }} > 0 ) {
+		$('.inout').prop( "disabled", true );
+	}
+
+	$(".glyphicon-remove-circle").on( "click", function() {
+		$(this).parent().hide();
+	});
+
+	$('#id_locker').focus();
+	$('.selectpicker').selectpicker();
+	$('#id_manager').selectpicker('val', '{{ clnt.manager.pk }}');
+  	$('#id_manager').prop('disabled',true);
+	$('#id_manager').selectpicker('refresh');
+	{% if request.user.is_superuser %}
+	$('#btn_change_m').hide();
+		$( document ).on( "click", '#change_m', function() {
+	    	$('#id_manager').prop('disabled',false);
+			$('#id_manager').selectpicker('refresh');
+			$('#btn_change_m').show();
+	  	});
+	{% endif %}
+
+	$("#id_c_list").change(function() {
+	  	var c_id = $('#id_c_list option:selected').val()
+        {% if request.user.is_superuser %}
+        // change link on update contract start date
+        var link_start_date = $('.link-start-date').attr('href').split('/')
+        link_start_date[3] = c_id
+        $('.link-start-date').attr('href',link_start_date.join('/'))
+        // end change link
+        {% endif %}
+		$('#id_ban_info').hide()
+	  	$.ajax({
+	  		// "{% url 'c_data' 5 %}",
+	  		url: "/contract/data/" + c_id,
+	  		dataType: "json",
+	  		success: function (data) {
+	  			$('#c_visits').html(data[0])
+	  			$('#c_freeze').html(data[1])
+	  			$('#c_ch').html(data[2])
+	  		},
+	  		error: function(){
+	  			$('#c_visits').html("")
+	  			$('#c_freeze').html("")
+	  			$('#c_ch').html("")
+	  		}
+	  	})
+	  	var c_val = $('#id_c_list option:selected').attr("id").split('/')
+	  	$('#id_number').val(c_val[0])
+	  	$('#id_card').val(c_val[2])
+	  	$('#id_start_date').val(c_val[7])
+	  	$('#id_end_date').val(c_val[8])
+	  	$('#period_freeze').html('Лимит заморозки: ' + c_val[5] + 'дней')
+	  	$('#freeze_left').html('Остаток: ' + c_val[6])
+	  	if (c_val[9] !== '0'){
+	  		$('#id_ban_info').html('Расторгнут ' + c_val[9])
+	  		$('#id_ban_info').show()
+	  	} else {
+	  		$('#id_ban_info').hide()
+	  	}
+	  	if (c_val[1] === '99999') {
+	  		var text = '<div class="col-sm-12">\
+	  						<label for="visits">Безлимитное посещение </label>\
+						</div>'
+	  		$('#a_visits').html(text)
+	  	} else {
+	  		var text = '<div class="col-sm-6">\
+		   					<label for="visits">Посещения:' + c_val[3]
+		   					+ '</label>\
+						</div>\
+						<div class="col-sm-6">\
+						  <label for="visits">Остаток:' + c_val[4]
+						  + '</label>\
+						</div>'
+	  		$('#a_visits').html(text)
+	  	}
+	  })
+
+	{% if contract.pk %}
+		$('#id_c_list').selectpicker('val', '{{ contract.pk }}');
+	{% endif %}
+
+<!-- Enable the tabs -->
+  $('#credits_tab a').click(function (e) {
+    e.preventDefault()
+    $(this).tab('show')
+    f = $(this).prop("name")
+    $('#paybut').attr("form", f)
+  });
+  {% if not request.user.is_reception %}
+	$('li [name=cr]').click();
+  {% endif%}
+
+});
+</script>
+{% endblock %}

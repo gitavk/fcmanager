@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Гость{% endblock %}
+{% block extrahead %}
+
+{% endblock %}
+{% block menu %}
+{{ res }}
+{% if clnt %}
+	<div class="alert alert-danger" id="clnt_err">
+    	<a href="{% url "person_card" clnt.pk %}">Такой клиент уже есть в базе</a> 
+    	<span class="glyphicon glyphicon-remove-circle"></span>
+	</div>
+{% endif %}
+{% if res == 'OK' %}
+	<div class="alert alert-success" id="clnt_err">
+    	<a href="">База гостей успешно обновлена</a> 
+    	<span class="glyphicon glyphicon-remove-circle"></span>
+	</div>
+{% endif %}
+{% endblock %}
+{% block content %}
+<form method="POST" class="form-horizontal">
+{% csrf_token %}{{ form.errors }}
+	<legend>
+		Гость
+	</legend>
+	<div class="form-group">
+		<div class="col-lg-2">
+			<label for="id_last_name">Фамилия</label>
+		</div>
+		<div class="col-lg-4 control">
+				<input type="text" name="last_name" id="id_last_name" 
+				class="form-control input-lg"
+				value ="{{ form.last_name.value|default:"" }}"
+				{% if request.readonly %}readonly{% endif %}
+				/>
+		</div>
+		<div class="col-lg-2">
+			<label for="id_manager">Менеджер</label>
+		</div>
+		<div class="col-lg-4 control">
+			<input type="text" name="manager" id="id_manager" 
+			 class="form-control input-lg" disabled
+			 value="{{ request.manager.get_full_name|default:request.user.get_full_name }}"
+			 {% if request.readonly %}readonly{% endif %}/>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-lg-2">
+			<label for="id_first_name">Имя</label>
+		</div>
+		<div class="col-lg-4">
+			<div class="control">
+				<input type="text" name="first_name" id="id_first_name" 
+				class="form-control input-lg"
+				value ="{{ form.first_name.value|default:"" }}"
+				{% if request.readonly %}readonly{% endif %}
+				/>
+			</div>
+		</div>
+		<div class="col-lg-2">
+			<label for="id_date">Дата</label>
+		</div>
+		<div class="col-lg-4 control">
+			<input type="text" name="date" id="id_date" 
+			 class="form-control input-lg" disabled
+			 value="{{ form.date.value|date:"d.m.Y" }}"
+			 {% if request.readonly %}readonly{% endif %}
+			 />
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-lg-2">
+			<label for="id_patronymic">Отчество</label>
+		</div>
+		<div class="col-lg-4">
+			<div class="control">
+				<input type="text" name="patronymic" id="id_patronymic" 
+				class="form-control input-lg"
+				value ="{{ form.first_name.value|default:"" }}"
+				{% if request.readonly %}readonly{% endif %}
+				/>
+			</div>
+		</div>
+		<div class="col-lg-2">
+			<label for="id_gtype">Вид</label>
+			<span class="glyphicon glyphicon-flash"></span>
+		</div>
+		<div class='col-lg-4'>
+			<div class="control-group">
+			   <div class="controls">
+					<select id="id_gtype" name="gtype" class="selectpicker"
+					 data-width="100%"
+					 >
+					  	<option value="0">гость</option>
+					  	<option value="1">входящий звонок</option>
+					  	<option value="2">исходящий звонок</option>
+					</select>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-lg-2">
+			<label for="id_phone">телефон</label>
+			<span class="glyphicon glyphicon-flash"></span>
+		</div>
+		<div class="col-lg-4">
+			<div class="control-group">
+				<div class="controls">
+					<input type="number" name="phone" id="id_phone" 
+					class="form-control input-lg"
+					data-validation-regex-regex="^79[0-9]{9}$|^812[0-9]{7}$" 
+					data-validation-regex-message="мобильный 79... городской 812..."
+					value ="{{ form.phone.value|default:"" }}"
+					{% if form.is_client.value %}
+						disabled
+					{% else %} 
+						required
+					{% endif %}
+					{% if request.readonly %}readonly{% endif %}
+					>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-sm-2'>
+			  <label for="id_note">Примечания</label>
+		</div>
+		<div class='col-sm-4'>
+			<div class="control-group">
+		    	<div class="controls">
+				    <input id="id_note" type="text" name="note" 
+				    class="form-control input-lg"
+				    data-validation-minlength-message="Не менее 2 символов" minlength="2"
+				    value ="{{ form.note.value|default:"" }}"
+					{% if request.readonly %}readonly{% endif %}
+					/>
+				</div>
+			</div>
+		</div>
+	</div>
+  	<a href="{% url "o_menu" %}" class="btn btn-info" role="button">
+        Назад
+    </a>
+    <button class="btn btn-success" type="submit">
+        Сохранить
+    </button>
+</form>
+{% endblock %}
+
+{% block extrafoot %}
+<script type="text/javascript" src="{% static "bootstrap-select/bootstrap-select.js" %}"></script>
+<script type="text/javascript" src="{% static "bootstrap-select/i18n/defaults-ru-RU1.js" %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static "bootstrap-select/bootstrap-select.css" %}">
+
+<script>
+  $(function () { 
+  	$('.selectpicker').selectpicker();
+    if ({{ form.gtype.value|default:"0" }} !== 0) {
+  		$('#id_gtype').selectpicker('val', '{{ form.gtype.value }}')
+  	};
+  	{% if request.readonly %} 
+  	$('.selectpicker').prop('disabled',true);
+	$('.selectpicker').selectpicker('refresh');
+	{% endif %}
+  });
+</script>
+
+<script src="{% static "ReactiveRaven/jqBootstrapValidation.js" %}">
+</script>
+<script>
+  $(function () {
+  	$("input,select,textarea").not("[type=submit]").jqBootstrapValidation();
+  });
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$(".glyphicon-remove-circle").on( "click", function() {
+		$(this).parent().hide();
+	});
+	$('#id_last_name').focus();
+});
+</script>
+{% endblock %}

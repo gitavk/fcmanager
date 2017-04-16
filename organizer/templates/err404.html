@@ -1,0 +1,11 @@
+{% extends "printbase.html" %}
+{% load static %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+<div class="alert alert-danger">{{ o_name }} не найден</div>
+<a href="{{ b_url }}" class="btn btn-info" role="button">
+        Назад
+    </a>
+{% endblock %}

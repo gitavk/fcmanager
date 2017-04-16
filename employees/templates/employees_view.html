@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ p_title }}{% endblock %}
+{% block menu %}
+<div class="row">
+	<div class="col-lg-3">
+    <a href="{% url "employees" %}">
+      <img src="{% static "img/groupsmeeting.png"%}" alt="Работа с персоналом">
+      <div class="icontext">Работа с персоналом</div>
+    </a>
+	</div>
+  <div class="col-lg-3">
+    <a href="{% url 'employees_add' %}">
+      <img src="{% static "img/employees_add.png" %}" alt="Добавить">
+      <div class="icontext">Добавить</div>
+    </a>
+  </div>
+  <div class="col-lg-3">
+  </div>
+  <div class="col-lg-3">
+  </div>
+</div>
+{% endblock %}
+{% block content %}
+{{ res }}
+<table class="table">
+<thead>
+  <tr>
+    <th>Наименование</th>
+    <th></th>
+  </tr>
+</thead>
+<tbody>
+  {% for e in lst %}
+  <tr>
+    <td>{{ e.lastname|title }} {{ e.firstname|title }} 
+    {{ e.patronymic|title }}</td>
+    <td>
+    <a href="{% url 'e_card' e.pk %}" class="btn btn-sm btn-success" 
+          role="button">
+              <i class="fa fa-male"></i>Личная карта
+      </a>
+    <a href="{% url 'e_visits' e.pk %}" class="btn btn-sm btn-info" 
+          role="button">
+              <i class="fa fa-users"></i>Посещения
+      </a>
+
+      <a href="{% url 'e_note' e.pk %}" class="btn btn-sm btn-warning" 
+          role="button">
+              <i class="fa fa-pencil"></i>Заметка
+      </a>
+    </td>
+  </tr>
+  {% endfor %}
+</tbody>
+</table>
+{% endblock %}

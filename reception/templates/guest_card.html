@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+{% load static %}
+{% load extra_filtrs %}
+{% block title %}{{p_title}}{% endblock %}
+{% block extrahead %}
+{% endblock %}
+{% block menu %}
+
+{% endblock %}
+{% block content %}
+{% if not guest.pk|has_invite:0 %}
+	<div class="alert alert-danger" id="id_has_invite">
+    	Нет разового визита 
+    	<span class="glyphicon glyphicon-remove-circle"></span>
+	</div>
+{% endif %}
+<div class="col-lg-6">
+<form id="guest" class="form-horizontal" method="post">
+	{% csrf_token %}
+	<legend>
+		{{p_title}}
+	</legend>
+	<div class="form-group">
+		<div class='col-lg-4'>
+			<div class="control-group"><div class="controls">				
+			  <label for="id_lastname">Фамилия</label>
+			  <span class="glyphicon glyphicon-flash"></span>
+			</div></div>
+		</div>
+		<div class='col-lg-8'>
+			<div class="control-group"><div class="controls">				
+			    <input id="id_lastname" type="text" name="lastname" required
+			     class="form-control input-lg" value="{{ guest.lastname|title }}" />
+			</div></div>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-lg-4'>
+			<div class="control-group"><div class="controls">				
+			  <label for="id_firstname">Имя</label>
+			  <span class="glyphicon glyphicon-flash"></span>
+			</div></div>
+		</div>
+		<div class='col-lg-8'>
+			<div class="control-group"><div class="controls">				
+			    <input id="id_firstname" type="text" name="firstname" required
+			     class="form-control input-lg" value="{{guest.firstname|title}}" />
+			</div></div>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-lg-4'>
+			<div class="control-group"><div class="controls">				
+			  <label for="id_patronymic">Отчество</label>
+			  <span class="glyphicon glyphicon-flash"></span>
+			</div></div>
+		</div>
+		<div class='col-lg-8'>
+			<div class="control-group"><div class="controls">				
+			    <input id="id_patronymic" type="text" name="patronymic" required
+			     class="form-control input-lg" value="{{ guest.patronymic|title}}" />
+			</div></div>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-lg-4'>
+			<div class="control-group"><div class="controls">				
+			  <label for="id_born">Дата рождения</label>
+			  <span class="glyphicon glyphicon-flash"></span>
+			</div></div>
+		</div>
+		<div class='col-lg-8'>
+			<div class="control-group"><div class="controls">
+			  <div class='input-group date' id='born' 
+			  data-date-format="DD.MM.YYYY">
+		        <input type="text" name="born" 
+		        class="form-control input-lg" />
+		        <span class="input-group-addon">
+		          <i class="fa fa-calendar"></i>
+		        </span>
+	    	  </div>
+    	</div></div>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-lg-4'>
+			<div class="control-group"><div class="controls">
+				<label for="id_phone">Телефон</label>
+				 <span class="glyphicon glyphicon-flash"></span>			
+			</div></div>
+		</div>
+		<div class='col-lg-8'>
+			<div class="control-group"><div class="controls">
+			<input id="id_phone" type="text" name="phone" required
+		     class="form-control input-lg"
+		     value="{{ guest.phone }}" 
+		     data-validation-regex-regex="^79[0-9]{9}$|^812[0-9]{7}$" 
+		     data-validation-regex-message="мобильный 79... городской 812..."/>	
+			</div></div>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-lg-12'>
+		 	<a href="#visits" data-toggle="collapse" 
+		 	   data-parent="#visits"  id="a_visits">
+				<label>посещения</label>
+			</a>
+		   <div id="visits" class="collapse col-lg-12">
+		      <div class="panel-body">
+			      <table class="table">
+			      <thead><tr>
+			    		<th>Дата</th><th>Приход</th><th>Уход</th><th>Шкафчик</th>
+					</tr>
+				   </thead>
+				   <tbody id="c_visits">
+				   		{% for v in visits %}
+				   		<tr>
+				   		  <td>{{ v.date_start|date:'d.m.Y' }}</td>
+				   		  <td>{{ v.date_start|time:"H:i" }}</td>
+				   		  <td>{{ v.date_end|time:"H:i" }}</td>
+				   		  <td>{{ v.locker }}</td>
+				   		</tr>
+				   		{% endfor %}
+				   </tbody>
+			      </table>
+		     </div>
+		   </div>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-lg-4'>
+			<div class="control-group"><div class="controls">
+			  <label for="id_date">Дата регистрации</label>			
+			</div></div>
+		</div>
+		<div class='col-lg-8'>
+			<div class="control-group"><div class="controls">
+			<input id="id_date" type="text" name="date" disabled 
+		     class="form-control input-lg" value="{{ guest.date|date:"d.m.Y"}}" />
+			</div></div>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class='col-lg-4'>
+			<div class="control-group"><div class="controls">
+			  <label for="id_manager">Менеджер</label>				
+			</div></div>
+		</div>
+		<div class='col-lg-8'>
+			<div class="control-group"><div class="controls">
+			  <input id="id_manager" type="text" name="manager" disabled
+			     class="form-control input-lg" 
+			     value="{{ request.user.get_full_name }}" />			
+			</div></div>
+		</div>
+	</div>
+</form>
+</div>
+<div class="col-lg-6">
+<form id="inout" action="{% url 'r_inout' guest.pk %}" method="POST">
+	{% csrf_token %}
+	<legend>
+		<a href="{{ b_url }}" class="btn btn-info" role="button">
+	        Назад
+	    </a>
+	    <button form="guest" class="btn btn-success" type="submit">
+	        Сохранить
+	    </button>
+		<a href="{% url 'r_guest_visit' guest.pk %}" class="btn btn-warning" role="button">
+	        Гостевой визит
+	    </a>
+	</legend>
+	<div class="form-group">
+		<div class='col-lg-4'>
+		  <label for="id_locker">номер шкафчика</label>
+		</div>
+		<div class='col-lg-4'>
+		  <div class="control-group">
+		    	<div class="controls">
+				    <input id="id_locker" form="inout" type="number"
+				      data-validation-number-message="Числовое поле"
+				      name="locker" min="0" class="form-control input-lg inout"
+					  value="{{ v.locker }}" required/>
+					  <!-- v.locker  -->
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-4">
+		{% if guest.is_online %}
+			<button form="inout" class="btn btn-warning btn-lg inout" type="submit">
+    			Выйти из клуба
+			</button>
+		{% else %}
+			<button form="inout" class="btn btn-success inout btn-lg" type="submit">
+    			Войти в клуб
+			</button>			
+		{% endif %}
+		</div>
+	</div><div class="form-group">
+<div>.</div></div>
+	<div class="form-group">
+		<div class="col-lg-6">
+			<a href="#paybut" class="btn btn-primary" type="button" id="paybut"
+			data-toggle="popover" data-placement="top"
+	        data-html="true"
+	        data-content="
+	        <div class='col-lg-12' id='cashinfo'>
+	        	Общая сумма:<strong>
+	        	<span id='paysumm'>0
+	        			</span></strong>
+	        </div>
+			<div class='col-lg-6'>
+	        	<a class='btn btn-sm btn-warning' role='button' id='cash'
+	        	 name='cash'>нал</a>
+	        </div>
+	        <div class='col-lg-6 text-right'>
+	        	<a class='btn btn-sm btn-danger' role='button' id='card'
+	        	name='card'>безнал</a>
+	        </div>	            
+	        ">
+				Оплатить
+			</a>
+		</div>
+		<div class="col-lg-6">
+			<a href="{% url 'guest_credit' guest.pk %}" 
+			   class="btn btn-info" type="button">
+				Новый долг
+			</a>
+		</div>
+	</div>
+</form>
+<form>
+	<div class="col-lg-12">
+		<table class="table" id="credits">
+			<thead>
+				<th>
+					<a href="#credits" id="checkall" class="btn btn-primary btn-xs">
+					все
+					</a>
+				</th>
+				<th>товар</th>
+				<th>цена</th>
+				<th>количество</th>
+			</thead>
+			<tbody>
+				{% for c in credits %}
+				<tr>
+					<td><input type="checkbox" value="{{ c.amount }}" 
+name="cr{{ c.pk }}|{{ c.goods.cash_name|title }}|{{ c.count }}|{{ c.goods.price }}|{{c.goods.department}}">
+					 </td>
+					<td>{{ c.goods|title }}</td>
+					<td>{{ c.goods.price }}</td>
+					<td>{{ c.count }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</form>
+</div>
+{% endblock %}
+{% block extrafoot %}
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$(document).on("click", '[name=card]', function(){
+		$('#cash').hide()
+		$('#card').hide()
+		$('#cashinfo').html("<div class='alert alert-info'>\
+								<h3><div class='col-lg-12'>\
+									<span class='glyphicon glyphicon-warning-sign'>\
+									</span>\
+									</div>\
+									<div class='center-block'>\
+    									снять деньги с карты\
+									<span class='glyphicon glyphicon-phone'>\
+									</span>\
+    								</div>\
+    							</h3>\
+							</div>\
+							<div class='col-lg-12'>\
+					        	<a class='btn btn-sm btn-danger'\
+					        	 role='button' id='cash'\
+					        	name='card'>пробить чек</a>\
+					        </div>")
+	})
+	$( document ).on( "click",'#cash', function(){
+		$('#cash').hide()
+		$('#card').hide()
+		$('#cashinfo').html('<div class="alert alert-info">\
+					<h3>печать чека</h3>\
+				</div>')
+		var cht = ''
+		if ($(this).attr('name') === 'cash'){
+			cht = '1'
+		} else {
+			cht = '2'
+		};
+		// check cash status
+		var status = 0
+		curl = 'http://{{ cashhost }}:8000/cgi-bin/check.py'
+		$.when(
+		    $.ajax({
+		        url: encodeURI(curl),
+		        crossDomain: true,
+		        timeout: 10000,
+		        cache: false,
+		        async: false,
+		        dataType: 'jsonp',
+		        success: function (data) {
+		            status = parseInt(data['res'], 10)
+		        },
+		    })
+	    ).then(function() {
+	        if ( [4, 2].indexOf(status) < 0 ){
+				$('#cashinfo').html('<div class="alert alert-danger">\
+						<h3>Проверьте:</h3>\
+						<h3>- ленту</h3>\
+						<h3>- подключение</h3>\
+						<h3>- замятие ленты</h3>\
+						<h3>Перезапустите кассу</h3>\
+					</div>');
+				return
+	        }
+			var gchecked = $("#credits input:checked").get()
+			var sal = ''
+			for (var i = 0; i < gchecked.length; i++) {
+				sal += gchecked[i].name + '|'
+			}
+			sal = encodeURI(sal)
+			var buyer = encodeURI('Клиент : {{ guest|title }}')
+			var gurl = 'http://{{ cashhost }}:8000/cgi-bin/sale.py'
+			$.ajax({
+	        	url: encodeURI(gurl),
+				crossDomain: true,
+				timeout: 10000,
+	   			cache: false,
+	   			async: false,
+	   			data: ({sales: sal, chtype: cht, clnt:buyer}),
+				dataType: 'jsonp',
+	        	success: function (data) {
+	        		$('#cashinfo').html('<div class="alert alert-success">\
+			    							<h3>сохранение в базу</h3>\
+										</div>')
+	        	},
+	        	error: function(){
+	        		$('#cashinfo').html('<div class="alert alert-danger">\
+			    							<h3>ошибка печати чека</h3>\
+										</div>')
+	        	}
+	        });
+	        var crurl = '{% url "close_credit" %}'
+	        $.ajax({
+				url: crurl,
+				timeout: 10000,
+				dataType: 'json',
+				data:({crlist: sal, chtype: cht,}),
+				success: function (data) {
+					$("#credits input:checked").parent().parent().remove()
+					window.location.reload(true);
+				},
+				error: function(){
+					$('#cashinfo').html('<div class="alert alert-danger">\
+						<h3>ошибка базы данных</h3>\
+					</div>')
+				}
+			});
+	    });
+	});
+
+	$('#paybut').popover({
+		title:'Оплата <span id="close" \
+				class="glyphicon glyphicon-remove-circle"></span>'
+	});
+	$( document ).on( "click", '#close', function() {
+    	$("#paybut").popover('hide');
+  	});
+	$( document ).on( "click", '#checkall', function() {
+		$('#credits input[type=checkbox]').prop('checked', false);
+		$("input[type=checkbox]").click();
+	});
+	$("input[type=checkbox]").on( "click", function() {
+		var gchecked = $("#credits input:checked").get()
+		var summ = 0
+		for (var i = 0; i < gchecked.length; i++) {
+			summ += parseInt(gchecked[i].value, 10)
+		}
+		$('#paysumm').html(summ)
+		var datacontent="\
+	        <div class='col-lg-12' id='cashinfo'>\
+	        	Общая сумма:<strong>\
+	        	<span id='paysumm'>" + summ + 
+	        	"</span></strong>\
+	        </div>\
+			<div class='col-lg-6'>\
+	        	<a class='btn btn-sm btn-warning' role='button' id='cash'\
+	        	name='cash'>нал</a>\
+	        </div>\
+	        <div class='col-lg-6 text-right'>\
+	        	<a class='btn btn-sm btn-danger' role='button' id='card'\
+	        	name='card'>безнал</a>\
+	        </div>"
+	    $('#paybut').attr("data-content",datacontent)
+	});
+
+	$(".glyphicon-remove-circle").on( "click", function() {
+		$(this).parent().hide();
+	});
+	{% if guest.pk|has_invite:0 %}
+		$('.inout').attr( "disabled", false );
+	{% else %}
+		$('.inout').attr( "disabled", true );
+	{% endif %}
+
+	$('#born').datetimepicker({
+        // language: 'ru',
+        pickTime: false,
+        defaultDate: '{{ guest.born|date:"m/d/Y"|default:"01/01/2009" }}'
+    });
+
+});
+</script> 
+{% endblock %}

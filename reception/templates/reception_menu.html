@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Рецепция{% endblock %}
+
+{% block menu %}
+<div class="col-xs-3">
+	<a href="{% url "online" %}">
+		<img src="{% static "img/people.png"%}" alt="находящиеся в клубе">
+    	<div class="icontext">находящиеся в клубе</div>
+	</a>
+</div>
+<div class="col-xs-3">
+	<a href="{% url "client_login" %}">
+		<img src="{% static "img/exit.png"%}" alt="вход в клуб">
+    	<div class="icontext">вход в клуб</div>
+	</a>
+</div>
+<div class="col-xs-3">
+	<a href="{% url "bithday" %}">
+		<img src="{% static "img/present.png"%}" alt="день рождения">
+    	<div class="icontext">день рождения</div>
+	</a>
+</div>
+<div class="col-xs-3">
+	<a href="{% url "reception_visits" %}">
+		<img src="{% static "img/x_office_calendar.png"%}" alt="посещение за период">
+    	<div class="icontext">посещение за период</div>
+	</a>
+</div>
+<div class="row col-lg-12">.</div>
+
+<div class="col-xs-3">
+	<a href="{% url "credit" %}">
+		<img src="{% static "img/coins.png"%}" alt="оплата">
+    	<div class="icontext">оплата</div>
+	</a>
+</div>
+<div class="col-xs-3">
+	<a href="{% url "reminder" %}">
+		<img src="{% static "img/reminder.png"%}" alt="напоминания">
+    	<div class="icontext">напоминания</div>
+	</a>
+</div>
+<div class="col-xs-3">
+	<a href="{% url "r_guest" 0 %}">
+		<img src="{% static "img/guest.png"%}" alt="работа с гостем">
+    	<div class="icontext">работа с гостем</div>
+	</a>
+</div>
+<div class="col-xs-3">
+	<a href="{% url "reception_day" Y m d %}">
+		<img src="{% static "img/note.png"%}" alt="отчет рецепциониста">
+    	<div class="icontext">чеки по кассе</div>
+	</a>
+</div>
+<div class="row col-lg-12">.</div>
+
+<div class="col-xs-3">
+	<a href="{% url "cashier" %}">
+		<img src="{% static "img/cash_register.png"%}" alt="Работа с кассой">
+    	<div class="icontext">Работа с кассой</div>
+	</a>
+</div>
+
+<div class="col-xs-3">
+	<a href="{% url "market" %}">
+	    <img src="{% static "img/tradepoint.png"%}" alt="торговые точки">
+	 	<div class="icontext">торговые точки</div>
+	</a>
+</div>
+
+
+{% endblock %}

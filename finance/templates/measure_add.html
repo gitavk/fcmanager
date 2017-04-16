@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{p_title}}{% endblock %}
+{% block extrahead %}
+
+{% endblock %}
+{% block menu %}
+{{ res }}
+{% endblock %}
+{% block content %}
+<form id="period" class="form-horizontal" action="" method="post">
+    {% csrf_token %}
+<!-- Form Name -->
+<legend>{{p_title}}</legend>
+<div class="form-group">
+	<div class='col-sm-2'>
+	  <label for="id_name">Название</label>
+	  <span class="glyphicon glyphicon-flash"></span>
+	</div>
+	<div class='col-sm-4'>
+		<div class="control-group">
+		    <div class="controls">
+		    	<input id="id_name" type="text" name="name"
+		    	value="{{ m.name|default:""}}" 
+		    	class="form-control input-lg" required/>
+			</div>
+		</div>
+	</div>
+	<div class='col-sm-2'>
+		  <label for="id_note">Примечание</label>
+	</div>
+	<div class='col-sm-4'>
+		<div class="control-group">
+	    	<div class="controls">
+			    <input id="id_note" type="text" name="note" 
+		    	value="{{ m.note|default:""}}" 
+			    class="form-control input-lg"
+			    data-validation-minlength-message="Не менее 2 символов" minlength="2"/>
+			</div>
+		</div>
+	</div>
+</div>
+    <a href="{% url "measure" %}" class="btn btn-info" role="button">
+        Назад
+    </a>
+    <button class="btn btn-success" type="submit">
+        Сохранить
+    </button>
+</form>
+{% endblock %}
+{% block extrafoot %}
+
+<script src="{% static "ReactiveRaven/jqBootstrapValidation.js" %}">
+</script>
+<script>
+  $(function () { 
+  	$("input,select,textarea").not("[type=submit]").jqBootstrapValidation(); 
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{p_title}}{% endblock %}
+{% block extrahead %}
+
+{% endblock %}
+{% block menu %}
+{{ res }}
+{% endblock %}
+{% block content %}
+{% if e.note %}
+	<div class="alert alert-danger" id="clnt_note">
+    	{{ e.note }}
+    	<span class="glyphicon glyphicon-remove-circle"></span>
+	</div>
+{% endif %}
+<form id="period" role="form" action="" method="post">
+    {% csrf_token %} {{ f.errors }}
+<legend>{{p_title}}
+    <a href="{{ b_url }}" class="btn btn-info" role="button">
+        Назад
+    </a>
+    <button class="btn btn-success" type="submit">
+        Сохранить
+    </button>
+</legend>
+<div class="form-group">
+	<div class='col-lg-2'>
+	  <label for="id_lastname">Фамилия</label>
+	  <i class="fa fa-bolt"></i>
+	</div>
+	<div class='col-lg-4'>
+		<div class="control-group">
+		    <div class="controls">
+		    	<input id="id_lastname" type="text" name="lastname"
+		    	value="{{ e.lastname|title|default:""}}" 
+		    	class="form-control input-lg" required/>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="form-group">
+	<div class='col-lg-2'>
+	  <label for="id_born">Дата рождения</label>
+	  <i class="fa fa-bolt"></i>
+	</div>
+	<div class='col-lg-4'>
+		<div class="control-group">
+		    <div class="controls">
+		    	<div class='input-group date' id='id_born'
+			   data-date-format="DD.MM.YYYY">
+				<input type="text" name="born" 
+				 class="form-control input-lg" />
+					<span class="input-group-addon">
+						<i class="fa fa-calendar"></i>
+		        	</span>
+			</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="form-group">
+	<div class='col-lg-2'>
+	  <label for="id_firstname">Имя</label>
+	  <i class="fa fa-bolt"></i>
+	</div>
+	<div class='col-lg-4'>
+		<div class="control-group">
+		    <div class="controls">
+		    	<input id="id_firstname" type="text" name="firstname"
+		    	value="{{ e.firstname|title|default:""}}" 
+		    	class="form-control input-lg" required/>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="form-group">
+	<div class='col-lg-2'>
+	  <label for="id_phone">Телефон</label>
+	</div>
+	<div class='col-lg-4'>
+		<div class="control-group">
+		    <div class="controls">
+		    	<input id="id_phone" type="text" name="phone"
+		    	data-validation-regex-regex="^79[0-9]{9}$|^812[0-9]{7}$" 
+				data-validation-regex-message="мобильный 79... городской 812..."
+		    	value="{{ e.phone|default:""}}" 
+		    	class="form-control input-lg" />
+			</div>
+		</div>
+	</div>
+</div>
+<div class="form-group">
+	<div class='col-lg-2'>
+	  <label for="id_patronymic">Отчество</label>
+	  <i class="fa fa-bolt"></i>
+	</div>
+	<div class='col-lg-4'>
+		<div class="control-group">
+		    <div class="controls">
+		    	<input id="id_patronymic" type="text" name="patronymic"
+		    	value="{{ e.patronymic|title|default:""}}" 
+		    	class="form-control input-lg" required/>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="form-group">
+	<div class='col-lg-2'>
+	  <label for="id_address">Адрес</label>
+	</div>
+	<div class='col-lg-4'>
+		<div class="control-group">
+		    <div class="controls">
+		    	<input id="id_address" type="text" name="address"
+		    	value="{{ e.address|default:""}}" 
+		    	class="form-control input-lg"/>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="form-group row">
+	<div class='col-lg-2'>
+	  <label for="id_card">Карта</label>
+	  <i class="fa fa-bolt"></i>
+	</div>
+	<div class='col-lg-4'>
+		<div class="control-group">
+		    <div class="controls">
+		    	<input id="id_card" type="text" name="card"
+		    	value="{{ e.card|default:""}}" 
+		    	class="form-control input-lg" required/>
+			</div>
+		</div>
+	</div>
+</div>
+<hr/>
+		<div class='col-lg-4'>
+		  <label for="id_department">Департамент</label>
+		</div>
+		<div class='col-lg-8 pull-left'>
+		  <label for="id_position">Должность</label>
+		</div>
+		<div class='col-lg-4'>
+			<div class="control-group">
+			    <div class="controls">
+			    	<select id="id_department" name="department" 
+				 		class="selectpicker" data-width="100%">
+					  	<option ></option>
+					   {% for d in departments %}
+					  	<option value="{{ d.pk }}">
+					  		{{ d|title }}
+					  	</option>
+		      		   {% endfor %}
+				</select>
+				</div>
+			</div>
+		</div>
+	<div class="form-group">
+		<div class='col-lg-4'>
+			<div class="control-group">
+			    <div class="controls">
+			    	<select id="id_position" name="wposition" 
+				 		class="selectpicker" data-width="100%">
+				 	{% if new %}
+				 		<!-- update after select department -->
+				 	{% else %}
+					  	<option ></option>
+					   {% for p in positions %}
+					  	<option value="{{ p.pk }}">
+					  		{{ p|title }}
+					  	</option>
+		      		   {% endfor %}
+		      		{% endif %}
+					</select>
+				</div>
+			</div>
+		</div>
+	</div>
+	{% if not new %}
+	<div class="col-lg-4">
+		<a href="{% url 'change_work' e.pk %}" class="btn btn-warning" role="button">
+	       <i class="fa fa-exchange"></i> перевести
+	    </a>
+		<a href="#dismiss" class="btn btn-danger" id="dismiss"
+		role="button" data-toggle="popover" data-html="true"
+		title="Уволить {{ e.get_full_name|title }}" 
+		data-placement="top"
+		data-content="
+		<div class='col-lg-12' id='dismissinfo'>
+    <a href='#dismiss' class='btn btn-sm btn-success' role='button'
+    id='Y' >да</a>
+    <a href='#dismiss' class='btn btn-sm btn-info pull-right' role='button' 
+    id='close'>нет</a>
+    	</div>">
+	       <i class="fa fa-flag-checkered"></i>  Уволить
+	    </a>
+    </div>
+    {% endif %}
+</form>
+{% if e.whistory %}
+<div class="col-lg-12">
+<a data-toggle="collapse" data-parent="#whistory" href="#whistory" id="a_whistory">
+Трудовой стаж
+</a>
+<div class='col-sm-12'>
+   <div id="whistory" class="collapse col-sm-12">
+      <div class="panel-body">
+	      <table class="table">
+	      <thead>
+	       <tr>
+	    		<th>Принят</th><th>Уволен</th><th>Департамент</th><th>Должность</th>
+			</tr>
+		   </thead>
+		   <tbody id="l_whistory">
+		   {% for wh in e.whistory %}
+		   	<tr>
+		   		<td>
+		   			{{ wh.date_start| date:"d.m.Y" }}
+		   		</td>
+		   		<td>
+		   			{{ wh.date_end| date:"d.m.Y"| default:"По настоящее время" }}
+		   		</td>
+		   		<td>
+		   			{{ wh.wposition.department| title }}
+		   		</td>
+		   		<td>
+		   			{{ wh.wposition.position| title }}
+		   		</td>
+		   	</tr>
+		   {% endfor %}
+		   </tbody>
+	      </table>
+     </div>
+   </div>
+</div>
+</div>
+{% endif %}
+{% endblock %}
+{% block extrafoot %}
+<script type="text/javascript" src="{% static "bootstrap-select/bootstrap-select.js" %}"></script>
+<script type="text/javascript" src="{% static "bootstrap-select/i18n/defaults-ru-RU1.js" %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static "bootstrap-select/bootstrap-select.css" %}">
+
+<script src="{% static "ReactiveRaven/jqBootstrapValidation.js" %}">
+</script>
+<script>
+$(function () {
+{% if not new %}
+	$( document ).on( "click",'#Y', function(){
+		$.ajax({
+	        url: encodeURI("{% url 'dismiss' %}"),
+	        data: ({id: {{ e.pk }}, }),
+	        success: function (data) {
+	        	res = parseInt(data['res'], 10);
+	        	if ( res === 0){
+	        		$('#dismissinfo').html('<h3>Не трудоустроен</h3>')
+	        	} else if (res > 0) {
+	        		$('#dismissinfo').html('<h3>Уволен</h3>')
+	        	} else {
+	        		$('#dismissinfo').html('<h3>Сотрудник не найден</h3>')
+	        	}
+	        },
+        	error: function(){
+        		$('#dismissinfo').html('<h3>Ошибка базы данных</h3>')
+        	}
+	    })
+	});
+
+	$(".glyphicon-remove-circle").on( "click", function() {
+		$(this).parent().hide();
+	});
+
+	$(".btn-danger").popover();
+	$( document ).on( "click", '#close', function() {
+	    $(".btn-danger").popover('hide');
+	});
+{% else %}
+	   $( document ).on( "change", '#id_department', function() {
+	   $.ajax({
+	      url: encodeURI("{% url 'e_departmentposions' %}"),
+	      data:({id: $(this).val()}),
+	      dataType: "json",
+	      success: function (data) {
+	         var to = "<option >ничего не выбрано</option>"
+	        $.each(data, function(k, v) {
+	          to += '<option value="' + k +'">'
+	                      + v + '</option>'
+	        });
+	        $('#id_position').empty().append(to)
+	        $('#id_position').selectpicker('refresh');
+	      }
+	    })
+	})
+{% endif %}
+	$("input,select,textarea").not("[type=submit]").jqBootstrapValidation(); 
+	$('.selectpicker').selectpicker();
+
+	{% if e.currwork %}
+		$('#id_department').selectpicker('val','{{e.currwork.wposition.department.pk }}')
+		$('#id_department').prop('disabled',true);
+		$('#id_position').selectpicker('val','{{e.currwork.wposition.position.pk }}')
+		$('#id_position').prop('disabled',true);
+		$('.selectpicker').selectpicker('refresh');
+	{% endif %}
+
+    $('#id_born').datetimepicker({
+        // language: 'ru',
+        pickTime: false,
+        maxDate: '{% now "m/d/Y" %}',
+        {% if e.born %}
+        defaultDate: '{{ e.born | date:"m/d/Y"}}' // e.born
+        {% else %}
+        defaultDate: '01/01/2000'
+        {% endif %}
+    });
+});
+</script>
+{% endblock %}

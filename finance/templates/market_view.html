@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{p_title}}{% endblock %}
+{% block menu %}
+<div class="row">
+  <div class="col-lg-4">
+    <a href="{% url "market" %}">
+      <img src="{% static "img/tradepoint.png"%}" alt="торговые точки">
+      <div class="icontext">торговые точки</div>
+    </a>
+  </div>
+  <div class="col-lg-4">
+.
+  </div>
+  <div class="col-lg-4">
+
+  </div>
+</div>
+{% endblock %}
+{% block content %}
+{{ res }}
+<table class="table">
+<thead>
+  <tr>
+    <th>Товар</th>
+    <th>Количество</th>
+    <th>Цена</th>
+  </tr>
+</thead>
+<tbody>
+  {% for g in lst %}
+  <tr>
+    <td>{{ g }}</td>
+    <td>{{ g.on_market }}</td>
+    <td>{{ g.price }}</td>
+  </tr>
+  {% endfor %}
+</tbody>
+</table>
+{% endblock %}

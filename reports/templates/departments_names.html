@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+{% load extra_filtrs %}
+{% block title %}Названия отделов{% endblock %}
+
+{% block menu %}
+<div class="col-lg-12">
+  <a href="{% url "reports_menu" %}">
+    <img src="{% static "img/notepad.png"%}" alt="Отчеты">
+    <div class="icontext">Отчеты</div>
+  </a>
+</div>
+{% endblock %}
+{% block content %}
+<div class="col-lg-12">
+  <form method="post" > {% csrf_token %}
+  <a href="{% url "reports_menu" %}" class="btn btn-info"> назад </a>
+  <button type="submit" class="btn btn-success"> сохранить </button>
+    <table class="table">
+    <thead>
+      <tr><th>
+    	<div class="col-lg-3"><strong>отдел</strong></div>
+    	<div class="col-lg-9"><strong>текст</strong></div>
+      </th></tr>
+    </thead>
+    {% for n in lst %}
+    <tr>
+    <td>
+    	<div class="col-lg-3">отдел {{ n }}</div>
+    	<div class="col-lg-9">
+        <input id="id_name" type="text" name="name"
+            value="{{ lst|lookup:n |default:""}}" 
+            class="form-control input-lg" />
+      </div>
+      <div class="col-lg-2"></div>
+    </td></tr>
+    {% endfor %}
+    </table>
+  </form>
+</div>
+{% endblock %}

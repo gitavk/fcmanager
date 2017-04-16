@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+{% if err %}
+	<div class="alert alert-danger">Посещения не нашлось</div>
+	<a href="{% url 'p_menu' %}" class="btn btn-sm btn-warning" role="button">
+		назад к списку
+	</a>
+{% else %}
+	<div class="alert alert-success">Запись о посещении удалена</div>
+	<a href="{% url 'person_card' p.pk %}" class="btn btn-sm btn-warning" role="button">
+		назад к {{ p.last_name }}
+	</a>{% endif %}
+{% endblock %}

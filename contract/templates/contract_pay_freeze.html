@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Платная заморозка{% endblock %}
+{% block menu %}
+{% endblock %}
+
+{% block content %}
+	<div class="col-lg-12">
+		<a href="{% url "p_menu" %}" class="btn btn-info" role="button">
+		    Назад
+		</a>
+	</div>
+<form class="form-horizontal" method="post">
+    {% csrf_token %}
+<!-- Form Name -->
+<legend>
+		Платная заморозка к договору № {{contract.number}} для клиента 
+		{{ contract.client.last_name }} {{ contract.client.first_name }}
+</legend>
+<div class="col-lg-6">
+	<label> Доспутно по договору: {{ contract.contract_type.period_freeze }} дней</label>
+</div>
+<div class="col-lg-6">
+	<label> Доспутный остаток: {{ contract.freeze_left }} дней</label>
+</div>
+	<div class="form-group">
+		<div class='col-sm-4'>
+			<div class="control-group">
+			   <div class="controls">
+					<select id="id_goods" name="goods" data-width="100%">
+					  	<option ></option>
+					   {% for pay_freez in pay_freezes %}
+					  	<option value="{{ pay_freez.pk }}">
+					  		{{ pay_freez.name }}
+					  	</option>
+		      		   {% endfor %}
+					</select>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-lg-6">
+		<button class="btn btn-success" type="submit">Купить</button>
+	</div>
+	<div class="col-lg-6">
+		<a data-toggle="collapse" href="#freeze">история заморозки </a>
+		<div id="freeze" class="panel-collapse collapse">
+		    <div class="panel-body">
+			      <table class="table">
+			      <thead><tr>
+			    		<th>Начало</th><th>Окончание</th><th>Дней</th>
+					</tr>
+				   </thead>{% for f in freeze %}
+			      <tr>
+			      	<td>{{ f.date_start|date:'d.m.Y' }}</td>
+			      	<td>{{ f.date_end|date:'d.m.Y' }} </td>
+			      	<td>{{ f.days }} </td>
+			      </tr>{% endfor %}
+			      </table>
+		    </div>
+		</div>
+	</div>
+</form>
+{% endblock %}
+{% block extrafoot %}
+
+{% endblock %}
