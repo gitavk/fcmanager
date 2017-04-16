@@ -438,6 +438,7 @@ def manager(request, year, month):
     columns.append((u'Оплата: полная / рассрочка', 3000))
     columns.append((u'Вид оплаты', 4000))
     columns.append((u'Стоимость', 4000))
+    columns.append((u'ФАКТИЧЕСКАЯ СУММА ДОГОВОРА', 4000))
     columns.append((u'Взнос', 4000))
     columns.append((u'Доплата', 4000))
     columns.append((u'Фактическая оплата', 8000))
@@ -467,7 +468,7 @@ def manager(request, year, month):
         day = d + 1
         d = date(year, month, day)
         if day_summ > 0:
-            ws.write(row_num, 14, day_summ, style)
+            ws.write(row_num, 15, day_summ, style)
         day_summ = 0
         for cr in CreditsHistory.objects.filter(
                 date__month=month, date__year=year, date__day=day,):
@@ -497,10 +498,11 @@ def manager(request, year, month):
                 ws.write(row_num, 6, c.client.initialsC(), style)
                 ws.write(row_num, 7, pplan, style)
                 ws.write(row_num, 9, c.contract_type.price, style)
-                ws.write(row_num, 10, contribution, style)
-                ws.write(row_num, 11, e_pay, style)
-                ws.write(row_num, 12, cr.amount, style)
-                ws.write(row_num, 13, c.client.manager.initials(), style)
+                ws.write(row_num, 10, c.amount, style)
+                ws.write(row_num, 11, contribution, style)
+                ws.write(row_num, 12, e_pay, style)
+                ws.write(row_num, 13, cr.amount, style)
+                ws.write(row_num, 14, c.client.manager.initials(), style)
                 if cr.contract.discount:
                     ws.write(row_num, 3, c.discount.value, style)
                 else:
@@ -529,10 +531,11 @@ def manager(request, year, month):
                     ws.write(row_num, 6, ptt.client.initialsC(), style)
                     ws.write(row_num, 7, '', style)
                     ws.write(row_num, 9, cr.goods.priceondate(d), style)
-                    ws.write(row_num, 10, cr.amount, style)
-                    ws.write(row_num, 11, '', style)
-                    ws.write(row_num, 12, cr.amount, style)
-                    ws.write(row_num, 13, ptt.client.manager.initials(), style)
+                    ws.write(row_num, 10, '', style)
+                    ws.write(row_num, 11, cr.amount, style)
+                    ws.write(row_num, 12, '', style)
+                    ws.write(row_num, 13, cr.amount, style)
+                    ws.write(row_num, 14, ptt.client.manager.initials(), style)
                     day_summ += cr.amount
                 else:
                     continue
@@ -540,8 +543,8 @@ def manager(request, year, month):
                 continue
             ws.write(row_num, 0, d, styled)
             ws.write(row_num, 8, pay_type[cr.payment_type], style)
-            ws.write(row_num, 14, '', style)
-            ws.write(row_num, 15, cr.user.initials(), style)
+            ws.write(row_num, 15, '', style)
+            ws.write(row_num, 16, cr.user.initials(), style)
 
     wb.save(response)
     return response
