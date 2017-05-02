@@ -1,0 +1,14 @@
+[Unit]
+Description=Django fcgi server for no_cache
+After=syslog.target
+
+[Service]
+Type=forking
+PIDFile=/home/fclub_nocache/django.pid
+ExecStart=/home/fclub_nocache/manage.py runfcgi socket=/home/fclub_nocache/fclub_nocache.socket pidfile=/home/fclub_nocache/django.pid
+Restart=on-abort
+User=www-data
+Group=www-data
+
+[Install]
+WantedBy=multi-user.target
