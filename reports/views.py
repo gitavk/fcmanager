@@ -544,7 +544,7 @@ def manager(request, year, month):
             ws.write(row_num, 0, d, styled)
             ws.write(row_num, 8, pay_type[cr.payment_type], style)
             ws.write(row_num, 15, '', style)
-            ws.write(row_num, 16, cr.payment_user.initials(), style)
+            ws.write(row_num, 16, cr.user.initials(), style)
 
     wb.save(response)
     return response
