@@ -136,6 +136,7 @@ def ptt(request, id=0, act=None ):
                 else:
                     post_values['is_discount'] = 0
                 post_values['goods_type'] = gt.pk
+                post_values['pay_days'] = 0
                 form = FormGoods(post_values, instance=g)
                 if form.is_valid():
                     form.save()
