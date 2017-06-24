@@ -241,7 +241,7 @@ class Credits(models.Model):
     def escape(self):
         if self.goods:
             is_not_sys = self.goods.goods_type.name not in SYS_GOODS
-            if not_sys_goods and not self.goods.is_pay_freeze:
+            if is_not_sys and not self.goods.is_pay_freeze:
                 cnt = self.count
                 invoice = InvoiceGoods.objects.filter(goods=self.goods)
                 for ig in IssuanceGoods.objects.filter(
