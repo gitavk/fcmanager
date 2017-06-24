@@ -91,6 +91,7 @@ class Goods(models.Model):
     # for pay freeze
     is_pay_freeze = models.BooleanField(default=False, blank=True)
     pay_days = models.SmallIntegerField(default=0, blank=True)
+    is_active = models.BooleanField(default=True, blank=True)
 
     def __unicode__(self):
         return unicode(self.name)
