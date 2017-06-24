@@ -195,7 +195,7 @@ def client_ptt(request, clnt_id=0, ):
                 contract_visits_left = contract.visits_left()
 
     gt = GoodsType.objects.filter(name='PTT')
-    ptts = Goods.objects.filter(goods_type__in=gt)
+    ptts = Goods.objects.filter(goods_type__in=gt, is_active=True)
     context_dict = dict(clnt=clnt, request=request, c=clnt,
                         ptts=ptts, block_visit=block_visit, card=card,
                         contract_visits_left=contract_visits_left,
