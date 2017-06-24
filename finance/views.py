@@ -24,7 +24,7 @@ from .forms import *
 departments = settings.DEPARTMENTS
 # not true goods type
 excl_gt = GoodsType.objects.filter(name__in=['PTT'])
-excl_g = Goods.objects.filter(goods_type__in=excl_gt, is_pay_freeze=True, is_active=False)
+excl_g = Goods.objects.filter(goods_type__in=excl_gt, is_pay_freeze=True)
 
 @login_required(login_url='/login')
 def ptt_trainer(request):
@@ -294,7 +294,8 @@ def credit(request, clnt=0, b_url=None,):
                     res = ""
                     cnt = 0
             else:
-                res = Goods.objects.filter(name__icontains=find).exclude(pk__in=excl_g)
+                res = Goods.objects.filter(
+                    name__icontains=find).exclude(pk__in=excl_g).exclude(is_active=False)
                 cnt = res.count()
                 if cnt == 1:
                     res = res[0]
