@@ -519,7 +519,13 @@ def manager(request, year, month):
                     if ptts.count() > 1:
                         ptt = ptts[ptt_line]
                         ptt_line += 1
+                    elif ptts:
+                        ptt_line = 0
+                        ptt = ptts[0]
                     else:
+                        ptts = Client_PTT.objects.filter(
+                            date__gte=d, employee=cr.employee, goods=cr.goods, client=cr.client
+                        ).order_by('date')
                         ptt_line = 0
                         ptt = ptts[0]
 
