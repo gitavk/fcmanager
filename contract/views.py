@@ -340,7 +340,7 @@ def print_contract(request, id):
 
     if contract.pay_plan:
         pplan = "в рассрочку"
-        ppsteps = PayPlanSteps.objects.filter(pay_plan=contract.pay_plan)
+        ppsteps = PayPlanSteps.objects.filter(pay_plan=contract.pay_plan).order_by('number')
     else:
         pplan = "Единовременно"
         ppsteps = PayPlanSteps.objects.filter(number=1)[:1]
