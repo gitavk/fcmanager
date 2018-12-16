@@ -309,6 +309,9 @@ class Contract(models.Model):
                     self.date_end = self.date_start + timedelta(days=days)
         super(Contract, self).save(*args, **kwargs)
 
+    def __unicode__(self):
+        return '#%s: %s' % (self.number, self.client.get_full_name())
+
 
 class Ban(models.Model):
     id = models.AutoField(primary_key=True)
