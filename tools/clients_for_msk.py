@@ -41,12 +41,11 @@ for line in f:
     active = 0
     amount = 0
     data = line.split(';')
-    full_name = data[12].split(' ')
-    born = data[14].split('/')  # client born
+    full_name = data[8].split(' ')
+    born = data[10].split('/')  # client born
     if len(born) > 2:
         born = date(int(born[2]), int(born[0]), int(born[1]), )
-    cname = data[7]
-    cname = cname.strip()
+    cname = data[7].strip()
     cdate = data[1].split('/')  # contract data
     if len(cdate) > 2:
         cdate = date(int(cdate[2]), int(cdate[0]), int(cdate[1]), )
@@ -68,10 +67,11 @@ for line in f:
     else:
         wrong_data += 1
         log_f.write(
-            'Wrong data;%s;%s;%s\n' %
+            'Wrong end date;%s;%s;%s\n' %
             (e_date, ' '.join(full_name), cname)
         )
         continue
+
     if total > 1 and e_date > td:
         activecontracts += 1
         try:
@@ -81,7 +81,7 @@ for line in f:
             log_f.write('Unknown contract;%s;%s\n' % (cname, ' '.join(full_name)))
             continue
         cts = ContractType.objects.filter(name__iexact=cname).order_by('-date_modified')
-
+        ctype = cts[0]
         if not isinstance(born, date):
             log_f.write(
                 'Wrong born date;%s;%s;%s\n' %
@@ -106,16 +106,19 @@ for line in f:
                                                  client=cl)
                 except Contract.DoesNotExist:
                     cl_ct = Contract(
-                        contract_type=cts[0],
+                        contract_type=ctype,
                         date_start=s_date, date_end=e_date,
                         date=cdate, client=cl, payer=cl,
                         payment_date=cdate,
                         number='O-%s' % data[2].strip(),
-                        amount=cts[0].price,
+                        amount=ctype.price,
                         manager=manager)
                     try:
                         cl_ct.save()
-                        pass
+                        freeze_days = ctype.period_freeze - int(data[5])
+                        if freeze_days > 0:
+                            cl_ct.freeze(close_day, freeze_days)
+                        # print(freeze_days)
                     except Exception, e:
                         print e
                     log_f.write(
@@ -123,7 +126,7 @@ for line in f:
                         (cdate, cname, ' '.join(full_name))
                     )
             except Client.DoesNotExist:
-                phone = data[13].strip()
+                phone = data[9].strip()
                 if len(phone) == 7:
                     phone = '499' + phone
                 elif len(phone) == 10:
@@ -158,15 +161,19 @@ for line in f:
                             born_date=born, phone=phone,
                             manager=manager)
                 cl.save()
-                cl_ct = Contract(contract_type=cts[0],
+                cl_ct = Contract(contract_type=ctype,
                                  date_start=s_date, date_end=e_date,
                                  date=cdate, client=cl, payer=cl,
-                                 amount=cts[0].price,
+                                 amount=ctype.price,
                                  number='O-%s' % data[2].strip(),
                                  payment_date=cdate,
                                  manager=manager)
                 try:
                     cl_ct.save()
+                    freeze_days = ctype.period_freeze - int(data[5])
+                    if freeze_days > 0:
+                        cl_ct.freeze(close_day, freeze_days)
+                    # print(freeze_days)
                 except Exception, e:
                     print e
                 clntsave += 1
@@ -185,3 +192,5 @@ log_f.write('active contracts load: %d\r\n' % activecontracts)
 log_f.write('Clients add: %d\r\n' % clntsave)
 log_f.write('finish\r\n')
 log_f.close()
+for x in unknown_contracts:
+    print x
