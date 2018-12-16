@@ -26,17 +26,15 @@ total = 0
 activecontracts = 0
 wrong_data = 0
 clntsave = 0
-
-# Client_PTT.objects.all().delete()
-# Credits.objects.all().delete()
-# Contract.objects.all().delete()
-# Client.objects.all().delete()
-
+close_day = date(2018, 6, 30)
+open_day = date(2018, 12, 26)
 td = datetime.today().date()
 
 log_f = codecs.open(filelog, "w", "utf-8")
 log_f.write('start upload: %s \n' % filename)
 f = codecs.open(filename, "r", "utf-8")
+unknown_contracts = set()
+manager = User.objects.filter(groups__name='manager').order_by('id')[0]
 
 for line in f:
     total += 1
@@ -47,7 +45,6 @@ for line in f:
     born = data[14].split('/')  # client born
     if len(born) > 2:
         born = date(int(born[2]), int(born[0]), int(born[1]), )
-
     cname = data[7]
     cname = cname.strip()
     cdate = data[1].split('/')  # contract data
@@ -61,25 +58,31 @@ for line in f:
     e_date = data[4].split('/')  # contract end
     if len(e_date) > 2:
         e_date = date(int(e_date[2]), int(e_date[0]), int(e_date[1]), )
+        if e_date < close_day:
+            log_f.write(
+                'Contract is ended: %s;%s;%s\n' %
+                (e_date, ' '.join(full_name), cname)
+            )
+            continue
+        e_date = open_day + (e_date - close_day)
     else:
         wrong_data += 1
-        # log_f.write(
-        #     'Wrong data;%s;%s;%s\n' %
-        #     (e_date, ' '.join(full_name), cname)
-        # )
+        log_f.write(
+            'Wrong data;%s;%s;%s\n' %
+            (e_date, ' '.join(full_name), cname)
+        )
         continue
-
     if total > 1 and e_date > td:
         activecontracts += 1
         try:
             ct = ContractType.objects.get(name__iexact=cname, is_active=True)
         except ContractType.DoesNotExist:
-            log_f.write('Unnown contract;%s;%s\n' % (cname, ' '.join(full_name)))
+            unknown_contracts.add(cname)
+            log_f.write('Unknown contract;%s;%s\n' % (cname, ' '.join(full_name)))
             continue
-
         cts = ContractType.objects.filter(name__iexact=cname).order_by('-date_modified')
 
-        if type(born) == list:
+        if not isinstance(born, date):
             log_f.write(
                 'Wrong born date;%s;%s;%s\n' %
                 (e_date, ' '.join(full_name), born)
@@ -87,11 +90,14 @@ for line in f:
             continue
         else:
             try:
-                cl = Client.objects.get(first_name__iexact=full_name[1],
-                                        last_name__iexact=full_name[0],
-                                        patronymic__iexact=full_name[2],
-                                        born_date=born,
-                                        )
+                cl = Client.objects.get(
+                    first_name__iexact=full_name[1],
+                    last_name__iexact=full_name[0],
+                    patronymic__iexact=full_name[2],
+                    born_date=born,
+                    # pk=-1,
+                )
+                log_f.write('old client: name %s\n' % cl.get_full_name())
                 try:
                     cl_ct = Contract.objects.get(contract_type__in=cts,
                                                  date__day=cdate.day,
@@ -103,11 +109,13 @@ for line in f:
                         contract_type=cts[0],
                         date_start=s_date, date_end=e_date,
                         date=cdate, client=cl, payer=cl,
-                        payment_date=cdate, number=data[2].strip(),
+                        payment_date=cdate,
+                        number='O-%s' % data[2].strip(),
                         amount=cts[0].price,
-                        manager=User.objects.get(pk=10))
+                        manager=manager)
                     try:
                         cl_ct.save()
+                        pass
                     except Exception, e:
                         print e
                     log_f.write(
@@ -117,9 +125,9 @@ for line in f:
             except Client.DoesNotExist:
                 phone = data[13].strip()
                 if len(phone) == 7:
-                    phone = '812' + phone
+                    phone = '499' + phone
                 elif len(phone) == 10:
-                    if int(phone[:3]) == 812:
+                    if int(phone[:3]) in [499, 495]:
                         phone = phone
                     elif int(phone[0]) == 9:
                         phone = '7' + phone
@@ -148,14 +156,15 @@ for line in f:
                             last_name=full_name[0],
                             patronymic=full_name[2],
                             born_date=born, phone=phone,
-                            manager=User.objects.get(pk=10))
+                            manager=manager)
                 cl.save()
                 cl_ct = Contract(contract_type=cts[0],
                                  date_start=s_date, date_end=e_date,
                                  date=cdate, client=cl, payer=cl,
-                                 amount=cts[0].price, number=data[2].strip(),
+                                 amount=cts[0].price,
+                                 number='O-%s' % data[2].strip(),
                                  payment_date=cdate,
-                                 manager=User.objects.get(pk=10))
+                                 manager=manager)
                 try:
                     cl_ct.save()
                 except Exception, e:
@@ -166,9 +175,8 @@ for line in f:
                     'Wrong patronymic;%s;%s;%s\n' %
                     (e_date, ' '.join(full_name), cname)
                 )
-
-        # log_f.write('contract: %s ' % cname)
-        # log_f.write('full_name: %s\n' % ''.join(full_name))
+        log_f.write('contract: %s ' % cname)
+        log_f.write('full_name: %s\n' % ''.join(full_name))
 
 f.close()
 log_f.write('total read lines: %d\r\n' % total)
