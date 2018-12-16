@@ -4,7 +4,7 @@ from datetime import date, timedelta, datetime
 from django.db import models
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db.models import Avg, Max, Min
+from django.db.models import Max, Min
 
 from person.models import Client
 
@@ -77,10 +77,10 @@ class PayPlan(models.Model):
         max_length=30, blank=False, null=False, unique=True)
     plantype = models.SmallIntegerField(default=0)
     """ pay plan type:
-		0 == by value
-		1 == by percentage
-		2 == custom
-	"""
+        0 == by value
+        1 == by percentage
+        2 == custom
+    """
     is_active = models.BooleanField(default=True)
     amount = models.FloatField(default=0.0)
 
@@ -105,8 +105,8 @@ class Contract(models.Model):
     date_joined = models.DateTimeField(
         auto_now_add=True, blank=True, null=True)
     """
-	UPDATE contract_contract SET date_joined = date;
-	"""
+    UPDATE contract_contract SET date_joined = date;
+    """
     manager = models.ForeignKey(settings.AUTH_USER_MODEL)
     date_start = models.DateField(default=datetime.now)
     date_end = models.DateField()
@@ -122,19 +122,19 @@ class Contract(models.Model):
     bonus_visit = models.IntegerField(default=0, blank=True, null=True)
 
     is_current = models.SmallIntegerField(default=2)
-    """ is_current : 
-		0 == old
-		1 == current
-		2 == prospect
-		3 == ban
-	"""
+    """ is_current :
+        0 == old
+        1 == current
+        2 == prospect
+        3 == ban
+    """
 
     payment_type = models.SmallIntegerField(default=0)
-    """ payment_type : 
-		0 == cash
-		1 == cashless
-		2 == other way
-	"""
+    """ payment_type :
+        0 == cash
+        1 == cashless
+        2 == other way
+    """
     class Meta:
         get_latest_by = "id"
 
