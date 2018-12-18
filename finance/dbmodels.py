@@ -1,6 +1,7 @@
 from django.db import models
 
-from .models import *
+from .models import Goods, Market
+
 
 class vIssuanceGoods(models.Model):
     id = models.AutoField(primary_key=True)
@@ -12,6 +13,7 @@ class vIssuanceGoods(models.Model):
     class Meta:
         db_table = 'v_issuance_goods'
         managed = False
+
 
 class vIssuanceGoodsRecovery(models.Model):
     id = models.AutoField(primary_key=True)

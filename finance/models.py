@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 
 from django.db import models
-from django.db.models import Avg, Max, Min, Sum, Q
+from django.db.models import Max, Min, Sum, Q
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.core.exceptions import ValidationError
@@ -20,10 +20,10 @@ class GoodsType(models.Model):
 
     """
      need add name = SERVICE
-     for system type not delete, not edit 
+     for system type not delete, not edit
      need add name = PTT, 1PTT
      (personal trainer)
-     for system type not delete, not edit 
+     for system type not delete, not edit
     """
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=150, unique=True)
@@ -230,7 +230,7 @@ class Credits(models.Model):
     department = models.IntegerField(default=1)
 
     payment_type = models.SmallIntegerField(default=0)
-    """ payment_type: 
+    """ payment_type:
         0 == cash
         1 == cashless
         2 == other way
@@ -404,7 +404,7 @@ class CreditsHistory(models.Model):
         Employee, blank=True, null=True, on_delete=models.PROTECT)
     ptt_card = models.BigIntegerField(blank=True, null=True, unique=True)
     payment_type = models.SmallIntegerField(default=0)
-    """ payment_type: 
+    """ payment_type:
         0 == cash
         1 == cashless
         2 == other way
@@ -622,7 +622,7 @@ class Client_PTT(models.Model):
     goods = models.ForeignKey(Goods, on_delete=models.PROTECT)
     is_card = models.SmallIntegerField(default=0)
     payment_type = models.SmallIntegerField(default=0)
-    """ payment_type: 
+    """ payment_type:
         0 == cash
         1 == cashless
         2 == other way
