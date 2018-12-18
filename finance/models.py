@@ -510,6 +510,9 @@ class CreditsHistory(models.Model):
         self.amount = 0
         self.save()
 
+    def __unicode__(self):
+        return '%s %s %s' % (self.date, self.goodsname(), self.amount)
+
 
 class Invoice(models.Model):
     id = models.AutoField(primary_key=True)
