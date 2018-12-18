@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import forms
 from core.models import User
 
+
 class MyUserCreationForm(UserCreationForm):
     def clean_username(self):
         # Since User.username is unique, this check is redundant,
@@ -18,7 +19,9 @@ class MyUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
 
-class MyUserAdmin(UserAdmin):  
-    add_form = MyUserCreationForm   
 
-admin.site.register(User,MyUserAdmin)
+class MyUserAdmin(UserAdmin):
+    add_form = MyUserCreationForm
+
+
+admin.site.register(User, MyUserAdmin)
