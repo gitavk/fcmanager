@@ -29,7 +29,7 @@ clntsave = 0
 close_day = date(2018, 6, 30)
 open_day = date(2018, 12, 26)
 td = datetime.today().date()
-
+print(open_day - close_day)
 log_f = codecs.open(filelog, "w", "utf-8")
 log_f.write('start upload: %s \n' % filename)
 f = codecs.open(filename, "r", "utf-8")
@@ -118,6 +118,8 @@ for line in f:
                         freeze_days = ctype.period_freeze - int(data[5])
                         if freeze_days > 0:
                             cl_ct.freeze(close_day, freeze_days)
+                            cl_ct.date_end = e_date
+                            cl_ct.save()
                         # print(freeze_days)
                     except Exception, e:
                         print e
@@ -173,7 +175,8 @@ for line in f:
                     freeze_days = ctype.period_freeze - int(data[5])
                     if freeze_days > 0:
                         cl_ct.freeze(close_day, freeze_days)
-                    # print(freeze_days)
+                        cl_ct.date_end = e_date
+                        cl_ct.save()
                 except Exception, e:
                     print e
                 clntsave += 1
