@@ -5,9 +5,7 @@ from time import strptime, time
 
 from django.core.context_processors import csrf
 from django.conf import settings
-from django.core.files import File
 from django.core.files.base import ContentFile
-from django.utils.datastructures import MultiValueDictKeyError
 from django.db.models import Q
 from django.shortcuts import render_to_response
 from django.core.urlresolvers import reverse
@@ -16,7 +14,6 @@ from django.contrib.auth.decorators import login_required
 
 from forms import *
 from models import *
-from employees.models import Position, Employee, WorkRecord
 from contract.forms import form_Contract
 from contract.models import *
 from finance.models import *
@@ -61,12 +58,14 @@ def photo(request, id):
     except Client.DoesNotExist:
         context_dict = dict(b_url=reverse('p_active', args=(0, )))
         return render_to_response("clienterr.html", context_dict)
-    b_url=reverse('person_card', args=(clnt.pk, ))
-    
+    b_url = reverse('person_card', args=(clnt.pk, ))
+
     if request.method == 'POST':
         if request.POST["avatar64"]:
             imgName = settings.MEDIA_ROOT + "/avatar/user" + str(time()) + ".png"
-            clnt.avatar.save(imgName, ContentFile(request.POST['avatar64'].decode('base64')), save=True)
+            clnt.avatar.save(
+                imgName, ContentFile(request.POST['avatar64'].decode('base64')),
+                save=True)
             clnt.save()
             return HttpResponseRedirect(b_url)
 
@@ -81,7 +80,9 @@ def search(request, ):
     if 'query' in request.GET.keys():
         query = request.GET.get('query').upper()
         a_clnts = Contract.objects.filter(is_current__in=[1, 2]).values('client')
-        lst = Client.objects.filter(last_name__icontains=query).exclude(pk__in=a_clnts).order_by("last_name")
+        lst = Client.objects.filter(
+            last_name__icontains=query
+        ).exclude(pk__in=a_clnts).order_by("last_name")
         context_dict = dict(lst=lst, )
         return render_to_response('client_list.html', context_dict)
     elif 'id' in request.GET.keys():
@@ -103,7 +104,7 @@ def client_note(request, clnt_id=0, ):
         return render_to_response("clienterr.html", context_dict)
 
     if request.method == 'POST':
-        if len (request.POST['note']) > 0:
+        if len(request.POST['note']) > 0:
             clnt.note = request.user.get_full_name() + ': ' + request.POST['note']
         else:
             clnt.note = ''
@@ -140,7 +141,7 @@ def client_ptt(request, clnt_id=0, ):
             goods = Goods.objects.get(pk=int(post_values['goods']))
             post_values['department'] = goods.goods_type.pk
             if 'pay_plan' in post_values:
-                for  i, amount in enumerate(post_values.getlist('pp-price')):
+                for i, amount in enumerate(post_values.getlist('pp-price')):
                     delta = i * 30
                     plan_date = datetime.now() + timedelta(days=delta)
                     post_values['plan_date'] = plan_date
@@ -151,7 +152,7 @@ def client_ptt(request, clnt_id=0, ):
                         if int(post_values['payment_type']) == 2:
                             credit.close(request.user, 2)
                     else:
-                        return HttpResponse(cf.errors, mimetype="text/plain")                    
+                        return HttpResponse(cf.errors, mimetype="text/plain")
                 url = reverse('person_card', args=(clnt_id, ))
                 return HttpResponseRedirect(url)
             else:
@@ -170,7 +171,6 @@ def client_ptt(request, clnt_id=0, ):
     # if have current contract for user
     try:
         contract = Contract.objects.get(client=clnt, is_current=1)
-        curr_contract = contract.pk
     except Contract.DoesNotExist:
         # if have the prospect contract to activate
         try:
@@ -211,7 +211,7 @@ def prolongation(request, clnt_id=0, act=None):
             clnt = rGuest.objects.get(pk=clnt_id)
         except rGuest.DoesNotExist:
             return render_to_response("clienterr.html")
-    else:      
+    else:
         try:
             clnt = Client.objects.get(pk=clnt_id)
         except Client.DoesNotExist:
@@ -229,7 +229,7 @@ def prolongation(request, clnt_id=0, act=None):
         if contract.discount:
             curr_string += u' со скидкой: ' + str(contract.discount.value) + '%'
         else:
-            curr_string += u' без скидки. '           
+            curr_string += u' без скидки. '
     except Contract.DoesNotExist:
         contract = Contract()
         card = ""
@@ -247,9 +247,9 @@ def prolongation(request, clnt_id=0, act=None):
                 post_values['manager'] = request.user.pk
         else:
             post_values['manager'] = clnt.manager.id
-        
-        born = strptime(post_values['born_date'],"%d.%m.%Y")
-        post_values['born_date'] = date(born.tm_year,born.tm_mon,born.tm_mday,)
+
+        born = strptime(post_values['born_date'], "%d.%m.%Y")
+        post_values['born_date'] = date(born.tm_year, born.tm_mon, born.tm_mday)
         ctype = ContractType.objects.get(pk=post_values['contract_type'])
 
         if clnt.age() >= 14 and not ctype.is_child:
@@ -277,16 +277,18 @@ def prolongation(request, clnt_id=0, act=None):
                 return HttpResponse(formp.errors, mimetype="text/html")
 
             # replace values for chilrd
-            c_born = strptime(post_values['child_born_date'],"%d.%m.%Y")
-            post_values['born_date'] = date(c_born.tm_year,c_born.tm_mon,c_born.tm_mday,)
+            c_born = strptime(post_values['child_born_date'], "%d.%m.%Y")
+            post_values['born_date'] = date(c_born.tm_year, c_born.tm_mon, c_born.tm_mday,)
             post_values['first_name'] = post_values['child_first_name']
             post_values['last_name'] = post_values['child_last_name']
             post_values['patronymic'] = post_values['child_patronymic']
             try:
-                clnt = Client.objects.get(first_name=post_values['first_name'].upper(),
-                                           last_name=post_values['last_name'].upper(),
-                                           patronymic=post_values['patronymic'].upper(),
-                                           born_date=post_values['born_date'])
+                clnt = Client.objects.get(
+                    first_name=post_values['first_name'].upper(),
+                    last_name=post_values['last_name'].upper(),
+                    patronymic=post_values['patronymic'].upper(),
+                    born_date=post_values['born_date']
+                )
                 formc = form_client_add(post_values, instance=clnt)
             except Client.DoesNotExist:
                 formc = form_client_add(post_values)
@@ -307,10 +309,11 @@ def prolongation(request, clnt_id=0, act=None):
                 discount = Discount()
 
         if "custom" in post_values.keys():
-            pplan = PayPlan(name='conter#' + str(time()),
-                            plantype = 2,
-                            amount = post_values['pp_amount'],
-                            )
+            pplan = PayPlan(
+                name='conter#' + str(time()),
+                plantype=2,
+                amount=post_values['pp_amount'],
+            )
             pplan.save()
             i = 1
             while "price" + str(i) in post_values.keys():
@@ -361,51 +364,49 @@ def prolongation(request, clnt_id=0, act=None):
             for step in PayPlanSteps.objects.filter(pay_plan=pplan):
                 delta = (step.number - 1) * 30
                 if pplan.plantype == 1:
-                    amount = (ctype.price - ctype.price * credit_disc)*step.amount/100
+                    amount = (ctype.price - ctype.price * credit_disc) * step.amount / 100
                 else:
                     amount = step.amount
-                credit = Credits(user=request.user,
-                                amount=amount,
-                                plan_date=datetime.now() + timedelta(days=delta),
-                                contract=contract,
-                                payment_type=int(contract.payment_type),
-                                )
+                credit = Credits(
+                    user=request.user,
+                    amount=amount,
+                    plan_date=datetime.now() + timedelta(days=delta),
+                    contract=contract,
+                    payment_type=int(contract.payment_type),
+                )
                 credit.save()
-                # if int(contract.payment_type) == 2:
-                #     credit.close(request.user, 2)
-
         else:
             # write single credit
-            credit = Credits(user=request.user,
-                            amount=post_values['amount'],
-                            plan_date=datetime.now(),
-                            contract=contract,
-                            payment_type=int(contract.payment_type),
-                            )
+            credit = Credits(
+                user=request.user,
+                amount=post_values['amount'],
+                plan_date=datetime.now(),
+                contract=contract,
+                payment_type=int(contract.payment_type)
+            )
             credit.save()
-            # if int(contract.payment_type) == 2:
-            #         credit.close(request.user, 2)
         url = reverse('pers_cont', args=(clnt.pk, contract.pk))
         return HttpResponseRedirect(url)
 
     if clnt.age() >= 14:
-        ctypes = ContractType.objects.filter(is_active=True )
+        ctypes = ContractType.objects.filter(is_active=True)
         payer = clnt
     else:
-        ctypes = ContractType.objects.filter(is_active=True,is_child=True)
+        ctypes = ContractType.objects.filter(is_active=True, is_child=True)
         payer = Client()
 
     payplan = PayPlan.objects.filter(is_active=True).exclude(plantype=2)
-    discounts = Discount.objects.filter(Q(date_start__lte=datetime.now()),
-                                        Q(date_end__gte=datetime.now())|Q(date_end__isnull=True)
-                                       ).order_by('value')
+    discounts = Discount.objects.filter(
+        Q(date_start__lte=datetime.now()),
+        Q(date_end__gte=datetime.now()) | Q(date_end__isnull=True)
+    ).order_by('value')
     context_dict = dict(child=clnt, request=request, ctypes=ctypes, payplan=payplan,
                         cnumber=cnumber, manager=clnt.manager, card=card,
                         discounts=discounts, payer=payer, age=clnt.age(),
                         curr_string=curr_string,
                         )
     context_dict.update(csrf(request))
-    return render_to_response("person_prolongation.html",context_dict)
+    return render_to_response("person_prolongation.html", context_dict)
 
 
 @login_required(login_url='/login')
@@ -423,12 +424,10 @@ def person_card(request, clnt_id=0, **kwargs):
     contract_freeze = ""
     contract_days_left = 0
     contract_visits_left = 0
-    curr_contract = 0
     has_debts = 0
     # if have current contract for user
     try:
         contract = Contract.objects.get(client=clnt, is_current=1)
-        curr_contract = contract.pk
     except Contract.DoesNotExist:
         # if have the prospect contract to activate
         try:
@@ -449,12 +448,14 @@ def person_card(request, clnt_id=0, **kwargs):
         has_debts = Credits.objects.filter(client=clnt_id,
                                            plan_date__lte=datetime.now())
         if contract.contract_type.period_time_type:
-            v_start = PeriodTime.objects.get(period_time_type = contract.contract_type.period_time_type,
-                                             period_visit_wday = datetime.now().weekday()
-                                             ).period_visit_start
-            v_end = PeriodTime.objects.get(period_time_type = contract.contract_type.period_time_type,
-                                           period_visit_wday = datetime.now().weekday()
-                                           ).period_visit_end
+            v_start = PeriodTime.objects.get(
+                period_time_type=contract.contract_type.period_time_type,
+                period_visit_wday=datetime.now().weekday()
+            ).period_visit_start
+            v_end = PeriodTime.objects.get(
+                period_time_type=contract.contract_type.period_time_type,
+                period_visit_wday=datetime.now().weekday()
+            ).period_visit_end
             if (v_start < datetime.now().time() and v_end > datetime.now().time()):
                 visit_time_err = 0
 
@@ -463,7 +464,6 @@ def person_card(request, clnt_id=0, **kwargs):
 
         if contract.days_left() < 8:
             contract_days_left = contract.days_left()
-        
         if contract.contract_type.max_visit < 99999:
             if contract.visits_left() < 5:
                 contract_visits_left = contract.visits_left()
@@ -487,24 +487,26 @@ def person_card(request, clnt_id=0, **kwargs):
             if contract.is_current == 2:
                 contract.activate()
             if contract.is_freeze():
-                Freeze.objects.get(contract=contract, 
-                                   is_closed=False,
-                                   date_end__gte=date.today(),
-                                   date_start__lte=date.today(),
-                                   ).close()
+                Freeze.objects.get(
+                    contract=contract,
+                    is_closed=False,
+                    date_end__gte=date.today(),
+                    date_start__lte=date.today(),
+                ).close()
                 contract_freeze = ""
 
-            v = Visits(gender=clnt.gender,
-                      date_start=datetime.now(),
-                      locker=request.POST['locker'],
-                      date_end=None,
-                      contract=contract)
+            v = Visits(
+                gender=clnt.gender,
+                date_start=datetime.now(),
+                locker=request.POST['locker'],
+                date_end=None,
+                contract=contract)
             v.save()
             if contract_visits_left > 0:
-                contract_visits_left = int (contract_visits_left) - 1
+                contract_visits_left = int(contract_visits_left) - 1
         else:
             try:
-                v = Visits.objects.get(contract=contract,is_online=-1)
+                v = Visits.objects.get(contract=contract, is_online=-1)
                 v.out()
                 v.save()
                 v = ""
@@ -528,7 +530,7 @@ def person_card(request, clnt_id=0, **kwargs):
     gcredits = Credits.objects.filter(client=clnt)\
                               .order_by('plan_date')
     c_list = Contract.objects.filter(client=clnt)
-    m_list = User.objects.filter(groups__name='manager') # manual create
+    m_list = User.objects.filter(groups__name='manager')  # manual create
 
     context_dict = dict(clnt=clnt, request=request, block_visit=block_visit,
                         v=v, visit_time_err=visit_time_err, first_visit=first_visit,
@@ -540,12 +542,12 @@ def person_card(request, clnt_id=0, **kwargs):
                         contract_freeze=contract_freeze, contract_days_left=contract_days_left,
                         )
     context_dict.update(csrf(request))
-    return render_to_response("client_card.html",context_dict)
+    return render_to_response("client_card.html", context_dict)
 
 
 @login_required(login_url='/login/')
 def person_contract(request, clnt_id=0, contract_id=0):
-    res = "" 
+    res = ""
     # edit exist person with contract
     if clnt_id > 0 and contract_id > 0:
         try:
@@ -571,8 +573,10 @@ def person_contract(request, clnt_id=0, contract_id=0):
                     curr_period = contract.contract_type.period_days
 
                     # post_values['payment_date'] = datetime.now()
-                    born_date = strptime(post_values['born_date'],"%d.%m.%Y")
-                    post_values['born_date'] = datetime(born_date.tm_year,born_date.tm_mon,born_date.tm_mday,)
+                    born_date = strptime(post_values['born_date'], "%d.%m.%Y")
+                    post_values['born_date'] = datetime(
+                        born_date.tm_year, born_date.tm_mon, born_date.tm_mday
+                    )
                     ctype = ContractType.objects.get(pk=post_values['contract_type'])
                     period_delta = ctype.period_days - curr_period
 
@@ -630,21 +634,25 @@ def person_contract(request, clnt_id=0, contract_id=0):
                         res = 'Такой пользователь уже существует'
                         # return render_to_response("clienterr.html")
                     if ctype.is_child:
-                        child_born_date = strptime(post_values['child_born_date'],"%d.%m.%Y")
-                        post_values['child_born_date'] = datetime(child_born_date.tm_year,child_born_date.tm_mon,child_born_date.tm_mday,)
+                        child_born_date = strptime(post_values['child_born_date'], "%d.%m.%Y")
+                        post_values['child_born_date'] = datetime(
+                            child_born_date.tm_year,
+                            child_born_date.tm_mon,
+                            child_born_date.tm_mday
+                        )
                         if contract.contract_type.is_child:
                             child.first_name = post_values['child_first_name']
                             child.last_name = post_values['child_last_name']
                             child.patronymic = post_values['child_patronymic']
                             child.born_date = post_values['child_born_date']
                         else:
-                            child = Client(first_name=post_values['child_first_name'],
-                                        last_name=post_values['child_last_name'],
-                                        patronymic=post_values['child_patronymic'],
-                                        born_date=post_values['child_born_date'],
-                                        manager=request.user,
-                                        )
-
+                            child = Client(
+                                first_name=post_values['child_first_name'],
+                                last_name=post_values['child_last_name'],
+                                patronymic=post_values['child_patronymic'],
+                                born_date=post_values['child_born_date'],
+                                manager=request.user,
+                            )
                         child.save()
                         clnt = child
                     else:
@@ -661,55 +669,53 @@ def person_contract(request, clnt_id=0, contract_id=0):
                     else:
                         post_values['is_open_date'] = False
 
-                    contract.manager=request.user
-                    contract.date_start=contract.date_start
+                    contract.manager = request.user
+                    contract.date_start = contract.date_start
                     end_delta = timedelta(days=period_delta)
-                    contract.date_end=contract.date_end + end_delta
-                    contract.contract_type=ctype
-                    contract.card=post_values['card']
-                    contract.discount=discount
-                    contract.amount=post_values['amount']
-                    contract.pay_plan=pplan
-                    contract.payment_type=int(post_values['payment_type'])
-                    contract.payment_date=datetime.now()
-                    contract.client=clnt
-                    contract.payer=payer
-                    contract.is_open_date=post_values['is_open_date']
+                    contract.date_end = contract.date_end + end_delta
+                    contract.contract_type = ctype
+                    contract.card = post_values['card']
+                    contract.discount = discount
+                    contract.amount = post_values['amount']
+                    contract.pay_plan = pplan
+                    contract.payment_type = int(post_values['payment_type'])
+                    contract.payment_date = datetime.now()
+                    contract.client = clnt
+                    contract.payer = payer
+                    contract.is_open_date = post_values['is_open_date']
                     contract.save()
                     # save all real payments
-                    ch_summ = CreditsHistory.objects.filter(contract=contract,).aggregate(models.Sum('amount'))
-                    # ch_summ = CreditsHistory.objects.filter(contract=contract,).exclude(payment_type=2).aggregate(models.Sum('amount'))
-                    # CreditsHistory.objects.filter(contract=contract, payment_type=2).delete()
+                    ch_summ = CreditsHistory.objects.filter(
+                        contract=contract
+                    ).aggregate(models.Sum('amount'))
                     Credits.objects.filter(contract=contract).delete()
 
                     if pplan.pk:
                         for step in PayPlanSteps.objects.filter(pay_plan=pplan):
                             delta = (step.number - 1) * 30
                             if pplan.plantype == 1:
-                                amount = (ctype.price - ctype.price * credit_disc)*step.amount/100
+                                price = ctype.price - ctype.price * credit_disc
+                                amount = price * step.amount / 100
                             else:
                                 amount = step.amount
-                            credit = Credits(user=request.user,
-                                            amount=amount,
-                                            plan_date=contract.date + timedelta(days=delta),
-                                            contract=contract,
-                                            payment_type=contract.payment_type,
-                                            )
+                            credit = Credits(
+                                user=request.user,
+                                amount=amount,
+                                plan_date=contract.date + timedelta(days=delta),
+                                contract=contract,
+                                payment_type=contract.payment_type,
+                            )
                             credit.save()
-                            # if int(contract.payment_type) == 2:
-                            #     credit.close(request.user, 2)
-
                     else:
                         # write single credit
-                        credit = Credits(user=request.user,
-                                        amount=post_values['amount'],
-                                        plan_date=contract.date,
-                                        contract=contract,
-                                        payment_type=contract.payment_type,
-                                        )
+                        credit = Credits(
+                            user=request.user,
+                            amount=post_values['amount'],
+                            plan_date=contract.date,
+                            contract=contract,
+                            payment_type=contract.payment_type
+                        )
                         credit.save()
-                        # if int(contract.payment_type) == 2:
-                        #         credit.close(request.user, 2)
                     # close debts, that was in credits history
                     if ch_summ['amount__sum'] > 0:
                         for p in Credits.objects.filter(contract=contract).order_by('plan_date'):
@@ -736,9 +742,10 @@ def person_contract(request, clnt_id=0, contract_id=0):
                 else:
                     ppsteps = PayPlanSteps()
 
-                discounts = Discount.objects.filter(Q(date_start__lte=datetime.now()),
-                                                 Q(date_end__gte=datetime.now())|Q(date_end__isnull=True)
-                                                ).order_by('value')
+                discounts = Discount.objects.filter(
+                    Q(date_start__lte=datetime.now()),
+                    Q(date_end__gte=datetime.now()) | Q(date_end__isnull=True)
+                ).order_by('value')
 
                 if contract.discount:
                     discounts = discounts | Discount.objects.filter(pk=contract.discount.pk)
@@ -751,8 +758,9 @@ def person_contract(request, clnt_id=0, contract_id=0):
                 context_dict.update(csrf(request))
                 return render_to_response("person_contract.html", context_dict, )
 
+
 @login_required(login_url='/login/')
-def person_menu(request, l=0, **kwargs):
+def person_menu(request, letter=0, **kwargs):
     lst = []
     if kwargs['act'] == 'active':
         c = Contract.objects.filter(is_current=1).values('client')
@@ -766,7 +774,7 @@ def person_menu(request, l=0, **kwargs):
         clnts = Client.objects.all().order_by("last_name")
         url = "menu"
 
-    if l>0:
+    if letter > 0:
         clnts = clnts.filter(last_name__istartswith=abc[int(l)]).order_by("last_name")
 
     if 'query' in request.GET.keys():
@@ -778,7 +786,7 @@ def person_menu(request, l=0, **kwargs):
         clnt_contracts = Contract.objects.filter(client=clnt)
         if clnt_contracts.count():
             try:
-                curr_contract = Contract.objects.get(client=clnt,is_current=1).pk
+                curr_contract = Contract.objects.get(client=clnt, is_current=1).pk
             except Contract.DoesNotExist:
                 pass
 
@@ -786,6 +794,7 @@ def person_menu(request, l=0, **kwargs):
 
     context_dict = dict(lst=lst, request=request, abc=abc, url=url)
     return render_to_response("person_menu.html", context_dict, )
+
 
 @login_required(login_url='/login/')
 def person_add(request,):
@@ -806,8 +815,12 @@ def person_add(request,):
         contract = Contract()
 
         post_values['payment_date'] = datetime.now()
-        born_date = strptime(post_values['born_date'],"%d.%m.%Y")
-        post_values['born_date'] = datetime(born_date.tm_year,born_date.tm_mon,born_date.tm_mday,)
+        born_date = strptime(post_values['born_date'], "%d.%m.%Y")
+        post_values['born_date'] = datetime(
+            born_date.tm_year,
+            born_date.tm_mon,
+            born_date.tm_mday
+        )
         ctype = ContractType.objects.get(pk=post_values['contract_type'])
         post_values['date_start'] = datetime.now()
         post_values['date'] = datetime.now()
@@ -848,35 +861,43 @@ def person_add(request,):
                 guest = Guest.objects.get(phone=post_values['phone'])
                 guest.is_client = 1
                 guest.save()
-                manager  = guest.manager
+                manager = guest.manager
             except Guest.DoesNotExist:
                 manager = request.user
-            clnt = Client(first_name=post_values['first_name'],
-                            last_name=post_values['last_name'],
-                            patronymic=post_values['patronymic'],
-                            gender=post_values['gender'],
-                            phone=post_values['phone'],
-                            born_date=post_values['born_date'],
-                            address=post_values['address'],
-                            email=post_values['email'],
-                            passport=post_values['passport'],
-                            manager=manager,
-                            )
+            clnt = Client(
+                first_name=post_values['first_name'],
+                last_name=post_values['last_name'],
+                patronymic=post_values['patronymic'],
+                gender=post_values['gender'],
+                phone=post_values['phone'],
+                born_date=post_values['born_date'],
+                address=post_values['address'],
+                email=post_values['email'],
+                passport=post_values['passport'],
+                manager=manager,
+            )
             clnt.save()
-            payer = clnt # payer always is Client fields in form
+            payer = clnt  # payer always is Client fields in form
             if ctype.is_child:
-                child_born_date = strptime(post_values['child_born_date'],"%d.%m.%Y")
-                post_values['child_born_date'] = datetime(child_born_date.tm_year,child_born_date.tm_mon,child_born_date.tm_mday,)
-                clnt = Client(first_name=post_values['child_first_name'],
-                              last_name=post_values['child_last_name'],
-                              patronymic=post_values['child_patronymic'],
-                              born_date=post_values['child_born_date'],
-                              manager=manager,
-                             )
+                child_born_date = strptime(post_values['child_born_date'], "%d.%m.%Y")
+                post_values['child_born_date'] = datetime(
+                    child_born_date.tm_year,
+                    child_born_date.tm_mon,
+                    child_born_date.tm_mday,
+                )
+                clnt = Client(
+                    first_name=post_values['child_first_name'],
+                    last_name=post_values['child_last_name'],
+                    patronymic=post_values['child_patronymic'],
+                    born_date=post_values['child_born_date'],
+                    manager=manager,
+                )
                 clnt.save()
             if request.POST["avatar64"]:
                 imgName = settings.MEDIA_ROOT + "/avatar/user" + str(time()) + ".png"
-                clnt.avatar.save(imgName, ContentFile(post_values['avatar64'].decode('base64')), save=True)
+                clnt.avatar.save(
+                    imgName, ContentFile(post_values['avatar64'].decode('base64')), save=True
+                )
 
             post_values['client'] = clnt.id
             post_values['payer'] = payer.id
@@ -887,7 +908,7 @@ def person_add(request,):
 
             # form.save()
             if cform.is_valid():
-                res += " Form contract OK" 
+                res += " Form contract OK"
                 # cform.save()
                 try:
                     discount = Discount.objects.get(pk=int(post_values['discount']))
@@ -895,75 +916,76 @@ def person_add(request,):
                 except Discount.DoesNotExist:
                     credit_disc = 0
                     discount = Discount()
-                contract = Contract(number=post_values['number'],
-                                   manager=request.user,
-                                   date_start=post_values['date_start'],
-                                   date_end=post_values['date_end'],
-                                   contract_type=ctype,
-                                   card=post_values['card'],
-                                   discount=discount,
-                                   amount=post_values['amount'],
-                                   pay_plan=pplan,
-                                   payment_type=post_values['payment_type'],
-                                   is_open_date=post_values['is_open_date'],
-                                   payment_date=datetime.now(),
-                                   client=clnt,
-                                   payer=payer,
-                                   # wait for the activation
-                                   is_current=2, 
-                                   )
+                contract = Contract(
+                    number=post_values['number'],
+                    manager=request.user,
+                    date_start=post_values['date_start'],
+                    date_end=post_values['date_end'],
+                    contract_type=ctype,
+                    card=post_values['card'],
+                    discount=discount,
+                    amount=post_values['amount'],
+                    pay_plan=pplan,
+                    payment_type=post_values['payment_type'],
+                    is_open_date=post_values['is_open_date'],
+                    payment_date=datetime.now(),
+                    client=clnt,
+                    payer=payer,
+                    # wait for the activation
+                    is_current=2,
+                )
                 contract.save()
                 if pplan.pk:
                     for step in PayPlanSteps.objects.filter(pay_plan=pplan):
                         delta = (step.number - 1) * 30
                         if pplan.plantype == 1:
-                            amount = (ctype.price - ctype.price * credit_disc)*step.amount/100
+                            price = ctype.price - ctype.price * credit_disc
+                            amount = price * step.amount / 100
                         else:
                             amount = step.amount
-                        credit = Credits(user=request.user,
-                                        amount=amount,
-                                        plan_date=datetime.now() + timedelta(days=delta),
-                                        contract=contract,
-                                        payment_type=int(contract.payment_type),
-                                        )
+                        credit = Credits(
+                            user=request.user,
+                            amount=amount,
+                            plan_date=datetime.now() + timedelta(days=delta),
+                            contract=contract,
+                            payment_type=int(contract.payment_type),
+                        )
                         credit.save()
-                        # if int(contract.payment_type) == 2:
-                        #     credit.close(request.user, 2)
-
                 else:
                     # write single credit
-                    credit = Credits(user=request.user,
-                                    amount=post_values['amount'],
-                                    plan_date=datetime.now(),
-                                    contract=contract,
-                                    payment_type=int(contract.payment_type),
-                                    )
+                    credit = Credits(
+                        user=request.user,
+                        amount=post_values['amount'],
+                        plan_date=datetime.now(),
+                        contract=contract,
+                        payment_type=int(contract.payment_type),
+                    )
                     credit.save()
-                    # if int(contract.payment_type) == 2:
-                    #         credit.close(request.user, 2)
 
                 url = '/person/' + str(clnt.id) + '/' + str(contract.id)
                 return HttpResponseRedirect(url)
             else:
                 clnt.delete()
                 context_dict = dict(res=res, form=form, cform=cform, request=request,)
-                return render_to_response("person_add.html",context_dict)
+                return render_to_response("person_add.html", context_dict)
         else:
-            discounts = Discount.objects.filter(Q(date_start__lte=datetime.now()),
-                                    Q(date_end__gte=datetime.now())|Q(date_end__isnull=True)
-                                    ).order_by('value')
-
-
+            discounts = Discount.objects.filter(
+                Q(date_start__lte=datetime.now()),
+                Q(date_end__gte=datetime.now()) | Q(date_end__isnull=True)
+            ).order_by('value')
     else:
         form = form_client_add()
         cform = form_Contract()
         contract = Contract()
-        discounts = Discount.objects.filter(Q(date_start__lte=datetime.now()),
-                                    Q(date_end__gte=datetime.now())|Q(date_end__isnull=True)
-                                    ).order_by('value')
+        discounts = Discount.objects.filter(
+            Q(date_start__lte=datetime.now()),
+            Q(date_end__gte=datetime.now()) | Q(date_end__isnull=True)
+        ).order_by('value')
 
-    context_dict = dict(form=form, cform=cform, cnumber=cnumber, contract=contract,
-                        discounts=discounts,request=request,
-                        manager=manager, ctypes=ctypes, payplan=payplan, res=res)
+    context_dict = dict(
+        form=form, cform=cform, cnumber=cnumber, contract=contract,
+        discounts=discounts, request=request,
+        manager=manager, ctypes=ctypes, payplan=payplan, res=res
+    )
     context_dict.update(csrf(request))
     return render_to_response("person_add.html", context_dict)
