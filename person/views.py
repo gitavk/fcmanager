@@ -436,6 +436,7 @@ def person_card(request, clnt_id=0, **kwargs):
         except IndexError:
             # check for guestvisit!!!
             contract = Contract()
+            contract.client = clnt
             block_visit = 1
 
     if not block_visit:
@@ -775,7 +776,7 @@ def person_menu(request, letter=0, **kwargs):
         url = "menu"
 
     if letter > 0:
-        clnts = clnts.filter(last_name__istartswith=abc[int(l)]).order_by("last_name")
+        clnts = clnts.filter(last_name__istartswith=abc[int(letter)]).order_by("last_name")
 
     if 'query' in request.GET.keys():
         query = request.GET.get('query')
