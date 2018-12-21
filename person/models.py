@@ -82,8 +82,10 @@ class Client(models.Model):
             # raised when birth date is February 29 and the current year is not
             # a leap year
             birthday = self.born_date.replace(
-                year=today.year, month=self.born_date.month+1, day=1)
-
+                year=today.year,
+                month=self.born_date.month + 1,
+                day=1
+            )
         if birthday > today:
             return today.year - self.born_date.year - 1
         else:
