@@ -16,6 +16,7 @@ class PeriodTimeTypeAdmin(admin.ModelAdmin):
 
 class ContractAdmin(admin.ModelAdmin):
     actions = ['delete_selected']
+    search_fields = ['number']
 
     def delete_selected(self, request, queryset):
         for obj in queryset:
