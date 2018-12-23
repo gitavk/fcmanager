@@ -3,6 +3,7 @@ from datetime import date
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '&bh9dvy7&w)i)oibeigll9ioz1x&zb5j$_)8)4l1@6e8a60q8j'
+FORCE_SCRIPT_NAME = ''
 
 DATABASES = {
     'default': {
