@@ -3,7 +3,7 @@ db.sqlite3
 *.pyc
 *.log
 *.csv
-settings.py
+settings_local.py
 media/*
 static/bootstrap302/*
 
