@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from contract.models import *
 import os
 import sys
 import inspect
@@ -11,6 +10,7 @@ if cmd_folder not in sys.path:
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE",  "fclub.settings")
 
+from contract.models import *
 
 # close contract freeze by date end
 
