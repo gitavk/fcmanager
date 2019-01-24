@@ -29,7 +29,14 @@ for c in Contract.objects.filter(is_current=2):
     try:
         curr_c = Contract.objects.get(client=c.client, is_current=1)
     except Contract.DoesNotExist:
-        date_to_active = c.date + timedelta(days=c.contract_type.period_activation)
+        # added logic for reissue contracts it should be activated first
+        reissue = Contract.objects.filter(client=c.client, number__startswith='O-')
+        if len(reissue):
+            contract = Contract.objects.get(pk=reissue.pk)
+        else:
+            contract = Contract.objects.get(pk=c.pk)
+        period = timedelta(days=contract.contract_type.period_activation)
+        date_to_active = contract.date + period
         if date_to_active.date() <= datetime.now().date():
-            c.activate()
-            print 'Activate contract: ', c.client, c.number
+            contract.activate()
+            print 'Activate contract: ', contract.client, contract.number
