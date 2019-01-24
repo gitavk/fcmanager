@@ -32,7 +32,7 @@ for c in Contract.objects.filter(is_current=2):
         # added logic for reissue contracts it should be activated first
         reissue = Contract.objects.filter(client=c.client, number__startswith='O-')
         if len(reissue):
-            contract = Contract.objects.get(pk=reissue.pk)
+            contract = Contract.objects.get(pk=reissue[0].pk)
         else:
             contract = Contract.objects.get(pk=c.pk)
         period = timedelta(days=contract.contract_type.period_activation)
