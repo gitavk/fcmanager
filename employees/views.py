@@ -257,7 +257,7 @@ def employee_card(request, id=0):
     positions = Position.objects.all().order_by('name')
     context_dict = dict(request=request, p_title=p_title, b_url=b_url, e=e,
                         departments=departments, positions=positions,
-                        f=f)
+                        f=f, new=0)
     context_dict.update(csrf(request))
     return render_to_response('employees_add.html', context_dict)
 
