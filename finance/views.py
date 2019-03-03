@@ -10,13 +10,13 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.core.context_processors import csrf
 from django.core.urlresolvers import reverse
-from django.db.models import ProtectedError, Avg, Max, Min
+from django.db.models import ProtectedError, Max
 from django.db.models import F
 from django.conf import settings
 
 from person.models import Client
 from reception.models import Guest
-from employees.models import Position, Employee, WorkRecord, DepartmentPosition
+from employees.models import Position, WorkRecord, DepartmentPosition
 from .models import *
 from .dbmodels import *
 from .forms import *
@@ -25,6 +25,7 @@ departments = settings.DEPARTMENTS
 # not true goods type
 excl_gt = GoodsType.objects.filter(name__in=['PTT'])
 excl_g = Goods.objects.filter(goods_type__in=excl_gt, is_pay_freeze=True)
+
 
 @login_required(login_url='/login')
 def ptt_trainer(request):
@@ -37,6 +38,7 @@ def ptt_trainer(request):
 
     res = json.dumps(trainers)
     return HttpResponse(res, content_type="application/json")
+
 
 @login_required(login_url='/login')
 def ptt_card(request, id=0, ):
@@ -56,13 +58,15 @@ def ptt_card(request, id=0, ):
             ptt.is_card = 1
             ptt.save()
             return HttpResponseRedirect(b_url)
-    context_dict = dict(request=request, b_url=b_url, p_title=p_title,
-                    ptt=ptt)
+    context_dict = dict(
+        request=request, b_url=b_url, p_title=p_title, ptt=ptt
+        )
     context_dict.update(csrf(request))
     return render_to_response('ptt_card.html', context_dict)
 
+
 @login_required(login_url='/login')
-def ptt(request, id=0, act=None ):
+def ptt(request, id=0, act=None):
     p_title = "Персональные тренировки"
     b_url = reverse('ptt')
     sysgt = GoodsType.objects.filter(name__in=['PTT', '1PTT'])
@@ -91,23 +95,24 @@ def ptt(request, id=0, act=None ):
                     PositionPTT(position=position, goods=g).save()
 
                 if request.POST['price']:
-                    date_s = strptime(request.POST['date_start'],"%d.%m.%Y")
-                    date_s = date(date_s.tm_year,date_s.tm_mon,date_s.tm_mday,)
+                    date_s = strptime(request.POST['date_start'], "%d.%m.%Y")
+                    date_s = date(date_s.tm_year, date_s.tm_mon, date_s.tm_mday)
                     g.new_price(request.POST['price'], date_s)
                     
                 if 'bar_code' in request.POST.keys():
                     if request.POST['bar_code'].strip() != '':
                         try:
-                            code=Decimal(request.POST['bar_code'])
-                            bar_code = BarCode(goods=g,code=code)
+                            code = Decimal(request.POST['bar_code'])
+                            bar_code = BarCode(goods=g, code=code)
                             bar_code.save()
                         except ValueError:
                             pass
                 return HttpResponseRedirect(b_url)
         positions = Position.objects.all()
-        context_dict = dict(request=request, p_title=p_title, b_url=b_url,
-                          departments=departments, form=form,
-                          positions=positions)
+        context_dict = dict(
+            request=request, p_title=p_title, b_url=b_url,
+            departments=departments, form=form, positions=positions
+        )
         context_dict.update(csrf(request))
         return render_to_response("ptt_add.html", context_dict)
     elif id > 0:
@@ -143,15 +148,15 @@ def ptt(request, id=0, act=None ):
                 if request.POST['price']:
                     new_price = Decimal(request.POST['price'])
                     if g.price() != new_price:
-                        date_s = strptime(request.POST['date_start'],"%d.%m.%Y")
-                        date_s = date(date_s.tm_year,date_s.tm_mon,date_s.tm_mday,)
+                        date_s = strptime(request.POST['date_start'], "%d.%m.%Y")
+                        date_s = date(date_s.tm_year, date_s.tm_mon, date_s.tm_mday)
                         g.new_price(request.POST['price'], date_s)
 
                 BarCode.objects.filter(goods=g).delete()
                 if 'bar_code' in request.POST.keys():
                     if request.POST['bar_code'].strip() != '':
                         try:
-                            code=Decimal(request.POST['bar_code'])
+                            code = Decimal(request.POST['bar_code'])
                             bar_code = BarCode(goods=g, code=code)
                             bar_code.save()
                         except ValueError:
@@ -181,6 +186,7 @@ def ptt(request, id=0, act=None ):
     context_dict = dict(request=request, lst=lst, p_title=p_title)
     return render_to_response("ptt.html", context_dict)
 
+
 @login_required(login_url='/login')
 def esc_credit(request, ):
     if 'cr_id' in request.GET.keys():
@@ -198,6 +204,7 @@ def esc_credit(request, ):
                 return HttpResponse(json.dumps(dict(res=1)), content_type="application/json")
             except Exception, e:
                 return HttpResponse(json.dumps(dict(res=-1)), content_type="application/json")
+
 
 @login_required(login_url='/login')
 def close_credit(request, ):
@@ -218,11 +225,11 @@ def close_credit(request, ):
         crlist = crlist.split('|')
         cc = CashCheck()
         cc.save()
-        for x in range(0,(len(crlist)-1)/5):
-            crid = int(crlist[x*5][2:])
+        for x in range(0, (len(crlist) - 1) / 5):
+            crid = int(crlist[x * 5][2:])
             if crid == 0:
                 # single cash payment
-                cnt = int(crlist[x*5+2])
+                cnt = int(crlist[x * 5 + 2])
                 glist = urllib2.unquote(request.GET['glist'].encode('utf-8')).split('|')
                 gid = int(glist[x])
                 g = Goods.objects.get(pk=gid)
@@ -252,6 +259,7 @@ def close_credit(request, ):
     context_dict = dict(res=res)
     return render_to_response("close_credit.html", context_dict)
 
+
 @login_required(login_url='/login')
 def hasitinvite(request, clnt=0, act=None,):
     res=0
@@ -274,6 +282,7 @@ def hasitinvite(request, clnt=0, act=None,):
             pass
     context_dict = dict(res=res, callback=callback)
     return render_to_response('has_invite.html', context_dict)
+
 
 @login_required(login_url='/login')
 def credit(request, clnt=0, b_url=None,):
@@ -346,18 +355,19 @@ def credit(request, clnt=0, b_url=None,):
             lst = []
             g_values = {}
             post_values = request.POST.copy()
-            for i in range(int(post_values['goods_cnt'])+1):
+            for i in range(int(post_values['goods_cnt']) + 1):
                 if 'cnt' + str(i) in post_values.keys():
                     count = int(post_values['cnt' + str(i)])
-                    g = Goods.objects.get(pk = int(post_values['g' + str(i)]))
+                    g = Goods.objects.get(pk=int(post_values['g' + str(i)]))
                     if 'trainer' + str(i) in post_values.keys():
                         g_values['employee'] = post_values['trainer' + str(i)]
                     else:
                         g_values['employee'] = ''
                     lst.append((g, count))
                     amount += g.price() * count
-            context_dict = dict(request=request, lst=lst, amount=amount,
-                    cashhost=cashhost)
+            context_dict = dict(
+                request=request, lst=lst, amount=amount, cashhost=cashhost
+                )
             return render_to_response('single_credit.html', context_dict)
 
     if request.method == 'POST':
@@ -413,7 +423,7 @@ def service(request, id=0, act=None ):
             if form.is_valid():
                 g = form.save()
                 if request.POST['price']:
-                    date_s = strptime(request.POST['date_start'],"%d.%m.%Y")
+                    date_s = strptime(request.POST['date_start'], "%d.%m.%Y")
                     date_s = date(date_s.tm_year,date_s.tm_mon,date_s.tm_mday,)
                     g.new_price(request.POST['price'], date_s)
                 if 'bar_code' in request.POST.keys():
@@ -462,7 +472,7 @@ def service(request, id=0, act=None ):
                 if request.POST['price']:
                     new_price = Decimal(request.POST['price'])
                     if g.price() != new_price:
-                        date_s = strptime(request.POST['date_start'],"%d.%m.%Y")
+                        date_s = strptime(request.POST['date_start'], "%d.%m.%Y")
                         date_s = date(date_s.tm_year,date_s.tm_mon,date_s.tm_mday,)
                         g.new_price(request.POST['price'], date_s)
 
@@ -493,19 +503,20 @@ def service(request, id=0, act=None ):
     context_dict = dict(request=request, lst=lst, p_title=p_title)
     return render_to_response("services.html", context_dict)
 
+
 @login_required(login_url='/login')
 def warehouse_goods(request, ):
     lst = InvoiceGoods.objects.filter(balance__gt=0).order_by('expirydate')
     context_dict = dict(request=request, lst=lst)
     return render_to_response("warehouse_goods.html", context_dict)
 
+
 @login_required(login_url='/login')
 def trash_goods_del(request,):
     tgpk = int(request.GET['id'])
     g = TrashGoods.objects.get(pk=tgpk)
-    for vig in vIssuanceGoodsRecovery.objects.filter(
-                                                    goods=g.goods).order_by(
-                                                    '-expirydate'):
+    goods_recovery = vIssuanceGoodsRecovery.objects.filter(goods=g.goods).order_by('-expirydate')
+    for vig in goods_recovery:
         ig = IssuanceGoods.objects.get(pk=vig.pk)
         if (ig.count - ig.balance) >= g.count:
             ig.balance += g.count
@@ -519,22 +530,24 @@ def trash_goods_del(request,):
     res = json.dumps(dict(res=1))
     return HttpResponse(res, content_type="application/json")
 
+
 @login_required(login_url='/login')
 def trash(request, id=0, act=None):
     res = ""
     p_title = "Накладная на списание"
+
     def add_trash_goods(gcnt):
-        for i in range(gcnt+1):
+        for i in range(gcnt + 1):
             if "cnt" + str(i) in post_values.keys():
                 try:
                     count = int(post_values['cnt' + str(i)])
                 except ValueError:
                     res = res + ' ValueError'
-                    continue 
+                    continue
                 if count < 1:
                     res = res + ' count < 1'
                     continue
-                g_pk = int(post_values['goods'+ str(i)])
+                g_pk = int(post_values['goods' + str(i)])
                 for vig in vIssuanceGoods.objects.filter(goods=g_pk
                                                 ).order_by('expirydate'):
                     ig = IssuanceGoods.objects.get(pk=vig.pk)
@@ -548,8 +561,7 @@ def trash(request, id=0, act=None):
                         ig.balance = 0
                     ig.save()
                     note = post_values['note' + str(i)]
-                    tg = TrashGoods(trash=t, goods=vig.goods
-                                   , count=trash_cnt, note=note)
+                    tg = TrashGoods(trash=t, goods=vig.goods, count=trash_cnt, note=note)
                     tg.save()
                     if count == 0:
                         break
@@ -564,7 +576,7 @@ def trash(request, id=0, act=None):
             else:
                 print (f.errors)
             add_trash_goods(int(post_values['goods_cnt']))
-            return HttpResponseRedirect (reverse('trash'))
+            return HttpResponseRedirect(reverse('trash'))
         else:
             last = Trash.objects.filter(date__year=datetime.now().year
                                         ).aggregate(Max('pk'))
@@ -576,14 +588,12 @@ def trash(request, id=0, act=None):
             context_dict = dict(request=request, p_title=p_title, p=p, res=res,
                                 number=number, )
             context_dict.update(csrf(request))
-            return render_to_response("trash_form.html", context_dict)        
+            return render_to_response("trash_form.html", context_dict)
     elif act == 'del':
         tpk = int(request.GET['id'])
         t = Trash.objects.get(pk=tpk)
         for g in TrashGoods.objects.filter(trash=t):
-            for vig in vIssuanceGoodsRecovery.objects.filter(
-                                                    goods=g.goods).order_by(
-                                                    '-expirydate'):
+            for vig in vIssuanceGoodsRecovery.objects.filter(goods=g.goods).order_by('-expirydate'):
                 ig = IssuanceGoods.objects.get(pk=vig.pk)
                 if (ig.count - ig.balance) >= g.count:
                     ig.balance += g.count
@@ -603,7 +613,7 @@ def trash(request, id=0, act=None):
         if request.method == 'POST':
             post_values = request.POST.copy()
             add_trash_goods(int(post_values['goods_cnt']))
-            return HttpResponseRedirect (reverse('trash'))
+            return HttpResponseRedirect(reverse('trash'))
         marketgoods = []
         i = Issuance.objects.filter(market=t.market).values('pk')
         ig = IssuanceGoods.objects.filter(balance__gt=0, issuance__in=i
@@ -626,6 +636,7 @@ def trash(request, id=0, act=None):
     context_dict.update(csrf(request))
     return render_to_response("trash.html", context_dict)
 
+
 @login_required(login_url='/login')
 def issuance(request, id=0, act=None):
     res = ""
@@ -635,13 +646,12 @@ def issuance(request, id=0, act=None):
         if request.method == 'POST':
             post_values = request.POST.copy()
             post_values['manager'] = request.user.pk
-            idate = strptime(post_values['date'],"%d.%m.%Y")
+            idate = strptime(post_values['date'], "%d.%m.%Y")
             post_values['date'] = date(idate.tm_year, idate.tm_mon, idate.tm_mday,)
             form = FormIssuance(post_values)
             if form.is_valid():
                 issuance = form.save()
-                total = 0
-                for i in range(int(post_values['goods_cnt'])+1):
+                for i in range(int(post_values['goods_cnt']) + 1):
                     post_values['issuance'] = issuance.pk
                     if "cnt" + str(i) in post_values.keys():
                         try:
@@ -672,12 +682,13 @@ def issuance(request, id=0, act=None):
                             post_values['balance'] = post_values['count']
                             gform = FormIssuanceGoods(post_values)
                             if gform.is_valid():
-                                IssuanceGoods(issuance = issuance,
-                                    goods = g,
-                                    count = post_values['count'],
-                                    note = post_values['note'],
-                                    balance = post_values['count']
-                                    ).to_market()
+                                IssuanceGoods(
+                                    issuance=issuance,
+                                    goods=g,
+                                    count=post_values['count'],
+                                    note=post_values['note'],
+                                    balance=post_values['count']
+                                ).to_market()
                             else:
                                 return HttpResponse(gform.errors, )
                             if count == 0:
@@ -709,7 +720,7 @@ def issuance(request, id=0, act=None):
         else:
             for g in IssuanceGoods.objects.filter(issuance=issuance):
                 # return goods to warehouse
-                ig = g.goods # invoice goods
+                ig = g.goods  # invoice goods
                 ig.balance = ig.balance + g.balance
                 ig.save()
                 g.delete()
@@ -733,7 +744,6 @@ def issuance(request, id=0, act=None):
                 ig.balance = ig.balance + g.balance
                 ig.save()
                 g.delete()
-            total = 0
             post_values = request.POST.copy()
             for i in range(int(post_values['goods_cnt']) + 2):
                 post_values['issuance'] = issuance.pk
@@ -765,34 +775,35 @@ def issuance(request, id=0, act=None):
                         post_values['balance'] = post_values['count']
                         gform = FormIssuanceGoods(post_values)
                         if gform.is_valid():
-                            IssuanceGoods(issuance = issuance,
-                                goods = g,
-                                count = post_values['count'],
-                                note = post_values['note'],
-                                balance = post_values['count']
-                                ).to_market()
+                            IssuanceGoods(
+                                issuance=issuance,
+                                goods=g,
+                                count=post_values['count'],
+                                note=post_values['note'],
+                                balance=post_values['count']
+                            ).to_market()
                         else:
                             return HttpResponse(gform.errors, content_type='text/html')
                         if count == 0:
-                            break                
+                            break
             return HttpResponseRedirect(reverse('issuance'))
         gselect = Goods.objects.all()
         igoods = {}
         for g in IssuanceGoods.objects.filter(issuance=issuance):
             if g.goods.goods.pk in igoods:
-                max_cnt = igoods[ g.goods.goods.pk ][0] + g.count
-                min_cnt = igoods[ g.goods.goods.pk ][1] + g.count - g.balance
-                cnt = igoods[ g.goods.goods.pk ][0] + g.count
-                igoods[ g.goods.goods.pk ] = (max_cnt, min_cnt, cnt)
+                max_cnt = igoods[g.goods.goods.pk][0] + g.count
+                min_cnt = igoods[g.goods.goods.pk][1] + g.count - g.balance
+                cnt = igoods[g.goods.goods.pk][0] + g.count
+                igoods[g.goods.goods.pk] = (max_cnt, min_cnt, cnt)
             else:
-                igoods[ g.goods.goods.pk ] = (g.count + g.goods.goods.in_stock(),
-                                              g.count - g.balance,
-                                              g.count )
+                igoods[g.goods.goods.pk] = (g.count + g.goods.goods.in_stock(),
+                                            g.count - g.balance,
+                                            g.count)
 
         context_dict = dict(request=request, p_title=p_title, res=res, edit=1,
                             gselect=gselect, issuance=issuance, igoods=igoods)
         context_dict.update(csrf(request))
-        return render_to_response("issuance_form.html", context_dict)                    
+        return render_to_response("issuance_form.html", context_dict)
     lst = []
     if 'query' in request.GET.keys():
         query = request.GET.get('query')
@@ -807,6 +818,7 @@ def issuance(request, id=0, act=None):
     context_dict = dict(request=request, but_all=but_all, lst=lst, res=res)
     context_dict.update(csrf(request))
     return render_to_response("issuance.html", context_dict)
+
 
 @login_required(login_url='/login')
 def market(request, id=0, act=None):
@@ -860,6 +872,7 @@ def market(request, id=0, act=None):
     context_dict = dict(request=request, lst=lst, p_title=p_title)
     return render_to_response("market_point.html", context_dict)
 
+
 @login_required(login_url='/login')
 def market_goods(request,):
     try:
@@ -876,6 +889,7 @@ def market_goods(request,):
     except Market.DoesNotExist:
         return HttpResponse(json.dumps(dict(res=0)), content_type="application/json")
 
+
 @login_required(login_url='/login')
 def provider_goods(request, id=0):
     try:
@@ -890,6 +904,7 @@ def provider_goods(request, id=0):
         lst = []
     context_dict = dict(request=request, lst=lst)
     return render_to_response("provider_goods.html", context_dict)
+
 
 @login_required(login_url='/login')
 def invoice(request, id=0, act=None):
@@ -926,20 +941,20 @@ def invoice(request, id=0, act=None):
         if request.method == 'POST':
             post_values = request.POST.copy()
             post_values['manager'] = request.user.id
-            datein = strptime(post_values['date'],"%d.%m.%Y")
+            datein = strptime(post_values['date'], "%d.%m.%Y")
             post_values['date'] = date(datein.tm_year, datein.tm_mon, datein.tm_mday,)
             post_values['note'] = post_values['inote']
             form = FormInvoice(post_values)
             if form.is_valid():
                 invoice = form.save()
-                for i in range(int(post_values['goods_cnt'])+1):
+                for i in range(int(post_values['goods_cnt']) + 1):
                     post_values['invoice'] = invoice.pk
                     if "cnt" + str(i) in post_values.keys():
                         try:
                             count = int(post_values['cnt' + str(i)])
                         except ValueError:
                             res = res + ' ValueError'
-                            continue 
+                            continue
                         if count < 1:
                             res = res + ' count < 1'
                             continue
@@ -948,7 +963,7 @@ def invoice(request, id=0, act=None):
                         post_values['balance'] = post_values['count']
                         post_values['cost'] = post_values['cost' + str(i)]
                         post_values['note'] = post_values['note' + str(i)]
-                        expirydate = strptime(post_values['date_expiry' + str(i)],"%d.%m.%Y")
+                        expirydate = strptime(post_values['date_expiry' + str(i)], "%d.%m.%Y")
                         post_values['expirydate'] = date(expirydate.tm_year,
                                                          expirydate.tm_mon,
                                                          expirydate.tm_mday,)
@@ -995,7 +1010,7 @@ def invoice(request, id=0, act=None):
                             post_values['balance'] = post_values['count']
                             post_values['cost'] = post_values['cost' + str(i)]
                             post_values['note'] = post_values['note' + str(i)]
-                            expirydate = strptime(post_values['date_expiry' + str(i)],"%d.%m.%Y")
+                            expirydate = strptime(post_values['date_expiry' + str(i)], "%d.%m.%Y")
                             post_values['expirydate'] = date(expirydate.tm_year,
                                                          expirydate.tm_mon,
                                                          expirydate.tm_mday,)
@@ -1016,7 +1031,7 @@ def invoice(request, id=0, act=None):
                             post_values['goods'] = eg.goods.pk
                             post_values['cost'] = post_values['cost' + str(i)]
                             post_values['note'] = post_values['note' + str(i)]
-                            expirydate = strptime(post_values['date_expiry' + str(i)],"%d.%m.%Y")
+                            expirydate = strptime(post_values['date_expiry' + str(i)], "%d.%m.%Y")
                             post_values['expirydate'] = date(expirydate.tm_year,
                                                          expirydate.tm_mon,
                                                          expirydate.tm_mday,)
@@ -1040,7 +1055,6 @@ def invoice(request, id=0, act=None):
             context_dict.update(csrf(request))
             return render_to_response("invoice_form.html", context_dict)
 
-
     lst = []
     if 'query' in request.GET.keys():
         query = request.GET.get('query')
@@ -1057,12 +1071,14 @@ def invoice(request, id=0, act=None):
     context_dict.update(csrf(request))
     return render_to_response("invoice.html", context_dict)
 
+
 @login_required(login_url='/login')
 def warehouse(request, **kwargs):
     glst = InvoiceGoods.objects.filter(balance__gt=0).values('goods')
     lst = Goods.objects.filter(pk__in=glst).order_by('name')
     context_dict = dict(request=request, lst=lst)
     return render_to_response("warehouse.html", context_dict)
+
 
 @login_required(login_url='/login')
 def goods_bar_code(request, ):
@@ -1080,9 +1096,9 @@ def goods_bar_code(request, ):
         res = json.dumps(dict(res=0))
     return HttpResponse(res, content_type="application/json")
 
+
 @login_required(login_url='/login')
 def goods(request, id=0, act=None ):
-    res=""
     if act == 'add':
         m = Measure.objects.all()
         p = Provider.objects.all()
@@ -1098,21 +1114,23 @@ def goods(request, id=0, act=None ):
             post_values['is_discount'] = 0
             form = FormGoods(post_values)
             if form.is_valid():
-                g = form.save()
+                g = form.save(commit=False)
+                g.is_active = True
+                g.save()
                 if request.POST['price']:
-                    date_s = strptime(request.POST['date_start'],"%d.%m.%Y")
-                    date_s = date(date_s.tm_year,date_s.tm_mon,date_s.tm_mday,)
+                    date_s = strptime(request.POST['date_start'], "%d.%m.%Y")
+                    date_s = date(date_s.tm_year, date_s.tm_mon, date_s.tm_mday,)
                     g.new_price(request.POST['price'], date_s)
 
                 for bcode in request.POST.getlist('bar_code'):
                     if bcode != '':
                         try:
-                            code=Decimal(bcode.strip())
+                            code = Decimal(bcode.strip())
                         except Exception, e:
                             continue
                         bar_code = BarCode(goods=g, code=code)
                         bar_code.save()
-                for i in range(int(request.POST['maxprov'])+1):
+                for i in range(int(request.POST['maxprov']) + 1):
                     key = 'provider' + str(i)
                     if key in request.POST.keys():
                         try:
@@ -1121,12 +1139,11 @@ def goods(request, id=0, act=None ):
                             prov_pk = 0
                         try:
                             prov = Provider.objects.get(pk=prov_pk)
-                            gprovider = GoodsProvider(goods=g,
-                                        provider=prov)
+                            gprovider = GoodsProvider(goods=g, provider=prov)
                             gprovider.save()
                         except Provider.DoesNotExist:
                             pass
-                        
+
                 return HttpResponseRedirect(reverse('goods'))
 
         context_dict = dict(request=request, p_title=p_title,
@@ -1141,6 +1158,7 @@ def goods(request, id=0, act=None ):
         gt = GoodsType.objects.all().exclude(name__in=['SERVICE', 'PTT', '1PTT'])
         try:
             g = Goods.objects.get(pk=id)
+            is_active = g.is_active
         except Goods.DoesNotExist:
             o_name = "Товар"
             b_url = reverse('goods')
@@ -1169,11 +1187,13 @@ def goods(request, id=0, act=None ):
                 post_values['is_discount'] = 0
                 form = FormGoods(post_values, instance=g)
                 if form.is_valid():
-                    form.save()
+                    g = form.save(commit=False)
+                    g.is_active = is_active
+                    g.save()
                 if request.POST['price']:
                     new_price = Decimal(request.POST['price'])
                     if g.price() != new_price:
-                        date_s = strptime(request.POST['date_start'],"%d.%m.%Y")
+                        date_s = strptime(request.POST['date_start'], "%d.%m.%Y")
                         date_s = date(date_s.tm_year,date_s.tm_mon,date_s.tm_mday,)
                         g.new_price(request.POST['price'], date_s)
 
@@ -1212,9 +1232,10 @@ def goods(request, id=0, act=None ):
             return render_to_response("goods_add.html", context_dict)
 
     sysgt = GoodsType.objects.filter(name__in=['SERVICE', 'PTT', '1PTT'])
-    lst = Goods.objects.all().exclude(goods_type__in=sysgt).order_by('name')
+    lst = Goods.objects.exclude(goods_type__in=sysgt, is_active=False).order_by('name')
     context_dict = dict(request=request, lst=lst)
     return render_to_response("goods.html", context_dict)
+
 
 @login_required(login_url='/login')
 def goods_type(request, id=0, **kwargs):
@@ -1260,6 +1281,7 @@ def goods_type(request, id=0, **kwargs):
     context_dict = dict(request=request, lst=lst)
     return render_to_response("goods_type.html", context_dict)
 
+
 @login_required(login_url='/login')
 def measure(request, id=0, **kwargs):
     if kwargs['act'] == 'add':
@@ -1303,10 +1325,12 @@ def measure(request, id=0, **kwargs):
     context_dict = dict(request=request, lst=lst)
     return render_to_response("measure.html", context_dict)    
 
+
 @login_required(login_url='/login')
 def fin_menu(request,):
     context_dict = dict(request=request,)
     return render_to_response("fin_menu.html", context_dict)
+
 
 @login_required(login_url='/login')
 def provider(request, p_id=0, **kwargs):
@@ -1342,6 +1366,7 @@ def provider(request, p_id=0, **kwargs):
     lst = Provider.objects.all().order_by('name')
     context_dict = dict(request=request, lst=lst)
     return render_to_response("provider.html", context_dict)
+
 
 @login_required(login_url='/login')
 def products_menu(request,):
