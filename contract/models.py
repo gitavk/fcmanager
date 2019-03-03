@@ -139,11 +139,10 @@ class Contract(models.Model):
         get_latest_by = "id"
 
     def activate(self):
+        time_delta = self.date_end - self.date_start
         if settings.OPEN_DAY:
             if self.date_start < settings.CLOSE_DAY:
                 time_delta = self.date_end - settings.OPEN_DAY
-            else:
-                time_delta = self.date_end - self.date_start
         self.date_start = date.today()
         self.date_end = self.date_start + time_delta
         self.is_current = 1
