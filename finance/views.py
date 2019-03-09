@@ -1232,7 +1232,7 @@ def goods(request, id=0, act=None ):
             return render_to_response("goods_add.html", context_dict)
 
     sysgt = GoodsType.objects.filter(name__in=['SERVICE', 'PTT', '1PTT'])
-    lst = Goods.objects.exclude(goods_type__in=sysgt, is_active=False).order_by('name')
+    lst = Goods.objects.exclude(goods_type__in=sysgt).filter(is_active=False).order_by('name')
     context_dict = dict(request=request, lst=lst)
     return render_to_response("goods.html", context_dict)
 
