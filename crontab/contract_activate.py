@@ -30,7 +30,7 @@ for c in Contract.objects.filter(is_current=2):
         curr_c = Contract.objects.get(client=c.client, is_current=1)
     except Contract.DoesNotExist:
         # added logic for reissue contracts it should be activated first
-        reissue = Contract.objects.filter(client=c.client, number__startswith='O-')
+        reissue = Contract.objects.filter(client=c.client, number__startswith='O-', is_current=2)
         if len(reissue):
             contract = Contract.objects.get(pk=reissue[0].pk)
         else:
