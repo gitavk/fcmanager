@@ -130,6 +130,7 @@ urlpatterns = patterns('',
     url(r'^market/edit/(\d+)/$', 'finance.views.market', {'act': 'edit'}, name='market_edit'),
     url(r'^market/del/(\d+)/$', 'finance.views.market', {'act': 'del'}, name='market_del'),
     url(r'^market/view/(\d+)/$', 'finance.views.market', {'act': 'view'}, name='market_view'),
+    url(r'^market/rest/$', 'reports.views.goods_rest', name='market_rest'),
 
     url(r'^warehouse/$', 'finance.views.warehouse', name='warehouse'),
     url(r'^warehouse/invoice/$', 'finance.views.invoice', {'act': None}, name='invoice'),

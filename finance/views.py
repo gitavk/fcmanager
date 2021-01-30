@@ -871,7 +871,6 @@ def market_goods(request,):
         for g in Goods.objects.filter(pk__in=glst).order_by('name'):
             if g.on_market() > 0:
                 lst [g.pk] = (g.pk, g.name, g.on_market())
-        # return HttpResponse(lst, content_type="application/json")
         return HttpResponse(json.dumps(lst), content_type="application/json")
     except Market.DoesNotExist:
         return HttpResponse(json.dumps(dict(res=0)), content_type="application/json")
