@@ -459,7 +459,7 @@ name="cr{{ c.pk }}|{{ c.goods.cash_name }}|{{ c.count }}|{{ c.g_amount }}|{{c.go
 	  		<td>
 	  			<input form="cr" type="checkbox"  
 	  			value="{{ cr.amount }}" 
-	  			name="cr{{ cr.pk }}|Абонемент|1|{{ cr.amount }}|1">
+                name="cr{{ cr.pk }}|Дог. N {{ cr.contract.number }} от {{ cr.contract.date|date:'d.m.Y' }} занятия физкультурой|1|{{ cr.amount }}|1">
 	  		</td>
 	  	{% endif %}
 	  		<td> {{ cr.plan_date|date:'d.m.Y' }}</td>
