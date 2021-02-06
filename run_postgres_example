@@ -1,0 +1,6 @@
+docker run -d \
+    --name dj15postgres \
+    -e POSTGRES_PASSWORD=123456 \
+    -e PGDATA=/var/lib/postgresql/data/pgdata \
+    -v /home/user/pgdata:/var/lib/postgresql/data \
+    postgres:10-alpine

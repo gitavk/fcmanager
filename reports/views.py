@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from time import strptime
 from datetime import date, datetime, time, timedelta
+from collections import Counter
 from calendar import monthrange
 from string import uppercase
 from decimal import Decimal
@@ -28,6 +29,67 @@ from .styles import *
 
 report_top_prefix = settings.REPORT_TOP_PREFIX
 pay_type = (u'нал.', u'без нал.', u'иное')
+
+
+@login_required(login_url='/login')
+def goods_rest(request):
+    """Generate report with goods rest."""
+
+    response = HttpResponse(mimetype='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename=goods_rest.xls'
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet("goods_rest")
+    # report styles and Heads
+    columns = (
+        (u'#', 1000),
+        (u'Товар', 30000),
+        (u'Количество', 4000),
+        (u'Стоимость', 4000),
+        (u'Сумма', 6000),
+    )
+    head = u'Остатки товаров на дату: ' + datetime.now().strftime("%d.%m.%Y")
+    ws.write_merge(0, 0, 0, len(columns)-1, head, styleh)
+    # Colums style
+    alignment = xlwt.Alignment()
+    alignment.wrap = 1
+    alignment.horz = xlwt.Alignment.HORZ_CENTER
+    styleth.alignment = alignment
+    row_num = 1
+    ws.row(row_num).height_mismatch = True
+    ws.row(row_num).height = 35*20
+    for col_num in xrange(len(columns)):
+        ws.write(row_num, col_num, columns[col_num][0], styleth)
+        # set column width
+        ws.col(col_num).width = columns[col_num][1]
+
+    # report data generation
+    prices = dict()
+    goods = Counter()
+    total = Counter()
+    for data in IssuanceGoods.objects.filter(balance__gt=0):
+        prices[data.goods.goods.name] = data.goods.goods.price()
+        goods.update({
+            data.goods.goods.name: data.balance
+        })
+        total.update({data.issuance.market.name: data.goods.goods.price() * data.balance})
+    # write main table
+    for row_num, (name, cnt) in enumerate(sorted(goods.items()), row_num + 1):
+        ws.write(row_num, 0, row_num - 1, style)
+        ws.write(row_num, 1, name, style)
+        ws.write(row_num, 2, cnt, style)
+        price = prices[name]
+        ws.write(row_num, 3, price, style)
+        ws.write(row_num, 4, price * cnt, style)
+    # write the total table
+    for row_num, (market, amount) in enumerate(total.items(), row_num + 3):
+        ws.write_merge(row_num, row_num, 2, 3, market, style)
+        ws.write(row_num, 4, amount, style)
+    # global summary
+    ws.write_merge(row_num + 1, row_num + 1, 2, 3, u'Итого в руб.', style)
+    ws.write(row_num + 1, 4, sum(total.values()), style)
+
+    wb.save(response)
+    return response
 
 
 @login_required(login_url='/login')

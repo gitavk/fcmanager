@@ -1,0 +1,18 @@
+version: "3.9"
+services:
+  database:
+    image: postgres:10-alpine
+    environment:
+      - POSTGRES_PASSWORD=123456
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - /home/user/pgdata:/var/lib/postgresql/data
+  web:
+    image: dj15
+    volumes:
+      - .:/usr/src/app
+    command: python /usr/src/app/manage.py runserver 0.0.0.0:8080
+    ports:
+      - 8080:8080
+    depends_on:
+      - database
