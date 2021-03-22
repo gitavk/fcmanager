@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 import json
 from datetime import datetime, timedelta, date
 from time import strptime, time
@@ -62,10 +63,14 @@ def photo(request, id):
 
     if request.method == 'POST':
         if request.POST["avatar64"]:
+            data = request.POST["avatar64"]
             imgName = settings.MEDIA_ROOT + "/avatar/user" + str(time()) + ".png"
+            base64_data = re.sub('^data:image/.+;base64,', '', data)
             clnt.avatar.save(
-                imgName, ContentFile(request.POST['avatar64'].decode('base64')),
-                save=True)
+                imgName,
+                ContentFile(base64_data.decode('base64')),
+                save=True
+            )
             clnt.save()
             return HttpResponseRedirect(b_url)
 
